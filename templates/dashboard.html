@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<script src="{% static 'js/calendar.js' %}"></script>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="user-profile">
+            <div class="avatar">👤</div>
+            <h2>{{ user.get_full_name }}</h2>
+            <p>{{ user.get_role_display }}</p>
+        </div>
+        
+        <nav class="menu">
+            <a href="#" class="menu-item active">🏠 Inicio</a>
+            <a href="solicitar examen" class="menu-item">📝 Solicitar Examen</a>
+            <a href="calendario" class="menu-item">📅 Calendario</a>
+            {% if user.is_admin %}
+            <a href="gestion_usuarios" class="menu-item">👥 Gestión de Usuarios</a>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <h1>Panel Principal</h1>
+            <div class="notifications">🔔</div>
+        </div>
+
+        <!-- Widgets -->
+        <div class="widgets-grid">
+            <div class="widget examenes-pendientes">
+                <h2>Exámenes Pendientes</h2>
+                <div class="examen-list">
+                    <!-- Dynamic content from JS -->
+                </div>
+            </div>
+
+            <div class="widget calendario">
+                <h2>Calendario</h2>
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+{% endblock %}
