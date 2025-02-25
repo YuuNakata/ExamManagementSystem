@@ -21,7 +21,7 @@ Optimiza procesos administrativos, garantiza transparencia y mejora la experienc
 ---
 
 ## Introducción 🚀  
-Este proyecto surge como respuesta a los desafíos en la gestión manual de exámenes de premio y suficiencia en la UCI. Su objetivo es:  
+Este proyecto surge como respuesta a los desafíos en la gestión manual de exámenes de premio y suficiencia en la Facultad de Tecnologías Interacticas. Su objetivo es:  
 - **Automatizar procesos** (solicitudes, calificaciones, notificaciones).  
 - **Facilitar acceso remoto** para estudiantes y docentes.  
 - **Garantizar transparencia y seguridad** en las evaluaciones.  
@@ -98,7 +98,7 @@ Este proyecto está bajo la licencia [MIT](LICENSE).
 
 ## Contacto 📧  
 ¿Preguntas o sugerencias?  
-- Equipo de desarrollo: devteam@uci.cu  
+- Equipo de desarrollo: raydelereuco@estudiantes.uci.cu  
 - Repositorio oficial: [github.com/YuuNakata/ExamManagementSystem](https://github.com/YuuNakata/ExamManagementSystem)  
 
 *¡Gracias por apoyar la innovación en la educación superior!* 🌟  
