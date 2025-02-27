@@ -1,25 +1,45 @@
-{% extends 'base.html' %}
 {% load static %}
-
-{% block content %}
-<link rel="stylesheet" href="{% static 'css/login.css' %}">
-
-<div class="login-container">
-    <div class="login-header">
-        <h1>Bienvenido al Sistema</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Exámenes</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-section">
+            <img src="{% static 'images/uci_logo.png' %}" alt="Logo Universidad">
+        </div>
+        
+        <form method="post" class="login-form" id="loginForm">
+            {% csrf_token %}
+            <h1>Iniciar Sesión</h1>
+            
+            <div class="input-group">
+                <span class="icon">👤</span>
+                <input type="text" id="username" name="username" placeholder="Usuario o Correo electrónico" required>
+            </div>
+            
+            <div class="input-group">
+                <span class="icon">🔒</span>
+                <input type="password" id="password" name="password" placeholder="Contraseña" required>
+                <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+            </div>
+            
+            {% if form.errors %}
+            <div class="error-message">
+                Usuario o contraseña incorrectos. Intente nuevamente.
+            </div>
+            {% endif %}
+            
+            <button type="submit" class="login-btn">Iniciar Sesión</button>
+            
+            
+        </form>
     </div>
-    <form method="post">
-        {% csrf_token %}
-        <div class="input-group">
-            <input type="text" name="username" placeholder="Usuario o Correo" required>
-        </div>
-        <div class="input-group">
-            <input type="password" name="password" placeholder="Contraseña" required>
-        </div>
-        <button type="submit" class="btn-primary">Ingresar</button>
-        <div class="forgot-password">
-            <a href="#">¿Olvidó su contraseña?</a>
-        </div>
-    </form>
-</div>
-{% endblock %}
+
+    <script src="{% static 'js/login.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Usuario - Sistema de Exámenes</title>
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+</head>
+<body>
+    <div class="register-container">
+        <form method="post">
+            {% csrf_token %}
+            <h1>Registrar Usuario</h1>
+            
+            <div class="form-group">
+                <label for="id_username">Nombre de Usuario:</label>
+                {{ form.username }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_email">Correo Electrónico:</label>
+                {{ form.email }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password1">Contraseña:</label>
+                {{ form.password1 }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_password2">Confirmar Contraseña:</label>
+                {{ form.password2 }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_role">Rol:</label>
+                {{ form.role }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_curso_programa">Curso/Programa:</label>
+                {{ form.curso_programa }}
+            </div>
+            
+            <div class="form-group">
+                <label for="id_departamento_facultad">Departamento/Facultad:</label>
+                {{ form.departamento_facultad }}
+            </div>
+            
+            <button type="submit" class="register-btn">Registrar</button>
+        </form>
+    </div>
+</body>
+</html>
