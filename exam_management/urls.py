@@ -17,12 +17,13 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-from .views import CustomLoginView, DashboardView,logout_view,register_user
+from .views import CustomLoginView, DashboardView, logout_view
+from users.views import register_user
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('login/', CustomLoginView.as_view(), name='login'),
-    path('dashboard/', DashboardView.as_view(), name='dashboard'),
-    path('logout/', logout_view, name='logout'),
-    path('register/', register_user, name='register'),
+    path("login/", CustomLoginView.as_view(), name="login"),
+    path("dashboard/", DashboardView.as_view(), name="dashboard"),
+    path("logout/", logout_view, name="logout"),
+    path("register/", register_user, name="register"),
 ]

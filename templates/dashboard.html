@@ -4,6 +4,7 @@
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
 <script src="{% static 'js/calendar.js' %}"></script>
 <div class="dashboard-container">
     <!-- Sidebar -->
@@ -22,10 +23,8 @@
             <a href="gestion_usuarios" class="menu-item">👥 Gestión de Usuarios</a>
             {% endif %}
             {% if user.is_authenticated %}
-                <form method="post" action="{% url 'logout' %}" class="menu-item">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-primary">Logout</button>
-                </form>
+                <a href="{% url 'logout' %}" class="menu-item btn-primary">Logout</a>
+
             {% else %}
                 <a href="{% url 'login' %}" class="menu-item btn-primary">Login</a>
             {% endif %}

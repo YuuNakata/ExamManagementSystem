@@ -9,19 +9,23 @@ Optimiza procesos administrativos, garantiza transparencia y mejora la experienc
 ---
 
 ## Tabla de Contenidos 📑
-- [Introducción](#introducción-)
-- [Características](#características-)
-- [Tecnologías Utilizadas](#tecnologías-utilizadas-)
-- [Instalación](#instalación-)
-- [Uso](#uso-)
-- [Contribución](#contribución-)
-- [Licencia](#licencia-)
-- [Contacto](#contacto-)
+
+- [Sistema de Gestión de Exámenes de Premio y Suficiencia 🎓](#sistema-de-gestión-de-exámenes-de-premio-y-suficiencia-)
+  - [Tabla de Contenidos 📑](#tabla-de-contenidos-)
+  - [Introducción 🚀](#introducción-)
+  - [Características ✅](#características-)
+  - [Tecnologías Utilizadas 💻](#tecnologías-utilizadas-)
+    - [Frontend](#frontend)
+    - [Backend](#backend)
+    - [Herramientas](#herramientas)
+  - [Instalación 🛠](#instalación-)
 
 ---
 
 ## Introducción 🚀  
+
 Este proyecto surge como respuesta a los desafíos en la gestión manual de exámenes de premio y suficiencia en la Facultad de Tecnologías Interacticas. Su objetivo es:  
+
 - **Automatizar procesos** (solicitudes, calificaciones, notificaciones).  
 - **Facilitar acceso remoto** para estudiantes y docentes.  
 - **Garantizar transparencia y seguridad** en las evaluaciones.  
@@ -32,6 +36,7 @@ Alineado con el Reglamento de Educación Superior de Cuba, busca elevar la calid
 ---
 
 ## Características ✅  
+
 - 📥 **Solicitud de exámenes** en línea.  
 - 📊 **Gestión automatizada de calificaciones**.  
 - 🔔 **Notificaciones instantáneas** vía correo o plataforma.  
@@ -42,27 +47,35 @@ Alineado con el Reglamento de Educación Superior de Cuba, busca elevar la calid
 ---
 
 ## Tecnologías Utilizadas 💻  
+
 ### Frontend  
+
 - **Java Script** (interfaz dinámica).  
-- **Bootstrap** o **Material-UI** (diseño responsivo).  
-### Backend  
+- **Bootstrap** o **Material-UI** (diseño responsivo).
+  
+### Backend
+
 - **Django** (gestión de solicitudes).  
-- **PostgreSQL** (gestión de datos).  
-### Herramientas  
+- **PostgreSQL** (gestión de datos).
+  
+### Herramientas
+
 - **Git** (control de versiones).  
 - **Visual Studio Code** (IDE empleado).  
 
 ---
 
-## Instalación 🛠  
-1. **Clonar repositorio**:  
+## Instalación 🛠
+
+1. **Clonar repositorio**:
+
    ```bash
    git clone https://github.com/YuuNakata/ExamManagementSystem.git
    cd ExamManagementSystem
    
-2. Instalar dependencias:  
+2. Instalar dependencias:
+
    pip install -r requirements.txt  # Si se usa Django
-   
 3. Configurar base de datos:  
    - Crear archivo .env con variables de entorno (ej: DB_URL, JWT_SECRET).  
 4. Ejecutar servidor:  
@@ -71,6 +84,7 @@ Alineado con el Reglamento de Educación Superior de Cuba, busca elevar la calid
 ---
 
 ## Uso 📖  
+
 1. Registro/Inicio de sesión:  
    - Estudiantes y docentes acceden con credenciales institucionales.  
 2. Solicitud de examen:  
@@ -83,7 +97,9 @@ Alineado con el Reglamento de Educación Superior de Cuba, busca elevar la calid
 ---
 
 ## Contribución 🤝  
+
 ¡Tu aporte es valioso! Sigue estos pasos:  
+
 1. Haz un fork del repositorio.  
 2. Crea una rama: git checkout -b feature/nueva-funcionalidad.  
 3. Realiza tus cambios y haz commit: git commit -m 'Añade X funcionalidad'.  
@@ -92,14 +108,18 @@ Alineado con el Reglamento de Educación Superior de Cuba, busca elevar la calid
 ---
 
 ## Licencia 📜  
+
 Este proyecto está bajo la licencia [MIT](LICENSE).  
 
 ---
 
 ## Contacto 📧  
+
 ¿Preguntas o sugerencias?  
-- Equipo de desarrollo: raydelereuco@estudiantes.uci.cu  
+
+- Equipo de desarrollo: <raydelereuco@estudiantes.uci.cu>  
 - Repositorio oficial: [github.com/YuuNakata/ExamManagementSystem](https://github.com/YuuNakata/ExamManagementSystem)  
 
 *¡Gracias por apoyar la innovación en la educación superior!* 🌟  
+
 ```

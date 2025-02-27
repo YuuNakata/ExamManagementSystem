@@ -1,37 +1,26 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import views as auth_views , logout
+from django.contrib.auth import views as auth_views, logout
 from django.views.generic import TemplateView
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegisterForm
 from django.contrib import messages
 from .decorators import admin_required
 
+
 class CustomLoginView(auth_views.LoginView):
-    template_name = 'login.html'
+    template_name = "login.html"
     redirect_authenticated_user = True
+
 
 @login_required
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect("login")
+
 
 class DashboardView(TemplateView):
-    template_name = 'dashboard.html'
-    
+    template_name = "dashboard.html"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user'] = self.request.user
+        context["user"] = self.request.user
         return context
-
-@login_required
-@admin_required
-def register_user(request):
-    if request.method == 'POST':
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            messages.success(request, f'Usuario {user.username} creado exitosamente.')
-            return redirect('dashboard')
-    else:
-        form = UserRegisterForm()
-    return render(request, 'register.html', {'form': form})
