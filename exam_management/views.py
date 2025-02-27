@@ -2,8 +2,6 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import views as auth_views, logout
 from django.views.generic import TemplateView
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .decorators import admin_required
 
 
 class CustomLoginView(auth_views.LoginView):
