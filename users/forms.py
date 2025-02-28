@@ -25,7 +25,11 @@ class UserRegisterForm(UserCreationForm):
         required=True,
     )
     role = forms.ChoiceField(
-        choices=[("estudiante", "Estudiante"), ("profesor", "Profesor")],
+        choices=[
+            ("estudiante", "Estudiante"),
+            ("profesor", "Profesor"),
+            ("admin", "Administrador"),
+        ],
         required=True,
         widget=forms.Select(attrs={"class": "form-control"}),
     )
@@ -51,3 +55,34 @@ class UserRegisterForm(UserCreationForm):
             "curso_programa",
             "departamento_facultad",
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["username"].help_text = ""
+        self.fields["password1"].help_text = ""
+        self.fields["password2"].help_text = ""
+
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "role",
+            "curso_programa",
+            "departamento_facultad",
+        ]
+        widgets = {
+            "username": forms.TextInput(attrs={"class": "form-control"}),
+            "email": forms.EmailInput(attrs={"class": "form-control"}),
+            "role": forms.Select(attrs={"class": "form-control"}),
+            "curso_programa": forms.TextInput(attrs={"class": "form-control"}),
+            "departamento_facultad": forms.TextInput(attrs={"class": "form-control"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["username"].help_text = ""

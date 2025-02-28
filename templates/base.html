@@ -7,11 +7,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión de Exámenes</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    {% block content %}{% endblock %}
-    
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="user-profile">
+                <div class="avatar">
+                    <span class="icono icono-usuario"></span>
+                </div>
+                <h2>
+                    {% if user.get_full_name %}
+                        {{ user.get_full_name }}
+                    {% else %}
+                        {{user.username}}
+                    {% endif %}</h2>
+                <p>{{ user.get_role_display }}</p>
+            </div>
+            
+            <nav class="menu">
+                <a href="/" class="menu-item active">
+                    <span class="icono icono-inicio"></span>
+                    Inicio</a>
+                <a href="#" class="menu-item">
+                    <span class="icono icono-examen"></span>
+                    Solicitar Examen</a>
+                <a href="#" class="menu-item">
+                    <span class="icono icono-calendario"></span>
+                    Calendario</a>
+                {% if user.is_superuser or user.is_admin %}
+                <a href="{% url 'users:user_management' %}" class="menu-item">
+                    <span class="icono icono-usuarios"></span>
+                    Gestión de Usuarios</a>
+                {% endif %}
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="menu-item btn-primary">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="menu-item btn-primary">Login</a>
+                {% endif %}
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
     <!-- Scripts Globales -->
     <script src="{% static 'js/forms.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

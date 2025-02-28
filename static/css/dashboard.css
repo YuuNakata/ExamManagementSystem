@@ -1,45 +1,24 @@
-.dashboard-container {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    min-height: 100vh;
-}
-
-.sidebar {
-    background: var(--negro);
-    color: white;
-    padding: 1rem;
-}
-
-.user-profile {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.menu {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.menu-item {
-    color: white;
-    padding: 1rem;
-    border-radius: 5px;
-    transition: background 0.3s;
-}
-
-.menu-item:hover {
-    background: rgba(255,255,255,0.1);
-}
-
-.main-content {
-    background: var(--gris);
+/* ============ CALENDARIO PRINCIPAL ============ */
+.widget.calendario {
+    background: var(--blanco);
     padding: 2rem;
+    border-radius: var(--radio-borde);
+    box-shadow: var(--sombra);
+    max-width: 800px;
+    margin: 2rem auto;
 }
 
-.widget {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+#calendar {
+    margin-top: 1.5rem;
 }
+
+/* ============ CABECERA ============ */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 2px solid var(--naranja-suave);
+}
+

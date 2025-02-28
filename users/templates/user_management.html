@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static "css/user_management.css" %}">
+<div class="main-content">
+    <div class="widget">
+        <div class="management-header">
+            <h2>Gestión de Usuarios</h2>
+            <div class="actions">
+                <input type="text" 
+                id="searchInput" 
+                placeholder="Buscar usuarios..." 
+                value="{{ request.GET.q }}">
+                <button onclick="performSearch()" class="btn-primary">Buscar</button>
+                <button class="btn-primary" onclick="showModal('registerModal')">Nuevo Usuario</button>
+            </div>
+        </div>
+        
+        <div class="users-list">
+            {% for user in users %}
+            <div id="editModal{{ user.id }}" class="modal" {% if editing_user_id == user.id|stringformat:"s" %}style="display: flex;"{% endif %}>
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal('editModal{{ user.id }}')">&times;</span>
+                    <h3>Modificar Usuario</h3>
+                    <form method="post" action="{% url 'users:update_user' user.id %}">
+                        {% csrf_token %}
+                        {{ user.update_form.as_p }}
+                        {% if edit_modal_errors and editing_user_id == user.id|stringformat:"s" %}
+                            <div class="error-list">
+                                {% for field, errors in edit_modal_errors.items %}
+                                    {% for error in errors %}
+                                        <p class="error-message">{{ error }}</p>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Guardar</button>
+                            <button type="button" class="btn-cancel" onclick="closeModal('editModal{{ user.id }}')">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="user-card">
+                <div class="user-info">
+                    <span class="username">{{ user.username }}</span>
+                    <span class="role">{{ user.get_role_display }}</span>
+                    <span class="email">{{ user.email }}</span>
+                </div>
+                <div class="user-actions">
+                    <button class="btn-edit" onclick="showModal('editModal{{ user.id }}')">
+                        <span class="icono icono-editar"></span>
+                    </button>
+
+                    <form id="deleteForm{{ user.id }}" method="post" action="{% url 'users:delete_user' user.id %}" onsubmit="return confirm('¿Está seguro que desea eliminar este usuario?')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-delete">
+                            <span class="icono icono-eliminar"></span>
+                        </button>            
+                    </form>
+                </div>
+
+                <!-- Modal Edición -->
+            </div>
+            {% empty %}
+            <div class="no-results">
+                <p>No se encontraron usuarios</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal Registro -->
+<div id="registerModal" class="modal" {% if register_modal_errors %}style="display: flex;"{% endif %}>
+    <div class="modal-content">
+        <h3>Registrar Nuevo Usuario</h3>
+        <form method="post" action="{% url 'users:register' %}">
+            {% csrf_token %}
+            {{ register_form.as_p }}
+            {% if register_modal_errors %}
+                <div class="error-list">
+                    {% for field, errors in register_modal_errors.items %}
+                        {% for error in errors %}
+                            <p class="error-message">{{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Registrar</button>
+                <button type="submit" name ="cancel" class="btn-cancel" onclick="closeModal('registerModal')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{% static 'js/users.js' %}"></script>
+{% endblock %}

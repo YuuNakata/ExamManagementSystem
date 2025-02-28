@@ -2,62 +2,20 @@
 
 {% load static %}
 
-{% block content %}
+{% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
 
-<script src="{% static 'js/calendar.js' %}"></script>
-<div class="dashboard-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="user-profile">
-            <div class="avatar">👤</div>
-            <h2>
-                {% if user.get_full_name %}
-                    {{ user.get_full_name }}
-                {% else %}
-                    {{user.username}}
-                {% endif %}</h2>
-            <p>{{ user.get_role_display }}</p>
-        </div>
-        
-        <nav class="menu">
-            <a href="#" class="menu-item active">🏠 Inicio</a>
-            <a href="solicitar examen" class="menu-item">📝 Solicitar Examen</a>
-            <a href="calendario" class="menu-item">📅 Calendario</a>
-            {% if user.is_superuser or user.is_admin %}
-            <a href="gestion_usuarios" class="menu-item">👥 Gestión de Usuarios</a>
-            {% endif %}
-            {% if user.is_authenticated %}
-                <a href="{% url 'logout' %}" class="menu-item btn-primary">Logout</a>
+{% block content %}
+    <div class="header">
+        <h1>Panel Principal</h1>
+        <div class="notifications">🔔</div>
+    </div>
 
-            {% else %}
-                <a href="{% url 'login' %}" class="menu-item btn-primary">Login</a>
-            {% endif %}
-        </nav>
-    </aside>
+    <div class="widget calendario">
+        <h2>Calendario</h2>
+        <div id="calendar"></div>
+    </div>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="header">
-            <h1>Panel Principal</h1>
-            <div class="notifications">🔔</div>
-        </div>
-
-        <!-- Widgets -->
-        <div class="widgets-grid">
-            <div class="widget examenes-pendientes">
-                <h2>Exámenes Pendientes</h2>
-                <div class="examen-list">
-                    <!-- Dynamic content from JS -->
-                </div>
-            </div>
-
-            <div class="widget calendario">
-                <h2>Calendario</h2>
-                <div id="calendar"></div>
-            </div>
-        </div>
-    </main>
-</div>
-
+    <script src="{% static 'js/calendar.js' %}"></script>
 {% endblock %}
