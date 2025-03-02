@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User
-
+from .models import RequestExam
 
 class UserRegisterForm(UserCreationForm):
     username = forms.CharField(
@@ -86,3 +86,9 @@ class UserUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["username"].help_text = ""
+
+class AnnoRequest(forms.ModelForm):
+    class Meta:
+        model = RequestExam
+        fields = ["anno"]
+        widget = { "anno": forms.Select()}

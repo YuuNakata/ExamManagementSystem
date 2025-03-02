@@ -31,3 +31,17 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
+
+class RequestExam(models.Model):
+    OPCIONES = [
+    ("1ro" , "1ro") ,
+    ("2do" , "2do") ,
+    ("3ro" , "3ro") ,
+    ("4to" , "4to") ,
+    ]
+    nombre = models.CharField(max_length=100)
+    asignatura = models.CharField(max_length= 20)
+    fecha = models.DateField()
+    anno = models.CharField(max_length= 3 , choices = OPCIONES)
+    suficiencia = models.BooleanField(default= False)
+    premio = models.BooleanField(default= False)
