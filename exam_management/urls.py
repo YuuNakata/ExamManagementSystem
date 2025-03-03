@@ -26,4 +26,5 @@ urlpatterns = [
     path("", DashboardView.as_view(), name="dashboard"),
     path("logout/", logout_view, name="logout"),
     path("users/", include("users.urls")),
+    path("exams/", include("exams.urls")),
 ]

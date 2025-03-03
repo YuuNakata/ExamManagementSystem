@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="confirmation-message">
+    <h2>¡Solicitud Completada!</h2>
+    <p>Tu solicitud ha sido registrada exitosamente.</p>
+    <a href="{% url 'exams:request_exam' %}" class="btn-primary">Aceptar</a>
+</div>
+{% endblock %}
