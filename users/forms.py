@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import User
 from .models import RequestExam
 
+
 class UserRegisterForm(UserCreationForm):
     username = forms.CharField(
         max_length=150,
@@ -49,6 +50,8 @@ class UserRegisterForm(UserCreationForm):
         fields = [
             "username",
             "email",
+            "first_name",
+            "last_name",
             "password1",
             "password2",
             "role",
@@ -60,7 +63,14 @@ class UserRegisterForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         self.fields["username"].help_text = ""
         self.fields["password1"].help_text = ""
-        self.fields["password2"].help_text = ""
+        # Traducción de labels
+        self.fields["username"].label = "Nombre de usuario"
+        self.fields["email"].label = "Correo electrónico"
+        self.fields["first_name"].label = "Nombres"
+        self.fields["last_name"].label = "Apellidos"
+        self.fields["role"].label = "Rol"
+        self.fields["curso_programa"].label = "Curso/Programa"
+        self.fields["departamento_facultad"].label = "Departamento/Facultad"
 
 
 class UserUpdateForm(forms.ModelForm):
@@ -78,6 +88,12 @@ class UserUpdateForm(forms.ModelForm):
         widgets = {
             "username": forms.TextInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),
+            "first_name": forms.TextInput(
+                attrs={"class": "form-control", "required": True}
+            ),
+            "last_name": forms.TextInput(
+                attrs={"class": "form-control", "required": True}
+            ),
             "role": forms.Select(attrs={"class": "form-control"}),
             "curso_programa": forms.TextInput(attrs={"class": "form-control"}),
             "departamento_facultad": forms.TextInput(attrs={"class": "form-control"}),
@@ -86,9 +102,24 @@ class UserUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["username"].help_text = ""
+        # Traducción de labels
+        self.fields["username"].label = "Nombre de usuario"
+        self.fields["email"].label = "Correo electrónico"
+        self.fields["first_name"].label = "Nombres"
+        self.fields["last_name"].label = "Apellidos"
+        self.fields["role"].label = "Rol"
+        self.fields["curso_programa"].label = "Curso/Programa"
+        self.fields["departamento_facultad"].label = "Departamento/Facultad"
+
+        # Eliminar texto de ayuda del username
+        self.fields["username"].help_text = ""
+
+        # Opcional: Mensajes de ayuda adicionales
+        self.fields["email"].help_text = "Ejemplo: usuario@dominio.com"
+
 
 class AnnoRequest(forms.ModelForm):
     class Meta:
         model = RequestExam
         fields = ["anno"]
-        widget = { "anno": forms.Select()}
+        widget = {"anno": forms.Select()}

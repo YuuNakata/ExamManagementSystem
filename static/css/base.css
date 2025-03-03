@@ -53,7 +53,7 @@ body {
     min-height: 100vh;
     box-sizing: border-box; /* Evitar desbordamientos */
 }
-/* ============ CORRECCIÓN DE SIDEBAR ============ */
+/* ============ SIDEBAR ============ */
 .sidebar {
     background: var(--negro);
     color: var(--blanco); 
@@ -181,7 +181,7 @@ body {
     justify-content: center;
 }
 
-/* Mejoras en los botones */
+
 .btn-primary {
     background: var(--naranja);
     color: var(--blanco);

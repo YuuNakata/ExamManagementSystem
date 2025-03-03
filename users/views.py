@@ -6,6 +6,7 @@ from django.db.models import Q
 from .models import User
 from users.forms import UserRegisterForm, UserUpdateForm
 from django.contrib import messages
+from django.db import IntegrityError
 
 
 @login_required
@@ -50,26 +51,33 @@ def update_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == "POST":
         form = UserUpdateForm(request.POST, instance=user)
-        if form.is_valid():
-            updated_user = form.save()
-            messages.success(
-                request, f"Usuario {updated_user.username} actualizado exitosamente."
-            )
-            return redirect("users:user_management")
+        try:
+            if form.is_valid():
+                updated_user = form.save()
+                messages.success(
+                    request,
+                    f"Usuario {updated_user.username} actualizado exitosamente.",
+                )
+                return redirect("users:user_management")
+            else:
+                # Si el formulario no es válido, captura los errores
+                raise IntegrityError("Error en los datos del formulario.")
 
-        # Si hay errores, recargar la página principal con los errores
-        users = User.objects.all()
-        register_form = UserRegisterForm()
-        return render(
-            request,
-            "user_management.html",
-            {
-                "users": users,
-                "register_form": register_form,
-                "edit_modal_errors": form.errors,
-                "editing_user_id": user_id,
-            },
-        )
+        except IntegrityError as e:
+            # Maneja errores de base de datos (como campos nulos)
+            messages.error(request, f"Error al actualizar: {str(e)}")
+            users = User.objects.all()
+            register_form = UserRegisterForm()
+            return render(
+                request,
+                "user_management.html",
+                {
+                    "users": users,
+                    "register_form": register_form,
+                    "edit_modal_errors": form.errors,
+                    "editing_user_id": user_id,
+                },
+            )
 
 
 @login_required

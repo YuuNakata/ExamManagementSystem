@@ -23,15 +23,14 @@
                 <div class="modal-content">
                     <span class="close" onclick="closeModal('editModal{{ user.id }}')">&times;</span>
                     <h3>Modificar Usuario</h3>
+
                     <form method="post" action="{% url 'users:update_user' user.id %}">
                         {% csrf_token %}
                         {{ user.update_form.as_p }}
                         {% if edit_modal_errors and editing_user_id == user.id|stringformat:"s" %}
                             <div class="error-list">
-                                {% for field, errors in edit_modal_errors.items %}
-                                    {% for error in errors %}
-                                        <p class="error-message">{{ error }}</p>
-                                    {% endfor %}
+                                {% for error in edit_modal_errors.values %}
+                                    <p class="error-message">{{ error }}</p>
                                 {% endfor %}
                             </div>
                         {% endif %}
@@ -44,7 +43,7 @@
             </div>
             <div class="user-card">
                 <div class="user-info">
-                    <span class="username">{{ user.username }}</span>
+                    <span class="full_name">{{ user.full_name }}</span>
                     <span class="role">{{ user.get_role_display }}</span>
                     <span class="email">{{ user.email }}</span>
                 </div>
