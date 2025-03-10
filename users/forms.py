@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User
-from .models import RequestExam
 
 
 class UserRegisterForm(UserCreationForm):
@@ -118,8 +117,4 @@ class UserUpdateForm(forms.ModelForm):
         self.fields["email"].help_text = "Ejemplo: usuario@dominio.com"
 
 
-class AnnoRequest(forms.ModelForm):
-    class Meta:
-        model = RequestExam
-        fields = ["anno"]
-        widget = {"anno": forms.Select()}
+
