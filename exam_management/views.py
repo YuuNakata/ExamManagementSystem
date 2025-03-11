@@ -15,6 +15,10 @@ def logout_view(request):
     return redirect("login")
 
 
+class NotificationsView(TemplateView):
+    template_name = "notifications.html"
+
+
 class DashboardView(TemplateView):
     template_name = "dashboard.html"
 

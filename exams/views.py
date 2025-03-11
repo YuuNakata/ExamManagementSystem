@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
 from .forms import ExamRequestForm
 
 
@@ -24,3 +25,24 @@ def request_exam(request):
 @login_required
 def confirmation(request):
     return render(request, "exams/confirmation.html")
+
+
+##Generic for make up##
+class ManageGradesView(TemplateView):
+    template_name = "exams/manage_grades.html"
+
+
+class VerifyRequestsView(TemplateView):
+    template_name = "exams/verify_requests.html"
+
+
+class CalendarView(TemplateView):
+    template_name = "exams/calendar.html"
+
+
+class ListGradesView(TemplateView):
+    template_name = "exams/list_grades.html"
+
+
+class RequestReviewView(TemplateView):
+    template_name = "exams/request_review.html"
