@@ -8,7 +8,7 @@ body {
 
 /* Header styles */
 .content-header {
-    background-color: #4CAF50;
+    background-color: #f85f00;
     color: white;
     padding: 20px;
     text-align: center;
@@ -50,7 +50,7 @@ body {
 }
 
 .btn-primary {
-    background-color: #4CAF50;
+    background-color: #f85f00;
     color: white;
     padding: 10px 15px;
     border: none;
@@ -60,7 +60,7 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: #45a049;
+    background-color: #f85f00;
 }
 
 /* Error message styles */
@@ -75,4 +75,4 @@ body {
 .error-message {
     color: #d8000c;
     font-weight: bold;
-}
+}   
