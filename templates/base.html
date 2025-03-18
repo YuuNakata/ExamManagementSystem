@@ -30,9 +30,6 @@
                 <a href="/" class="menu-item active">
                     <span class="icono icono-inicio"></span>
                     Inicio</a>
-                <a href="#" class="menu-item">
-                    <span class="icono icono-calendario"></span>
-                    Calendario</a>
                 {% if user.is_student %}
                 <a href="{% url 'exams:list_grades' %}" class="menu-item">
                     <span class="icono icono-examen"></span>
@@ -73,7 +70,7 @@
 
                 {% if user.is_authenticated %}
                     <a href="{% url 'notifications' %}" class="menu-item"><span>
-                        🔔
+                        🔔 Notificaciones
                     </span></a>
                     <a href="{% url 'logout' %}" class="menu-item btn-primary">Logout</a>
                 {% else %}
