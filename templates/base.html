@@ -29,10 +29,7 @@
             <nav class="menu">
                 <a href="/" class="menu-item active">
                     <span class="icono icono-inicio"></span>
-                    Inicio</a>
-                <a href="#" class="menu-item">
-                    <span class="icono icono-calendario"></span>
-                    Calendario</a>
+                    Principal</a>
                 {% if user.is_student %}
                 <a href="{% url 'exams:list_grades' %}" class="menu-item">
                     <span class="icono icono-examen"></span>
