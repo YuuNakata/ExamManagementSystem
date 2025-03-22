@@ -51,7 +51,9 @@
                     <button class="btn-edit" onclick="showModal('editModal{{ user.id }}')">
                         <span class="icono icono-editar"></span>
                     </button>
-
+                </div>
+                
+                <div>
                     <form id="deleteForm{{ user.id }}" method="post" action="{% url 'users:delete_user' user.id %}" onsubmit="return confirm('¿Está seguro que desea eliminar este usuario?')">
                         {% csrf_token %}
                         <button type="submit" class="btn-delete">

@@ -1,4 +1,45 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-<h1>Solicitar Revisión de Examen</h1>
+<div class="content-header">
+    <h1>Solicitar Revisión</h1>
+</div>
+
+<form method="post" class="exam-form">
+    {% csrf_token %}
+    
+    {% if form.errors %}
+        <div class="error-list">
+            {% for error in form.errors.values %}
+                <div class="error-message">{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="form-group">
+        <label for="subject">Asignatura:</label>
+        <select id="subject" name="subject">
+            <option value="RSI">RSI</option>
+            <option value="IA">IA</option>
+            <option value="IO">IO</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="exam_type">Tipo de Examen:</label>
+        <select id="exam_type" name="exam_type">
+            <option value="parcial">Suficiencia</option>
+            <option value="final">Premio</option>
+        </select>
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Aceptar</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/exams.css' %}">
 {% endblock %}
