@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static "css/base.css" %}">
+
+<div class="main-content">
+    <div class="widget">
+        <!-- Cabecera -->
+        <div class="management-header">
+            <h2>Calendario de {{ current_month|date:"F Y" }}</h2>
+        </div>
+
+        <!-- Grid del calendario -->
+        <div class="calendar-grid">
+            <div class="calendar-header">
+                <div class="header-day">Lun</div>
+                <div class="header-day">Mar</div>
+                <div class="header-day">Mié</div>
+                <div class="header-day">Jue</div>
+                <div class="header-day">Vie</div>
+                <div class="header-day">Sáb</div>
+                <div class="header-day">Dom</div>
+            </div>
+
+            {% for week in weeks %}
+            <div class="calendar-week">
+                {% for day in week %}
+                <div class="calendar-day {% if day.month != current_month.month %}other-month{% endif %}">
+                    <div class="day-number">{{ day.day }}</div>
+                    
+                    <!-- Exámenes del día -->
+                    {% for exam in exams %}
+                        {% if exam.date == day %}
+                        <div class="exam-entry">
+                            <div class="exam-badge {{ exam.exam_type }}">
+                                {{ exam.get_exam_type_display }}
+                            </div>
+                            <div class="exam-details">
+                                <span>{{ exam.subject }}</span>
+                                <small>{{ exam.get_turn_display }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

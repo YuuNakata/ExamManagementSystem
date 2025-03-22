@@ -43,16 +43,18 @@ body {
 
 /* ============ LAYOUT PRINCIPAL ============ */
 .dashboard-container {
-    margin-left: 0; /* Eliminar margen del contenedor */
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
 
 .main-content {
-    margin-left: 250px; /* Solo el contenido principal tiene margen */
-    width: calc(100% - 250px); /* Ajuste preciso del ancho */
-    padding: 2rem;
-    min-height: 100vh;
-    box-sizing: border-box; /* Evitar desbordamientos */
+    margin-left: 100px;
+    width: calc(100% - 100px);
+    padding: 2rem 0;
 }
+
 /* ============ SIDEBAR ============ */
 .sidebar {
     background: var(--negro);
@@ -213,4 +215,86 @@ body {
 .btn-primary:hover {
     transform: translateY(-1px);
     box-shadow: var(--sombra);
+}
+
+
+/* Calendario */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--gris);
+    border: 1px solid var(--gris);
+}
+
+.calendar-week {
+    display: contents;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--naranja);
+    color: var(--blanco);
+    text-align: center;
+    padding: 0.5rem;
+    font-weight: 600;
+}
+
+.calendar-day {
+    min-height: 120px;
+    background: var(--blanco);
+    padding: 0.5rem;
+    position: relative;
+    border: 1px solid var(--gris);
+}
+
+/* Modales */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: var(--blanco);
+    padding: 2rem;
+    border-radius: var(--radio-borde);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+}
+
+.modal .close {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-column: 1 / -1;
+}
+
+.header-day {
+    padding: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    border-bottom: 2px solid var(--naranja);
+}
+
+
+.other-month {
+    background-color: var(--naranja-suave);
+    opacity: 0.7;
 }

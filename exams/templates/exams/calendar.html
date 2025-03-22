@@ -1,4 +1,100 @@
+
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-<h1>Calendario de Exámenes</h1>
+<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+
+<div class="main-content">
+    <div class="widget">
+        <!-- Cabecera y controles de navegación -->
+        <div class="management-header">
+            <h2>Calendario de {{ current_month|date:"F Y"|capfirst }}</h2>
+            {% if not modo_lectura %}
+            <div class="actions">
+                <a href="?month={{ prev_month }}" class="btn-primary">&lt; Mes anterior</a>
+                <a href="?month={{ next_month }}" class="btn-primary">Mes siguiente &gt;</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Grid del calendario -->
+        <div class="calendar-grid">
+            <div class="calendar-header">
+                <div class="header-day">Lun</div>
+                <div class="header-day">Mar</div>
+                <div class="header-day">Mié</div>
+                <div class="header-day">Jue</div>
+                <div class="header-day">Vie</div>
+                <div class="header-day">Sáb</div>
+                <div class="header-day">Dom</div>
+            </div>
+
+            {% for week in weeks %}
+            <div class="calendar-week">
+                {% for day in week %}
+                <div class="calendar-day {% if day.month != current_month.month %}other-month{% endif %}" 
+                onclick="handleDayClick(event, '{{ day|date:'Y-m-d' }}')">
+                <div class="day-number">{{ day.day }}</div>
+                    
+                    <!-- Exámenes del día -->
+                    {% for exam in exams %}
+                        {% if exam.date == day %}
+                        <div class="exam-entry" data-exam-id="{{ exam.id }}">
+                            <div class="exam-badge {{ exam.exam_type }}">
+                                {{ exam.get_exam_type_display }}
+                            </div>
+                            <div class="exam-details">
+                                <span>{{ exam.subject }}</span>
+                                <small>{{ exam.get_turn_display }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Modales dinámicos -->
+{% if not modo_lectura %}
+{% for exam in exams %}
+<div id="examModal{{ exam.id }}" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('examModal{{ exam.id }}')">&times;</span>
+        <h3>Editar Examen</h3>
+        <form method="post" action="{% url 'exams:edit_exam' exam.id %}">
+            {% csrf_token %}
+            {{ exam.form.as_p }}
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Guardar</button>
+                <button type="button" class="btn-cancel" onclick="closeModal('examModal{{ exam.id }}')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+<div id="newExamModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('newExamModal')">&times;</span>
+        <h3>Nuevo Examen</h3>
+        <form method="post" action="{% url 'exams:create_exam' %}">
+            {% csrf_token %}
+            {{ new_exam_form.as_p }}
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Crear</button>
+                <button type="button" class="btn-cancel" onclick="closeModal('newExamModal')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{% static 'js/modals.js' %}"></script>
+{% endif %}
+
 {% endblock %}

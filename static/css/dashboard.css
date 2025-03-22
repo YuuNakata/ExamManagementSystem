@@ -1,24 +1,12 @@
-/* ============ CALENDARIO ============ */
-.widget.calendario {
-    background: var(--blanco);
+.dashboard-container {
     padding: 2rem;
-    border-radius: var(--radio-borde);
-    box-shadow: var(--sombra);
-    max-width: 800px;
-    margin: 2rem auto;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-#calendar {
-    margin-top: 1.5rem;
+.widget.calendar-widget {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
 }
-
-/* ============ CABECERA ============ */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding: 1rem 0;
-    border-bottom: 2px solid var(--naranja-suave);
-}
-

@@ -1,21 +1,12 @@
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-{% endblock %}
-
 {% block content %}
-    <div class="header">
-        <h1>Panel Principal</h1>
-        <div class="notifications">🔔</div>
+<div class="dashboard-container">
+    <div class="main-content">
+        <div class="widget">
+            {% include "exams/calendar.html" %}
+        </div>
     </div>
-
-    <div class="widget calendario">
-        <h2>Calendario</h2>
-        <div id="calendar"></div>
-    </div>
-
-    <script src="{% static 'js/calendar.js' %}"></script>
+</div>
 {% endblock %}
