@@ -21,5 +21,5 @@ class CalendarExamForm(forms.ModelForm):
             "subject": forms.TextInput(
                 attrs={"placeholder": "Nombre de la asignatura"}
             ),
-            "date": forms.DateInput(attrs={"type": "date", "class": "date-input"}),
+            "date": forms.HiddenInput(),
         }

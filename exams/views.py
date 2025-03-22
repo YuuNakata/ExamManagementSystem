@@ -40,10 +40,6 @@ def edit_calendar(request):
 def update_exam(request, pk):
     exam = get_object_or_404(CalendarExam, pk=pk)
 
-    # Verificar permisos
-    if request.user != exam.teacher:
-        return redirect("exams:edit_calendar")
-
     if request.method == "POST":
         form = CalendarExamForm(request.POST, instance=exam)
         if form.is_valid():
@@ -52,7 +48,7 @@ def update_exam(request, pk):
     else:
         form = CalendarExamForm(instance=exam)
 
-    return render(request, "exams/exam_modal.html", {"form": form})
+    return render(request, "exams/calendar.html", {"form": form})
 
 
 @login_required
@@ -81,7 +77,7 @@ def create_exam(request):
     else:
         form = CalendarExamForm(initial=initial_data)
 
-    return render(request, "exams/exam_modal.html", {"form": form})
+    return render(request, "exams/calendar.html", {"form": form})
 
 
 def get_calendar_context(request, read_only=True):
