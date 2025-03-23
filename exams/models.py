@@ -36,10 +36,18 @@ class CalendarExam(models.Model):
         ("5", "2:00-3:20"),
         ("6", "3:30-4:50"),
     ]
-    date = models.DateField("Fecha del examen", default=date.today)
-    turn = models.CharField("Turno", max_length=1, choices=TURN_CHOICES)
-    exam_type = models.CharField(max_length=20, choices=EXAM_TYPES)
-    subject = models.CharField(max_length=100, verbose_name="Asignatura")
+    date = models.DateField(
+        "Fecha del examen", default=date.today, null=False, blank=False
+    )
+    turn = models.CharField(
+        "Turno", max_length=1, choices=TURN_CHOICES, null=False, blank=False
+    )
+    exam_type = models.CharField(
+        max_length=20, choices=EXAM_TYPES, null=False, blank=False
+    )
+    subject = models.CharField(
+        max_length=100, verbose_name="Asignatura", null=False, blank=False
+    )
 
     def __str__(self):
         return f"{self.get_day_of_week_display()} - {self.get_turn_display()}"

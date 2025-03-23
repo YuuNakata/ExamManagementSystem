@@ -40,11 +40,20 @@ def edit_calendar(request):
 def update_exam(request, pk):
     exam = get_object_or_404(CalendarExam, pk=pk)
 
+    if not request.user.is_teacher:
+        return redirect("exams:edit_calendar")
+
     if request.method == "POST":
         form = CalendarExamForm(request.POST, instance=exam)
         if form.is_valid():
             form.save()
             return redirect("exams:edit_calendar")
+        else:
+            # Eliminar el examen si el formulario es inválido
+            exam.delete()
+            messages.error(request, "Examen eliminado por datos inválidos")
+            return redirect("exams:edit_calendar")
+
     else:
         form = CalendarExamForm(instance=exam)
 
