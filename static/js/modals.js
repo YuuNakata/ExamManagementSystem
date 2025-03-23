@@ -20,8 +20,9 @@ function closeModal(modalId) {
 function handleDayClick(event, date) {
     event.stopPropagation();
     const examEntry = event.target.closest('.exam-entry');
+    const addButton = event.target.closest('.add-exam-btn');
     
-    if (!examEntry) {
+    if (!examEntry && !addButton) {
         const dateInput = document.querySelector('#newExamModal input[name="date"]');
         if (dateInput) {
             dateInput.value = date;
@@ -29,6 +30,16 @@ function handleDayClick(event, date) {
         }
     }
 }
+
+function handleAddExam(event, date) {
+    event.stopPropagation();
+    const dateInput = document.querySelector('#newExamModal input[name="date"]');
+    if (dateInput) {
+        dateInput.value = date;
+        showModal('newExamModal');
+    }
+}
+
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {

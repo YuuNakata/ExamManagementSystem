@@ -62,8 +62,6 @@ def update_exam(request, pk):
 
 @login_required
 def create_exam(request):
-    if not request.user.is_teacher:
-        return redirect("exams:calendar")
 
     initial_data = {}
     date_param = request.GET.get("date")
@@ -80,9 +78,8 @@ def create_exam(request):
         form = CalendarExamForm(request.POST)
         if form.is_valid():
             new_exam = form.save(commit=False)
-            new_exam.teacher = request.user
             new_exam.save()
-            return redirect("exams:edit_calendar")
+        return redirect("exams:edit_calendar")
     else:
         form = CalendarExamForm(initial=initial_data)
 
@@ -118,7 +115,8 @@ def get_calendar_context(request, read_only=True):
 
     exams = CalendarExam.objects.filter(
         date__month=first_day.month, date__year=first_day.year
-    )
+    ).order_by("date", "turn")
+
     context = {
         "weeks": weeks,
         "current_month": first_day,
@@ -131,9 +129,6 @@ def get_calendar_context(request, read_only=True):
 
         context["prev_month"] = prev_month
         context["next_month"] = next_month
-        exams = CalendarExam.objects.filter(
-            date__month=first_day.month, date__year=first_day.year
-        )
         for exam in exams:
             exam.form = CalendarExamForm(instance=exam)
         context["exams"] = exams

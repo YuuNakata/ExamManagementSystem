@@ -24,6 +24,9 @@ class ExamRequest(models.Model):
 
 
 class CalendarExam(models.Model):
+    class Meta:
+        unique_together = ["date", "turn"]
+
     EXAM_TYPES = (
         ("suficiencia", "Suficiencia"),
         ("premio", "Premio"),

@@ -33,11 +33,11 @@
             {% for week in weeks %}
             <div class="calendar-week">
                 {% for day in week %}
-                <div class="calendar-day {% if day.month != current_month.month %}other-month{% endif %}" 
-                onclick="handleDayClick(event, '{{ day|date:'Y-m-d' }}')">
+                <div class="calendar-day {% if day.month != current_month.month %}other-month{% endif %}" >
                 <div class="day-number">{{ day.day }}</div>
                     
                     <!-- Exámenes del día -->
+                    <div class="exams-container">
                     {% for exam in exams %}
                         {% if exam.date == day %}
                         <div class="exam-entry" data-exam-id="{{ exam.id }}">
@@ -51,7 +51,10 @@
                         </div>
                         {% endif %}
                     {% endfor %}
-                    
+                    </div>
+                    {% if not modo_lectura %}
+                    <div class="add-exam-btn" onclick="handleAddExam(event, '{{ day|date:'Y-m-d' }}')">+</div>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>

@@ -37,10 +37,55 @@
     opacity: 0.7;
 }
 
+.actions a {
+    text-decoration: none;
+}
+
 .exam-entry {
-    font-size: 0.85rem;
-    margin: 2px 0;
-    padding: 4px;
+    margin: 4px 0;
+    padding: 6px;
     background: #f8f9fa;
     border-radius: 4px;
+    border-left: 3px solid #FF6B00;
+}
+
+.exam-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #FF6B00;
+    margin-bottom: 2px;
+}
+.exams-container {
+    max-height: 100px;
+    overflow-y: auto;
+    margin-bottom: 28px; /* Espacio para el botón + */
+}
+
+/* Estilos para el botón de agregar */
+.add-exam-btn {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: #FF6B00;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+}
+
+.add-exam-btn:hover {
+    transform: scale(1.1);
+    background: #E55D00;
+}
+
+/* Ajustar posición del día */
+.calendar-day {
+    position: relative;
+    padding-bottom: 30px; /* Espacio para el botón */
 }
