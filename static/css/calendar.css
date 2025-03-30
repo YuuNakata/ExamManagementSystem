@@ -1,91 +1,347 @@
-/* calendar.css */
-.calendar-widget {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+/* Estilos específicos del Calendario */
+
+/* Contenedor principal del widget de calendario */
+.widget { /* Asegúrate que este contenedor exista en tu HTML o ajusta al contenedor real */
+    background: var(--blanco);
+    border-radius: var(--radio-borde);
+    box-shadow: var(--sombra);
     padding: 1.5rem;
-    max-width: 1200px;
-    margin: 2rem auto;
+    /* max-width: 1200px;  Puedes ajustar esto según tu layout general */
+    margin: 2rem 0; /* Margen dentro del .main-content */
 }
 
+/* Cabecera con título y botones de navegación */
+.management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap; /* Para que los botones pasen abajo en pantallas pequeñas */
+    gap: 1rem;
+}
+.management-header h2 {
+    margin: 0;
+    color: var(--negro);
+    font-size: 1.5rem; /* Ajusta según preferencia */
+}
+.management-header .actions {
+    display: flex;
+    gap: 0.8rem;
+}
+/* Hereda estilos de .btn-primary de base_mejorada.css */
+
+/* La Grid principal del Calendario */
 .calendar-grid {
     display: grid;
-    grid-template-columns: repeat(7, minmax(120px, 1fr));
-    gap: 1px;
-    background: #F5F5F5;
-    border: 1px solid #F5F5F5;
+    /* Columnas: 7 iguales, mínimo 100px, máximo 1 fracción del espacio */
+    grid-template-columns: repeat(7, minmax(100px, 1fr));
+    gap: 1px; /* Crea las líneas entre celdas */
+    background: var(--gris-medio); /* Color de las líneas/gap */
+    border: 1px solid var(--gris-medio); /* Borde exterior */
+    border-radius: var(--radio-borde); /* Bordes redondeados */
+    overflow: hidden; /* Asegura que el contenido respete el borde redondeado */
 }
 
-.calendar-day {
-    min-height: 120px;
-    background: white;
-    padding: 0.8rem;
-    border: 1px solid #F5F5F5;
-    cursor: default;
-}
-
+/* Contenedor de la fila de encabezados (L, M, X...) */
 .calendar-header {
-    background: #FF6B00;
-    color: white;
-    grid-template-columns: repeat(7, 1fr);
+    display: contents; /* Hace que los hijos (.header-day) sean parte del grid principal */
+}
+
+/* Estilo de cada día en el encabezado */
+.header-day {
+    background: var(--naranja);
+    color: var(--blanco);
     text-align: center;
-    padding: 0.5rem;
-}
-
-.other-month {
-    background-color: #FFE5D6;
-    opacity: 0.7;
-}
-
-.actions a {
-    text-decoration: none;
-}
-
-.exam-entry {
-    margin: 4px 0;
-    padding: 6px;
-    background: #f8f9fa;
-    border-radius: 4px;
-    border-left: 3px solid #FF6B00;
-}
-
-.exam-badge {
-    font-size: 0.75rem;
+    padding: 0.8rem 0.4rem; /* Ajusta padding */
     font-weight: 600;
-    color: #FF6B00;
-    margin-bottom: 2px;
-}
-.exams-container {
-    max-height: 100px;
-    overflow-y: auto;
-    margin-bottom: 28px; /* Espacio para el botón + */
+    font-size: 0.85rem; /* Ligeramente más pequeño */
 }
 
-/* Estilos para el botón de agregar */
+/* Contenedor de la semana - LA CORRECCIÓN CLAVE */
+.calendar-week {
+    display: contents; /* IGNORA este div para layout, sus hijos van directo al grid */
+}
+
+/* Estilo de cada celda de día en el calendario */
+.calendar-day {
+    min-height: 120px; /* Altura mínima para cada día */
+    background: var(--blanco);
+    padding: 0.6rem; /* Padding interno */
+    position: relative; /* Necesario para posicionar el botón '+' absoluto */
+    display: flex; /* Para controlar mejor el contenido interno */
+    flex-direction: column; /* Apila número y exámenes */
+    transition: background-color 0.2s ease;
+    /* border: 1px solid var(--gris);  <- No es necesario si usas gap */
+}
+.calendar-day:hover {
+    background-color: var(--naranja-suave); /* Efecto hover sutil */
+}
+
+/* Estilo para los días que no pertenecen al mes actual */
+.calendar-day.other-month {
+    background-color: var(--gris); /* Fondo gris claro */
+    opacity: 0.7;
+    color: var(--gris-oscuro);
+}
+.calendar-day.other-month .day-number {
+    color: var(--gris-oscuro);
+}
+.calendar-day.other-month .add-exam-btn {
+    display: none; /* Ocultar botón de añadir en días de otro mes */
+}
+
+/* Número del día */
+.day-number {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--negro);
+    margin-bottom: 0.5rem;
+    text-align: left; /* O 'right' si prefieres */
+}
+
+/* Contenedor de los exámenes dentro de un día */
+.exams-container {
+    flex-grow: 1; /* Ocupa el espacio restante */
+    max-height: 80px; /* Limita altura antes de scroll */
+    overflow-y: auto; /* Scroll si hay muchos exámenes */
+    margin-bottom: 5px; /* Pequeño espacio antes del botón '+' si está visible */
+    scrollbar-width: thin; /* Estilo scrollbar */
+    scrollbar-color: var(--naranja-suave) var(--gris);
+}
+/* Estilo scrollbar para Webkit (Chrome, Safari) */
+.exams-container::-webkit-scrollbar {
+  width: 6px;
+}
+.exams-container::-webkit-scrollbar-track {
+  background: var(--gris);
+  border-radius: 3px;
+}
+.exams-container::-webkit-scrollbar-thumb {
+  background-color: var(--naranja-suave);
+  border-radius: 3px;
+}
+.exams-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--naranja);
+}
+
+
+/* Estilo para cada entrada de examen */
+.exam-entry {
+    margin-bottom: 5px;
+    padding: 5px 8px;
+    background: var(--naranja-suave); /* Fondo suave */
+    border-radius: 4px;
+    border-left: 3px solid var(--naranja); /* Barra lateral naranja */
+    font-size: 0.8rem;
+    cursor: pointer; /* Indica que es clickeable (para editar) */
+    transition: background-color 0.2s ease;
+}
+.exam-entry:hover {
+    background-color: #ffdbbf; /* Un poco más oscuro al pasar el ratón */
+}
+
+/* Tipo de examen (Suficiencia, Premio) */
+.exam-badge {
+    display: block; /* Ocupa su línea */
+    font-size: 0.7rem;
+    font-weight: 700; /* Más bold */
+    color: var(--naranja-oscuro); /* Naranja más oscuro para destacar */
+    margin-bottom: 2px;
+    text-transform: uppercase; /* Mayúsculas */
+}
+/* Podrías añadir colores específicos si quieres diferenciar tipos */
+/* .exam-badge.Premio { border-left-color: #007bff; color: #007bff; } */
+/* .exam-badge.Suficiencia { border-left-color: #28a745; color: #28a745; } */
+
+/* Detalles del examen (asignatura, turno) */
+.exam-details span {
+    display: block; /* Nombre en una línea */
+    font-weight: 500;
+    color: var(--negro);
+}
+.exam-details small {
+    font-size: 0.75rem;
+    color: var(--gris-oscuro);
+}
+
+/* Botón flotante para añadir examen */
 .add-exam-btn {
     position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background: #FF6B00;
-    color: white;
-    width: 24px;
-    height: 24px;
+    bottom: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    background: var(--naranja);
+    color: var(--blanco);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.4rem;
+    line-height: 1;
+    font-weight: bold;
     cursor: pointer;
-    font-size: 1.2rem;
-    transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    z-index: 10; /* Asegura que esté encima del contenido */
 }
 
 .add-exam-btn:hover {
     transform: scale(1.1);
-    background: #E55D00;
+    background: var(--naranja-oscuro);
 }
 
-/* Ajustar posición del día */
-.calendar-day {
+/* Estilos para Modales (Asegúrate que sean consistentes con base_mejorada.css) */
+/* Si ya tienes .modal, .modal-content, .close en base_mejorada.css, */
+/* puedes omitir esta sección o solo añadir ajustes específicos */
+
+.modal {
+    /* ... (asegúrate que estén definidos globalmente o aquí) ... */
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+    align-items: center; /* Centrado vertical */
+    justify-content: center; /* Centrado horizontal */
+}
+.modal.open { /* Clase para mostrar el modal vía JS */
+    display: flex;
+}
+
+.modal-content {
+    background-color: var(--blanco);
+    margin: auto;
+    padding: 2rem;
+    border: 1px solid var(--gris-medio);
+    border-radius: var(--radio-borde);
+    width: 90%;
+    max-width: 500px; /* Ancho máximo del modal */
+    box-shadow: var(--sombra-fuerte);
     position: relative;
-    padding-bottom: 30px; /* Espacio para el botón */
+    animation: modalFadeIn 0.3s ease-out; /* Animación del CSS base */
+}
+
+.modal .close {
+    /* ... (estilos del botón de cierre) ... */
+    color: var(--gris-oscuro);
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    background: none;
+    border: none;
+}
+.modal .close:hover,
+.modal .close:focus {
+    color: var(--negro);
+    text-decoration: none;
+}
+
+.modal h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--negro);
+    text-align: center;
+}
+
+/* Estilos para formularios dentro del modal */
+.modal form p { /* Asumiendo {{ form.as_p }} */
+    margin-bottom: 1rem;
+}
+.modal form label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.modal form input[type="text"],
+.modal form input[type="date"],
+.modal form input[type="time"],
+.modal form select,
+.modal form textarea {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid var(--gris-medio);
+    border-radius: var(--radio-borde);
+    font-size: 0.95rem;
+    box-sizing: border-box; /* Importante */
+}
+.modal form input:focus,
+.modal form select:focus,
+.modal form textarea:focus {
+    outline: none;
+    border-color: var(--naranja);
+    box-shadow: 0 0 0 2px var(--naranja-suave);
+}
+
+.form-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end; /* Botones a la derecha */
+    gap: 0.8rem;
+}
+
+.btn-cancel {
+    background-color: var(--gris-oscuro);
+    color: var(--blanco);
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radio-borde);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+.btn-cancel:hover {
+    background-color: var(--negro);
+}
+
+/* Responsive para el calendario */
+@media (max-width: 768px) {
+    .calendar-grid {
+        /* Hacer columnas más pequeñas en móviles */
+        grid-template-columns: repeat(7, minmax(0, 1fr)); /* Que se encojan */
+        gap: 0; /* Sin gap, usar bordes */
+    }
+    .calendar-day {
+        min-height: 80px; /* Menos altura */
+        padding: 0.3rem;
+        font-size: 0.75rem; /* Texto más pequeño */
+        border: 1px solid var(--gris-medio); /* Añadir borde si quitamos gap */
+    }
+    .day-number {
+        font-size: 0.7rem;
+        margin-bottom: 0.2rem;
+    }
+    .exam-entry {
+        padding: 3px 5px;
+        font-size: 0.65rem;
+    }
+     .exam-badge {
+        font-size: 0.6rem;
+    }
+    .exam-details small {
+        font-size: 0.6rem;
+    }
+    .add-exam-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 1rem;
+        bottom: 4px;
+        right: 4px;
+    }
+    .header-day {
+        padding: 0.5rem 0.1rem;
+        font-size: 0.7rem;
+    }
+    .management-header h2 {
+        font-size: 1.2rem;
+    }
 }

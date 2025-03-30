@@ -1,12 +1,23 @@
-{% extends "base.html" %}
+{# dashboard.html - CORREGIDO NUEVAMENTE #}
 {% load static %}
 
-{% block content %}
+{# Ya NO extiendas base.html #}
+{# Ya NO uses block content #}
+
+
 <div class="dashboard-container">
-    <div class="main-content">
-        <div class="widget">
-            {% include "exams/calendar.html" %}
-        </div>
+
+
+    {# Contenido específico del dashboard directamente #}
+    {# La clase widget/card se aplica al contenedor del calendario #}
+    <div class="widget card"> {# Asegúrate que calendar.html NO tenga otro widget innecesario dentro #}
+        {% include "exams/calendar.html" %}
     </div>
+    {# Más widgets aquí si es necesario, usando la clase card #}
+    {# <div class="widget card"> ... otro contenido ... </div> #}
+
+
 </div>
-{% endblock %}
+
+
+{# Ya NO necesitas endblock #}
