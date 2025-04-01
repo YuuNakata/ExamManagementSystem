@@ -53,7 +53,7 @@
                     {% endfor %}
                     </div>
                     {% if not modo_lectura %}
-                    <div class="add-exam-btn" onclick="handleAddExam(event, '{{ day|date:'Y-m-d' }}')">+</div>
+                    <div class="add-exam-btn" onclick="handleAddExam(event, '{{ day|date:"Y-m-d" }}')">+</div>
                     {% endif %}
                 </div>
                 {% endfor %}
