@@ -1,21 +1,23 @@
-{% extends 'base.html' %}
-
+{# dashboard.html - CORREGIDO NUEVAMENTE #}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-{% endblock %}
+{# Ya NO extiendas base.html #}
+{# Ya NO uses block content #}
 
-{% block content %}
-    <div class="header">
-        <h1>Panel Principal</h1>
-        <div class="notifications">🔔</div>
+
+<div class="dashboard-container">
+
+
+    {# Contenido específico del dashboard directamente #}
+    {# La clase widget/card se aplica al contenedor del calendario #}
+    <div class="widget card"> {# Asegúrate que calendar.html NO tenga otro widget innecesario dentro #}
+        {% include "exams/calendar.html" %}
     </div>
+    {# Más widgets aquí si es necesario, usando la clase card #}
+    {# <div class="widget card"> ... otro contenido ... </div> #}
 
-    <div class="widget calendario">
-        <h2>Calendario</h2>
-        <div id="calendar"></div>
-    </div>
 
-    <script src="{% static 'js/calendar.js' %}"></script>
-{% endblock %}
+</div>
+
+
+{# Ya NO necesitas endblock #}

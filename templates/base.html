@@ -6,69 +6,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión de Exámenes</title>
+    {% comment %} Asegúrate que el nombre del CSS coincida con el archivo guardado {% endcomment %}
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="user-profile">
-                <div class="avatar">
-                    <span class="icono icono-usuario"></span>
-                </div>
-                <h2>
-                    {% if user.get_full_name %}
-                        {{ user.get_full_name }}
-                    {% else %}
-                        {{user.username}}
-                    {% endif %}</h2>
-                <p>{{ user.get_role_display }}</p>
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-title">
+                {# Icono #}
+                {# <img src="{% static 'img/logo.svg' %}" alt="Logo" class="logo-img"> #}
+                <h1>Sistema de Gestión de Exámenes</h1>
             </div>
-            
-            <nav class="menu">
-                <a href="/" class="menu-item active">
-                    <span class="icono icono-inicio"></span>
-                    Inicio</a>
-                {% if user.is_student %}
-                <a href="{% url 'exams:list_grades' %}" class="menu-item">
-                    <span class="icono icono-examen"></span>
-                    Mis Notas</a>
-                <a href="{% url 'exams:request_exam' %}" class="menu-item">
-                    <span class="icono icono-examen"></span>
-                    Solicitar Examen</a>
-                <a href="{% url 'exams:request_review' %}" class="menu-item">
-                    <span class="icono icono-examen"></span>
-                    Solicitar Revisión</a>
-                {% endif %}
-                    
-                {% if user.is_superuser or user.is_admin %}
-                <a href="{% url 'users:user_management' %}" class="menu-item">
-                    <span class="icono icono-usuarios"></span>
-                    Gestión de Usuarios</a>
-                {% endif %}
-
-                {% if user.is_teacher %}
-                <a href="{% url 'exams:verify_requests' %}" class="menu-item">
-                    <span class="icono icono-examen"></span>
-                    Verificar Solicitudes
-                </a>
-                <a href="{% url 'exams:edit_calendar' %}" class="menu-item">
-                    <span class="icono icono-calendario"></span>
-                    Editar Calendario
-                </a>
-                <a href="{% url 'exams:manage_grades' %}" class="menu-item">
-                    <span class="icono icono-examen"></span>
-                    Gestión de Notas
-                </a>
-                {% endif %}
-                {% if user.is_admin %}
-                <a href="{% url 'reports:generate' %}" class="menu-item">
-                    <span class="icono icono-examen"></span>
-                    Reportes</a>
-                {% endif %}
-
+            <div class="header-actions">
                 {% if user.is_authenticated %}
+<<<<<<< HEAD
                     <a href="{% url 'notifications' %}" class="menu-item"><span>
                         🔔 Notificaciones
                     </span></a>
@@ -84,9 +36,249 @@
             {% block content %}{% endblock %}
         </main>
     </div>
+=======
+                <a href="{% url 'notifications' %}" class="notification-bell interactive-icon" aria-label="Notificaciones">
+                    <span class="icono icono-notificacion"></span>
+                    {# Contador de notificaciones opcional #}
+                    {# <span class="notification-count">3</span> #}
+                </a>
+                <div class="user-profile-header interactive-element">
+                    <div class="avatar-header">
+                        <span class="icono icono-usuario"></span>
+                    </div>
+                    <div class="user-info-header">
+                        <span class="user-name-header">
+                            {% if user.get_full_name %}
+                                {{ user.get_full_name|truncatechars:20 }} {# Truncar nombres largos #}
+                            {% else %}
+                                {{ user.username|truncatechars:20 }}
+                            {% endif %}
+                        </span>
+                        <small>{{ user.get_role_display }}</small>
+                    </div>
+                     <a href="{% url 'logout' %}" class="logout-link-header interactive-icon" title="Cerrar sesión">
+                        <span class="icono icono-logout"></span>
+                    </a>
+                </div>
+                 {% else %}
+                     <a href="{% url 'login' %}" class="btn btn-primary login-btn-header">
+                         <span class="icono icono-login"></span> Iniciar sesión
+                     </a>
+                 {% endif %}
+                <button class="menu-toggle interactive-icon" aria-label="Toggle menu" aria-expanded="false">
+                    <span class="icono icono-menu"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="nav-scroll-wrapper"> 
+            <a href="/" class="menu-item {% if request.path == '/' %}active{% endif %}">
+                <span class="icono icono-inicio"></span> Principal
+            </a>
+            {% if user.is_student %}
+            <a href="{% url 'exams:list_grades' %}" class="menu-item {% if 'mis-notas' in request.path %}active{% endif %}">
+                <span class="icono icono-examen"></span> Mis Notas
+            </a>
+            <a href="{% url 'exams:request_exam' %}" class="menu-item {% if 'solicitar-examen' in request.path %}active{% endif %}">
+                <span class="icono icono-solicitar"></span> Solicitar Examen
+            </a>
+            <a href="{% url 'exams:request_review' %}" class="menu-item {% if 'solicitar-revision' in request.path %}active{% endif %}">
+                <span class="icono icono-revision"></span> Solicitar Revisión
+            </a>
+            {% endif %}
+
+            {% if user.is_superuser or user.is_admin %}
+            <a href="{% url 'users:user_management' %}" class="menu-item {% if 'gestion-usuarios' in request.path %}active{% endif %}">
+                <span class="icono icono-usuarios"></span> Gestión Usuarios
+            </a>
+            {% endif %}
+
+            {% if user.is_teacher %}
+            <a href="{% url 'exams:verify_requests' %}" class="menu-item {% if 'verificar-solicitudes' in request.path %}active{% endif %}">
+                <span class="icono icono-verificar"></span> Verificar Solicitudes
+            </a>
+            <a href="{% url 'exams:edit_calendar' %}" class="menu-item {% if 'editar-calendario' in request.path %}active{% endif %}">
+                <span class="icono icono-calendario"></span> Calendario
+            </a>
+            <a href="{% url 'exams:manage_grades' %}" class="menu-item {% if 'gestion-notas' in request.path %}active{% endif %}">
+                <span class="icono icono-notas-gestion"></span> Gestión Notas
+            </a>
+            {% endif %}
+
+            {% if user.is_admin %}
+            <a href="{% url 'reports:generate' %}" class="menu-item {% if 'reportes' in request.path %}active{% endif %}">
+                <span class="icono icono-reportes"></span> Reportes
+            </a>
+            {% endif %}
+         </div>
+    </nav>
+
+    <!-- Sidebar para Móviles -->
+    <aside class="mobile-sidebar">
+        <div class="mobile-sidebar-header">
+            <h2>Menú</h2>
+            <button class="close-menu-btn interactive-icon" aria-label="Cerrar menú">×</button>
+        </div>
+         {% if user.is_authenticated %}
+         <div class="user-profile-mobile">
+              <div class="avatar">
+                  <span class="icono icono-usuario"></span>
+              </div>
+              <h4>
+                  {% if user.get_full_name %}
+                      {{ user.get_full_name }}
+                  {% else %}
+                      {{ user.username }}
+                  {% endif %}
+              </h4>
+              <p>{{ user.get_role_display }}</p>
+          </div>
+          <hr class="mobile-divider">
+          {% endif %}
+        <nav class="mobile-menu">
+            {# Copiar enlaces aquí, similar a .main-nav pero con estilo móvil #}
+             <a href="/" class="menu-item {% if request.path == '/' %}active{% endif %}">
+                <span class="icono icono-inicio"></span> Principal
+            </a>
+            {% if user.is_student %}
+            <a href="{% url 'exams:list_grades' %}" class="menu-item {% if 'mis-notas' in request.path %}active{% endif %}">
+                <span class="icono icono-examen"></span> Mis Notas
+            </a>
+            <a href="{% url 'exams:request_exam' %}" class="menu-item {% if 'solicitar-examen' in request.path %}active{% endif %}">
+                <span class="icono icono-solicitar"></span> Solicitar Examen
+            </a>
+            <a href="{% url 'exams:request_review' %}" class="menu-item {% if 'solicitar-revision' in request.path %}active{% endif %}">
+                <span class="icono icono-revision"></span> Solicitar Revisión
+            </a>
+            {% endif %}
+            {% if user.is_superuser or user.is_admin %}
+            <a href="{% url 'users:user_management' %}" class="menu-item {% if 'gestion-usuarios' in request.path %}active{% endif %}">
+                <span class="icono icono-usuarios"></span> Gestión Usuarios
+            </a>
+            {% endif %}
+            {% if user.is_teacher %}
+            <a href="{% url 'exams:verify_requests' %}" class="menu-item {% if 'verificar-solicitudes' in request.path %}active{% endif %}">
+                <span class="icono icono-verificar"></span> Verificar Solicitudes
+            </a>
+            <a href="{% url 'exams:edit_calendar' %}" class="menu-item {% if 'editar-calendario' in request.path %}active{% endif %}">
+                <span class="icono icono-calendario"></span> Calendario
+            </a>
+            <a href="{% url 'exams:manage_grades' %}" class="menu-item {% if 'gestion-notas' in request.path %}active{% endif %}">
+                <span class="icono icono-notas-gestion"></span> Gestión Notas
+            </a>
+            {% endif %}
+            {% if user.is_admin %}
+            <a href="{% url 'reports:generate' %}" class="menu-item {% if 'reportes' in request.path %}active{% endif %}">
+                <span class="icono icono-reportes"></span> Reportes
+            </a>
+            {% endif %}
+            <hr class="mobile-divider">
+             {% if user.is_authenticated %}
+                <a href="{% url 'notifications' %}" class="menu-item">
+                    <span class="icono icono-notificacion"></span> Notificaciones
+                </a>
+                <a href="{% url 'logout' %}" class="menu-item logout-mobile">
+                    <span class="icono icono-logout"></span> Cerrar sesión
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="menu-item btn btn-primary">
+                   <span class="icono icono-login"></span> Iniciar sesión
+                </a>
+            {% endif %}
+        </nav>
+    </aside>
+    <div class="mobile-overlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+         {# Contenedor interno para la animación, intentando mitigar el flicker #}
+         <div class="content-wrapper">
+            {% block content %}
+                {# EJEMPLO de cómo usarías 'cards' dentro de tu contenido #}
+                {# Quita esto y pon tu contenido real de Django #}
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Bienvenido al Sistema</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>Utiliza la navegación para acceder a las diferentes secciones.</p>
+                        <a href="#" class="btn btn-primary">Acción Principal</a>
+                        <a href="#" class="btn btn-secondary">Acción Secundaria</a>
+                    </div>
+                </div>
+
+                 <div class="card">
+                    <div class="card-header">
+                        <h3>Últimas Novedades</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Actualización del calendario de exámenes.</li>
+                            <li>Nueva función de solicitud de revisión disponible.</li>
+                        </ul>
+                    </div>
+                </div>
+            {% endblock %}
+         </div>
+    </main>
+>>>>>>> f9976ef5949ac43f2140ab07b202b41e7fb18854
 
     <!-- Scripts Globales -->
-    <script src="{% static 'js/forms.js' %}"></script>
+    <script>
+        // Mobile Menu Toggle Script (mejorado ligeramente)
+        const menuToggle = document.querySelector('.menu-toggle');
+        const closeMenuBtn = document.querySelector('.close-menu-btn');
+        const mobileSidebar = document.querySelector('.mobile-sidebar');
+        const mobileOverlay = document.querySelector('.mobile-overlay');
+        const body = document.body;
+
+        function openMenu() {
+            mobileSidebar.classList.add('open');
+            mobileOverlay.classList.add('open');
+            body.classList.add('no-scroll');
+            menuToggle.setAttribute('aria-expanded', 'true');
+        }
+
+        function closeMenu() {
+            mobileSidebar.classList.remove('open');
+            mobileOverlay.classList.remove('open');
+            body.classList.remove('no-scroll');
+            menuToggle.setAttribute('aria-expanded', 'false');
+        }
+
+        if (menuToggle && mobileSidebar && closeMenuBtn && mobileOverlay) {
+            menuToggle.addEventListener('click', () => {
+                if (mobileSidebar.classList.contains('open')) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+            closeMenuBtn.addEventListener('click', closeMenu);
+            mobileOverlay.addEventListener('click', closeMenu);
+
+            // Close on ESC key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === "Escape" && mobileSidebar.classList.contains('open')) {
+                    closeMenu();
+                }
+            });
+        }
+
+        // Close menu if clicking on a link inside it
+        const mobileLinks = document.querySelectorAll('.mobile-menu .menu-item');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                // Evitar cerrar si es un link que no navega (raro en este menú)
+                if (link.getAttribute('href') && link.getAttribute('href') !== '#') {
+                   setTimeout(closeMenu, 150); // Pequeño delay para ver el click
+                }
+            });
+        });
+
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
