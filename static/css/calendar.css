@@ -1,0 +1,118 @@
+:root {
+    --naranja: #FF6B00;
+    --naranja-suave: #FFE5D6;
+    --gris: #F5F5F5;
+    --gris-oscuro: #4A4A4A;
+    --negro: #333333;
+    --blanco: #FFFFFF;
+    --sombra: 0 4px 12px rgba(0,0,0,0.1);
+    --radio-borde: 8px;
+    --fuente-principal: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+/* calendar.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+.content-header {
+    background-color:var(--naranja);
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+.exam-calendar {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.exam-calendar th, .exam-calendar td {
+    border: 1px solid #ddd;
+    text-align: center;
+    padding: 10px;
+}
+
+.exam-calendar th {
+    background-color:var(--naranja);
+    color: white;
+    font-weight: bold;
+}
+
+.exam-calendar tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+#add-exam-form {
+    width: 60%;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#add-exam-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#add-exam-form input, #add-exam-form select, #add-exam-form button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#add-exam-form {
+    display: flex; /* Elementos en fila */
+    justify-content: space-between; /* Espacio uniforme entre elementos */
+    align-items: center; /* Alineación vertical */
+    width: 80%; /* Ancho completo */
+    padding: 10px;
+    background: var(--blanco);
+    border-radius: var(--radio-borde);
+    box-shadow: var(--sombra);
+    position: fixed;
+    bottom: 0;
+    left: 250px; /* Anclado al borde izquierdo */
+    gap: 5px; /* Espacio entre elementos */
+}
+
+#add-exam-form label {
+    margin: 0;
+    font-weight: bold;
+    white-space: nowrap; /* Evitar que el texto se divida */
+}
+
+#add-exam-form input,
+#add-exam-form select,
+#add-exam-form button {
+    flex: 1; /* Todos los elementos tendrán el mismo tamaño */
+    padding: 5px;
+    margin: 0;
+    border: 1px solid var(--gris-oscuro);
+    border-radius: var(--radio-borde);
+    font-size: 14px;
+}
+
+#add-exam-form button {
+    background-color: var(--naranja);
+    color: var(--blanco);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#add-exam-form button:hover {
+    background-color: var(--naranja-suave);
+    color: var(--negro);
+}
