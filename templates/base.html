@@ -20,23 +20,6 @@
             </div>
             <div class="header-actions">
                 {% if user.is_authenticated %}
-<<<<<<< HEAD
-                    <a href="{% url 'notifications' %}" class="menu-item"><span>
-                        🔔 Notificaciones
-                    </span></a>
-                    <a href="{% url 'logout' %}" class="menu-item btn-primary">Logout</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="menu-item btn-primary">Login</a>
-                {% endif %}
-            </nav>
-        </aside>
-        
-        <!-- Main Content -->
-        <main class="main-content">
-            {% block content %}{% endblock %}
-        </main>
-    </div>
-=======
                 <a href="{% url 'notifications' %}" class="notification-bell interactive-icon" aria-label="Notificaciones">
                     <span class="icono icono-notificacion"></span>
                     {# Contador de notificaciones opcional #}
@@ -223,7 +206,6 @@
             {% endblock %}
          </div>
     </main>
->>>>>>> f9976ef5949ac43f2140ab07b202b41e7fb18854
 
     <!-- Scripts Globales -->
     <script>

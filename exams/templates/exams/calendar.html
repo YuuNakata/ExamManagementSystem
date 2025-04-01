@@ -3,59 +3,6 @@
 {% load static %}
 
 {% block content %}
-<<<<<<< HEAD
-<div class="content-header">
-    <h1>Calendario de Exámenes</h1>
-</div>
-
-<table class="exam-calendar">
-    <thead>
-        <tr>
-            <th>Fecha</th>
-            <th>Asignatura</th>
-            <th>Tipo de Examen</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>15 de abril, 2025</td>
-            <td>RSI</td>
-            <td>Suficiencia</td>
-        </tr>
-        <tr>
-            <td>18 de abril, 2025</td>
-            <td>IA</td>
-            <td>Premio</td>
-        </tr>
-        <tr>
-            <td>22 de abril, 2025</td>
-            <td>IO</td>
-            <td>Suficiencia</td>
-        </tr>
-    </tbody>
-</table>
-<form id="add-exam-form">
-    <label for="date">Fecha:</label>
-    <input type="date" id="date" required>
-    <label for="exam_type">Asignatura:</label>
-        <select id="exam_type" name="exam_type">
-            <option value="parcial">IA</option>
-            <option value="final">IO</option>
-        </select>
-    <label for="exam_type">Tipo de Examen:</label>
-        <select id="exam_type" name="exam_type">
-            <option value="parcial">Suficiencia</option>
-            <option value="final">Premio</option>
-        </select>
-    <button type="button" onclick="addExam()">Agregar</button>
-</form>
-<script src="{% static 'js/addCalendar.js' %}"></script>
-{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
-{% endblock %}
-=======
 <link rel="stylesheet" href="{% static 'css/calendar.css' %}">
 
 <div class="main-content">
@@ -154,4 +101,3 @@
 {% endif %}
 
 {% endblock %}
->>>>>>> f9976ef5949ac43f2140ab07b202b41e7fb18854
