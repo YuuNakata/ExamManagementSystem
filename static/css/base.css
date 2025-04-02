@@ -78,7 +78,8 @@ a:hover {
 }
 
 .logo-title h1 {
-    font-size: 1.3rem;
+    font-size: 2.2rem;
+    font-family: 'Courier Prime', monospace;
     font-weight: 600;
     color: var(--negro);
     margin: 0;
@@ -689,3 +690,52 @@ a:hover {
 .modal .close:hover {
     color: var(--negro);
 }
+.calendar-day {
+    /* Añadir esto para días con eventos */
+    &.has-event {
+        background: var(--naranja-suave);
+        font-weight: 600;
+        
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: var(--naranja);
+            border-radius: 50%;
+        }
+    }
+}
+/* Estilos para el logo en el header */
+.main-header .logo-title img {
+    width:  3rem;
+    height: 3rem;
+    object-fit: contain; /* Mantiene la proporción sin distorsión */
+    vertical-align: middle; /* Alinea verticalmente con el texto adyacente */
+    margin-right: 8px; /* Espacio entre el logo y el título */
+    
+    /* Opcional: efectos hover */
+    transition: transform 0.2s ease;
+}
+
+/* Opcional: efecto al pasar el mouse */
+.main-header .logo-title img:hover {
+    transform: scale(1.1);
+}
+
+/* Estilos adicionales para mantener la alineación del logo con el título */
+.main-header .logo-title {
+    display: flex;
+    align-items: center;
+}
+
+/* Si prefieres que el logo sea un enlace clickeable */
+.main-header .logo-title a.logo-link {
+    display: inline-block;
+    line-height: 0; /* Elimina espacio extra debajo de la imagen */
+}
+
+
