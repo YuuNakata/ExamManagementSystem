@@ -3,13 +3,12 @@ from .models import ExamRequest, CalendarExam
 from django.core.exceptions import ValidationError
 
 
-class ExamRequestForm(forms.ModelForm):
-    class Meta:
-        model = ExamRequest
-        fields = ["subject", "exam_type", "request_date"]
-        widgets = {
-            "request_date": forms.DateInput(attrs={"type": "date"}),
-        }
+# class ExamRequestForm(forms.ModelForm):
+#     class Meta:
+#         model = ExamRequest
+#         widgets = {
+#             "request_date": forms.DateInput(attrs={"type": "date"}),
+#         }
 
 
 class CalendarExamForm(forms.ModelForm):
@@ -46,13 +45,6 @@ class CalendarExamForm(forms.ModelForm):
             raise ValidationError("El campo 'Tipo de examen' no puede estar vacío.")
         if not subject:
             raise ValidationError("El campo 'Asignatura' no puede estar vacío.")
-        if (
-            CalendarExam.objects.exclude(pk=self.instance.pk)
-            .filter(date=cleaned_data.get("date"), turn=cleaned_data.get("turn"))
-            .exists()
-        ):
-            raise ValidationError(
-                "Ya existe un examen en este turno para la fecha seleccionada"
-            )
+        
 
         return cleaned_data

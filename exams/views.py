@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import ExamRequestForm, CalendarExamForm
+from .forms import CalendarExamForm
 from .models import CalendarExam
 from datetime import date, timedelta
 from django.utils import timezone
@@ -11,22 +11,9 @@ from dateutil.relativedelta import relativedelta
 # ========= VISTAS EXISTENTES (MANTENIDAS) =========
 @login_required
 def request_exam(request):
-    if request.method == "POST":
-        form = ExamRequestForm(request.POST)
-        if form.is_valid():
-            exam_request = form.save(commit=False)
-            exam_request.student = request.user
-            exam_request.save()
-            return redirect("exams:confirmation")
-        messages.error(request, "Error en los datos. Revise los campos.")
-    else:
-        form = ExamRequestForm()
-    return render(request, "exams/request_exam.html", {"form": form})
 
+    return render(request, "exams/request_exam.html")
 
-@login_required
-def confirmation(request):
-    return render(request, "exams/confirmation.html")
 
 
 # ========= VISTAS DE CALENDARIO (ACTUALIZADAS) =========
