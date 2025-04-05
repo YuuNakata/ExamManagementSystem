@@ -1,4 +1,113 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/list_grades.css' %}">
+{% endblock %}
+
 {% block content %}
-<h1>Mis Calificaciones</h1>
+<div class="main-content">
+    <div class="widget">
+        <!-- Cabecera -->
+        <div class="management-header">
+            <h1>Mis Calificaciones</h1>
+             {# Optional: Add a simple filter if desired #}
+             <div class="actions filters">
+                 <select name="subject_filter" id="subject_filter" class="filter-select">
+                    <option value="">Todas las Asignaturas</option>
+                    <option value="RSI">RSI</option>
+                    <option value="IA">IA</option>
+                    <option value="IO">IO</option>
+                    {# Add more subjects dynamically if needed #}
+                </select>
+                 <button class="btn-primary btn-sm" onclick="applyFilters()">Filtrar</button>
+             </div>
+        </div>
+
+        <!-- Tabla de Calificaciones -->
+        <div class="grades-table-container">
+            <table class="grades-table">
+                <thead>
+                    <tr>
+                        <th>Asignatura</th>
+                        <th>Tipo Examen</th>
+                        <th>Fecha</th>
+                        <th>Nota</th>
+                        <th>Estado</th> {# e.g., Graded, Pending Review #}
+                    </tr>
+                </thead>
+                <tbody>
+                    {# Example Row 1 (Loop through student's actual grades) #}
+                    <tr>
+                        <td>Inteligencia Artificial</td>
+                        <td>Suficiencia</td>
+                        <td>15/11/2023</td>
+                        <td class="grade-score final">3</td>
+                        <td><span class="status-graded">Calificado</span></td>
+                    </tr>
+                    {# Example Row 2 #}
+                    <tr>
+                        <td>Redes y Sistemas Inteligentes</td>
+                        <td>Premio</td>
+                        <td>20/11/2023</td>
+                        <td class="grade-score pending">-</td> {# Grade not yet available #}
+                        <td><span class="status-pending">Pendiente</span></td>
+                    </tr>
+                    {# Example Row 3 - Failed #}
+                    <tr>
+                        <td>Investigación Operaciones</td>
+                        <td>Suficiencia</td>
+                        <td>10/11/2023</td>
+                        <td class="grade-score fail">4.0</td>
+                         {# Maybe link to request review if applicable #}
+                        <td><span class="status-graded">Calificado</span> <a href="{% url 'exams:request_review' %}" class="link-request-review">(Solicitar revisión)</a></td>
+                    </tr>
+                    {# Example Row 4 - Passed #}
+                    <tr>
+                        <td>Inteligencia Artificial</td>
+                        <td>Premio</td>
+                        <td>05/12/2023</td>
+                        <td class="grade-score pass">2</td>
+                        <td><span class="status-graded">Calificado</span></td>
+                    </tr>
+
+                    {# Add more rows dynamically based on backend data for the logged-in student #}
+                    {% comment %}
+                    {% for grade in student_grades %}
+                    <tr>
+                        <td>{{ grade.exam.subject }}</td>
+                        <td>{{ grade.exam.get_exam_type_display }}</td>
+                        <td>{{ grade.exam.date|date:"d/m/Y" }}</td>
+                        <td class="grade-score {% if grade.score is None %}pending{% elif grade.score >= 5 %}pass{% else %}fail{% endif %}">
+                            {{ grade.score|default:"-" }}
+                        </td>
+                        <td>
+                            {% if grade.status == 'graded' %}
+                                <span class="status-graded">Calificado</span>
+                                {% if grade.score is not None and grade.score < 2 %} {# Example condition for showing review link #}
+                                     <a href="{% url 'exams:request_review' %}?exam_id={{ grade.exam.id }}" class="link-request-review">(Solicitar revisión)</a>
+                                {% endif %}
+                            {% elif grade.status == 'pending_review' %}
+                                <span class="status-review">En Revisión</span>
+                            {% else %}
+                                <span class="status-pending">Pendiente</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="no-results">Aún no tienes calificaciones registradas o que coincidan con el filtro.</td>
+                    </tr>
+                    {% endfor %}
+                    {% endcomment %}
+                </tbody>
+            </table>
+        </div>
+
+    </div> {# End widget #}
+</div> {# End main-content #}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/list_grades.js' %}"></script>
 {% endblock %}

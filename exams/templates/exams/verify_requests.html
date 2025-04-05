@@ -1,4 +1,97 @@
 {% extends 'base.html' %}
-{% block content %}
-<h1>Verificar Solicitudes de Exámenes</h1>
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/verify_requests.css' %}">
 {% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="widget">
+        <!-- Cabecera y controles -->
+        <div class="management-header">
+            <h2>Verificar Solicitudes de Exámenes</h2>
+             <div class="actions filters">
+                {# Add filters if needed, e.g., by exam or date range #}
+                <input type="text" id="exam_search" name="exam_search" class="filter-input" placeholder="Buscar por asignatura...">
+                <button class="btn-primary btn-sm" onclick="applyFilters()">Buscar</button>
+            </div>
+        </div>
+
+        <!-- Lista de Solicitudes -->
+        <div class="requests-list-container">
+             <ul class="requests-list">
+                {# Example Request 1 (Loop through actual data in backend) #}
+                <li class="request-item">
+                    <div class="request-info">
+                        <span class="student-name">Nombre Apellido Estudiante Uno</span>
+                        <span class="exam-details">
+                            <strong>Examen:</strong> Inteligencia Artificial (Parcial) - 15/11/2023 - Mañana
+                        </span>
+                        <span class="request-date">Solicitado el: 01/11/2023 10:30</span>
+                    </div>
+                    <div class="request-actions">
+                        {# Actions might not be needed if verification is automatic or just for viewing #}
+                        {# <button class="btn-success btn-sm">Verificar</button> #}
+                        {# <button class="btn-danger btn-sm">Rechazar</button> #}
+                         <span class="status-verified">Verificado</span> {# Example status display #}
+                    </div>
+                </li>
+
+                {# Example Request 2 #}
+                <li class="request-item">
+                    <div class="request-info">
+                         <span class="student-name">Nombre Apellido Estudiante Dos</span>
+                         <span class="exam-details">
+                             <strong>Examen:</strong> Redes y Sistemas (Final) - 20/11/2023 - Tarde
+                         </span>
+                         <span class="request-date">Solicitado el: 02/11/2023 14:00</span>
+                    </div>
+                    <div class="request-actions">
+                        {# Example: Pending status might not need explicit display unless actions are present #}
+                         <span class="status-pending">Pendiente</span>
+                         {# <button class="btn-primary btn-sm">Marcar como Verificado</button> #}
+                    </div>
+                </li>
+                 {# Add more items dynamically based on backend data #}
+                 {% comment %}
+                 {% for request in exam_requests %}
+                 <li class="request-item">
+                    <div class="request-info">
+                        <span class="student-name">{{ request.student.full_name }}</span>
+                        <span class="exam-details">
+                            <strong>Examen:</strong> {{ request.calendar_exam.subject }} ({{ request.calendar_exam.get_exam_type_display }}) - {{ request.calendar_exam.date|date:"d/m/Y" }} - {{ request.calendar_exam.get_turn_display }}
+                        </span>
+                        <span class="request-date">Solicitado el: {{ request.request_date|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <div class="request-actions">
+                        {% if request.is_verified %}
+                           <span class="status-verified">Verificado</span>
+                        {% else %}
+                             <span class="status-pending">Pendiente</span>
+                           {# Optional action buttons #}
+                           {# <form method="post" action="{% url 'exams:mark_verified' request.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-success btn-sm">Verificar</button>
+                           </form> #}
+                        {% endif %}
+                    </div>
+                 </li>
+                 {% empty %}
+                 <li class="no-results">No hay solicitudes pendientes o que coincidan con la búsqueda.</li>
+                 {% endfor %}
+                 {% endcomment %}
+             </ul>
+        </div>
+
+         {# Optional: Pagination #}
+         {# <div class="pagination"> ... </div> #}
+
+    </div> {# End widget #}
+</div> {# End main-content #}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/verify_requests.js' %}"></script>
+{% endblock %}
+--- END OF FILE verify_requests.html ---
