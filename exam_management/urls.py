@@ -21,7 +21,7 @@ from .views import (
     CustomLoginView,
     dashboard_view,
     logout_view,
-    NotificationsView,
+    notifications_view,
 )
 
 
@@ -30,7 +30,7 @@ urlpatterns = [
     path("", dashboard_view, name="dashboard"),
     path("login/", CustomLoginView.as_view(), name="login"),
     path("logout/", logout_view, name="logout"),
-    path("notifications/", NotificationsView.as_view(), name="notifications"),
+    path("notifications/", notifications_view, name="notifications"),
     path("users/", include("users.urls")),
     path("exams/", include("exams.urls")),
     path("reports/", include("reports.urls")),
