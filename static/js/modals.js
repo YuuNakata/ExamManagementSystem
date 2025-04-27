@@ -31,15 +31,22 @@ function handleDayClick(event, date) {
     }
 }
 
-function handleAddExam(event, date) {
-    event.stopPropagation();
-    const dateInput = document.querySelector('#newExamModal input[name="date"]');
-    if (dateInput) {
-        dateInput.value = date;
+function handleAddExam(event, dateStr) {
+    event.stopPropagation(); // Prevent triggering day click if nested differently
+    const modal = document.getElementById('newExamModal');
+    if (modal) {
+        // Find the date input within the new exam form and set its value
+        const dateInput = modal.querySelector('input[name="date"]'); // Adjust selector if needed
+        if (dateInput) {
+            dateInput.value = dateStr;
+        } else {
+             console.warn("Date input not found in newExamModal form.");
+        }
         showModal('newExamModal');
+    } else {
+        console.error("newExamModal not found.");
     }
 }
-
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {

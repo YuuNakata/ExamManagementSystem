@@ -5,36 +5,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión de Exámenes</title>
-    {% comment %} Asegúrate que el nombre del CSS coincida con el archivo guardado {% endcomment %}
+    <title>Excelia - Sistema de Gestión</title> {# Título más específico #}
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    {# Favicon - ¡Añade tu favicon real aquí! #}
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+    {# Fuentes (Opcional, si quieres usar una específica como Inter o Lato) #}
+    {# <link rel="preconnect" href="https://fonts.googleapis.com"> #}
+    {# <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> #}
+    {# <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"> #}
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <header class="main-header">
         <div class="header-content">
-            <div class="logo-title">
-                {# Icono #}
-                <img src="{% static '/images/logo.png' %}" alt="Logo" title="Logo de Excelia">
-                <h1>Excelia</h1>
-            </div>
+            <a href="/" class="logo-title-link" aria-label="Ir a la página principal"> {# Enlace en el logo #}
+                <div class="logo-title">
+                    <img src="{% static 'images/logo.png' %}" alt="Logo Excelia" class="header-logo">
+                    <div class="title-text">
+                        <h1>Excelia</h1>
+                        <p>Sistema para la gestión de examenes de premio y suficiencia</p>
+                    </div>
+                </div>
+            </a>
             <div class="header-actions">
                 {% if user.is_authenticated %}
-                <a href="{% url 'notifications' %}" class="notification-bell interactive-icon" aria-label="Notificaciones">
+                <a href="{% url 'notifications' %}" class="notification-bell interactive-icon" aria-label="Notificaciones" title="Notificaciones">
                     <span class="icono icono-notificacion"></span>
-                    {# Contador de notificaciones opcional #}
-                    {# <span class="notification-count">3</span> #}
+                    {# <span class="notification-count">3</span> #} {# Contador opcional #}
                 </a>
-                <div class="user-profile-header interactive-element">
+                <div class="user-profile-header"> {# Quitada clase interactive-element si no hay dropdown #}
                     <div class="avatar-header">
+                        {# Podrías poner aquí la inicial del usuario o una imagen real si la tuvieras #}
                         <span class="icono icono-usuario"></span>
                     </div>
                     <div class="user-info-header">
                         <span class="user-name-header">
                             {% if user.get_full_name %}
-                                {{ user.get_full_name|truncatechars:20 }} {# Truncar nombres largos #}
+                                {{ user.get_full_name|truncatechars:18 }} {# Ajustar truncado si es necesario #}
                             {% else %}
-                                {{ user.username|truncatechars:20 }}
+                                {{ user.username|truncatechars:18 }}
                             {% endif %}
                         </span>
                         <small>{{ user.get_role_display }}</small>
@@ -44,11 +53,11 @@
                     </a>
                 </div>
                  {% else %}
-                     <a href="{% url 'login' %}" class="btn btn-primary login-btn-header">
+                     <a href="{% url 'login' %}" class="btn btn-secondary login-btn-header"> {# Cambiado a btn-secondary para diferenciarlo? O mantener primary #}
                          <span class="icono icono-login"></span> Iniciar sesión
                      </a>
                  {% endif %}
-                <button class="menu-toggle interactive-icon" aria-label="Toggle menu" aria-expanded="false">
+                <button class="menu-toggle interactive-icon" aria-label="Abrir menú" aria-expanded="false">
                     <span class="icono icono-menu"></span>
                 </button>
             </div>
@@ -56,43 +65,44 @@
     </header>
 
     <nav class="main-nav">
-        <div class="nav-scroll-wrapper"> 
+        {# Wrapper para scroll horizontal si es necesario #}
+        <div class="nav-scroll-wrapper">
             <a href="/" class="menu-item {% if request.path == '/' %}active{% endif %}">
-                <span class="icono icono-inicio"></span> Principal
+                <span class="icono icono-inicio"></span><span class="menu-item-text">Principal</span>
             </a>
             {% if user.is_student %}
             <a href="{% url 'exams:list_grades' %}" class="menu-item {% if 'mis-notas' in request.path %}active{% endif %}">
-                <span class="icono icono-examen"></span> Mis Notas
+                <span class="icono icono-examen"></span><span class="menu-item-text">Mis Notas</span>
             </a>
             <a href="{% url 'exams:request_exam' %}" class="menu-item {% if 'solicitar-examen' in request.path %}active{% endif %}">
-                <span class="icono icono-solicitar"></span> Solicitar Examen
+                <span class="icono icono-solicitar"></span><span class="menu-item-text">Solicitar Examen</span>
             </a>
             <a href="{% url 'exams:request_review' %}" class="menu-item {% if 'solicitar-revision' in request.path %}active{% endif %}">
-                <span class="icono icono-revision"></span> Solicitar Revisión
+                <span class="icono icono-revision"></span><span class="menu-item-text">Solicitar Revisión</span>
             </a>
             {% endif %}
 
             {% if user.is_superuser or user.is_admin %}
             <a href="{% url 'users:user_management' %}" class="menu-item {% if 'gestion-usuarios' in request.path %}active{% endif %}">
-                <span class="icono icono-usuarios"></span> Gestión Usuarios
+                <span class="icono icono-usuarios"></span><span class="menu-item-text">Gestión Usuarios</span>
             </a>
             {% endif %}
 
             {% if user.is_teacher %}
             <a href="{% url 'exams:verify_requests' %}" class="menu-item {% if 'verificar-solicitudes' in request.path %}active{% endif %}">
-                <span class="icono icono-verificar"></span> Verificar Solicitudes
+                <span class="icono icono-verificar"></span><span class="menu-item-text">Verificar Solicitudes</span>
             </a>
             <a href="{% url 'exams:edit_calendar' %}" class="menu-item {% if 'editar-calendario' in request.path %}active{% endif %}">
-                <span class="icono icono-calendario"></span> Calendario
+                <span class="icono icono-calendario"></span><span class="menu-item-text">Calendario</span>
             </a>
             <a href="{% url 'exams:manage_grades' %}" class="menu-item {% if 'gestion-notas' in request.path %}active{% endif %}">
-                <span class="icono icono-notas-gestion"></span> Gestión Notas
+                <span class="icono icono-notas-gestion"></span><span class="menu-item-text">Gestión Notas</span>
             </a>
             {% endif %}
 
             {% if user.is_admin %}
             <a href="{% url 'reports:generate' %}" class="menu-item {% if 'reportes' in request.path %}active{% endif %}">
-                <span class="icono icono-reportes"></span> Reportes
+                <span class="icono icono-reportes"></span><span class="menu-item-text">Reportes</span>
             </a>
             {% endif %}
          </div>
@@ -101,115 +111,123 @@
     <!-- Sidebar para Móviles -->
     <aside class="mobile-sidebar">
         <div class="mobile-sidebar-header">
-            <h2>Menú</h2>
-            <button class="close-menu-btn interactive-icon" aria-label="Cerrar menú">×</button>
+            <span class="mobile-menu-title">Menú</span> {# Título más simple #}
+            <button class="close-menu-btn interactive-icon" aria-label="Cerrar menú">
+                 <span class="icono icono-cerrar"></span> {# Icono de cerrar #}
+            </button>
         </div>
          {% if user.is_authenticated %}
          <div class="user-profile-mobile">
-              <div class="avatar">
+              <div class="avatar-mobile">
                   <span class="icono icono-usuario"></span>
               </div>
-              <h4>
+              <h4 class="user-name-mobile">
                   {% if user.get_full_name %}
                       {{ user.get_full_name }}
                   {% else %}
                       {{ user.username }}
                   {% endif %}
               </h4>
-              <p>{{ user.get_role_display }}</p>
+              <p class="user-role-mobile">{{ user.get_role_display }}</p>
+              <a href="{% url 'notifications' %}" class="menu-item notifications-mobile">
+                 <span class="icono icono-notificacion"></span> Notificaciones
+              </a>
           </div>
-          <hr class="mobile-divider">
           {% endif %}
         <nav class="mobile-menu">
-            {# Copiar enlaces aquí, similar a .main-nav pero con estilo móvil #}
-             <a href="/" class="menu-item {% if request.path == '/' %}active{% endif %}">
+            {# Mismos enlaces que .main-nav, pero con clase .mobile-menu-item #}
+             <a href="/" class="mobile-menu-item {% if request.path == '/' %}active{% endif %}">
                 <span class="icono icono-inicio"></span> Principal
             </a>
             {% if user.is_student %}
-            <a href="{% url 'exams:list_grades' %}" class="menu-item {% if 'mis-notas' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:list_grades' %}" class="mobile-menu-item {% if 'mis-notas' in request.path %}active{% endif %}">
                 <span class="icono icono-examen"></span> Mis Notas
             </a>
-            <a href="{% url 'exams:request_exam' %}" class="menu-item {% if 'solicitar-examen' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:request_exam' %}" class="mobile-menu-item {% if 'solicitar-examen' in request.path %}active{% endif %}">
                 <span class="icono icono-solicitar"></span> Solicitar Examen
             </a>
-            <a href="{% url 'exams:request_review' %}" class="menu-item {% if 'solicitar-revision' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:request_review' %}" class="mobile-menu-item {% if 'solicitar-revision' in request.path %}active{% endif %}">
                 <span class="icono icono-revision"></span> Solicitar Revisión
             </a>
             {% endif %}
             {% if user.is_superuser or user.is_admin %}
-            <a href="{% url 'users:user_management' %}" class="menu-item {% if 'gestion-usuarios' in request.path %}active{% endif %}">
+            <a href="{% url 'users:user_management' %}" class="mobile-menu-item {% if 'gestion-usuarios' in request.path %}active{% endif %}">
                 <span class="icono icono-usuarios"></span> Gestión Usuarios
             </a>
             {% endif %}
             {% if user.is_teacher %}
-            <a href="{% url 'exams:verify_requests' %}" class="menu-item {% if 'verificar-solicitudes' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:verify_requests' %}" class="mobile-menu-item {% if 'verificar-solicitudes' in request.path %}active{% endif %}">
                 <span class="icono icono-verificar"></span> Verificar Solicitudes
             </a>
-            <a href="{% url 'exams:edit_calendar' %}" class="menu-item {% if 'editar-calendario' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:edit_calendar' %}" class="mobile-menu-item {% if 'editar-calendario' in request.path %}active{% endif %}">
                 <span class="icono icono-calendario"></span> Calendario
             </a>
-            <a href="{% url 'exams:manage_grades' %}" class="menu-item {% if 'gestion-notas' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:manage_grades' %}" class="mobile-menu-item {% if 'gestion-notas' in request.path %}active{% endif %}">
                 <span class="icono icono-notas-gestion"></span> Gestión Notas
             </a>
             {% endif %}
             {% if user.is_admin %}
-            <a href="{% url 'reports:generate' %}" class="menu-item {% if 'reportes' in request.path %}active{% endif %}">
+            <a href="{% url 'reports:generate' %}" class="mobile-menu-item {% if 'reportes' in request.path %}active{% endif %}">
                 <span class="icono icono-reportes"></span> Reportes
             </a>
             {% endif %}
-            <hr class="mobile-divider">
-             {% if user.is_authenticated %}
-                <a href="{% url 'notifications' %}" class="menu-item">
-                    <span class="icono icono-notificacion"></span> Notificaciones
-                </a>
-                <a href="{% url 'logout' %}" class="menu-item logout-mobile">
+         </nav>
+         {# Acciones al final del menú móvil #}
+         <div class="mobile-sidebar-footer">
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="mobile-menu-item logout-mobile">
                     <span class="icono icono-logout"></span> Cerrar sesión
                 </a>
             {% else %}
-                <a href="{% url 'login' %}" class="menu-item btn btn-primary">
+                <a href="{% url 'login' %}" class="mobile-menu-item btn btn-primary login-mobile">
                    <span class="icono icono-login"></span> Iniciar sesión
                 </a>
             {% endif %}
-        </nav>
+         </div>
     </aside>
     <div class="mobile-overlay"></div>
 
     <!-- Main Content -->
     <main class="main-content">
-         {# Contenedor interno para la animación, intentando mitigar el flicker #}
-         <div class="content-wrapper">
+         {# Contenedor interno opcional si necesitas más control #}
+         {# <div class="content-wrapper"> #}
             {% block content %}
-                {# EJEMPLO de cómo usarías 'cards' dentro de tu contenido #}
-                {# Quita esto y pon tu contenido real de Django #}
+                {# CONTENIDO ESPECÍFICO DE CADA PÁGINA VA AQUÍ #}
+                {# Ejemplo de cómo usar cards (puedes borrar esto en tus plantillas hijas) #}
                 <div class="card">
                     <div class="card-header">
-                        <h2>Bienvenido al Sistema</h2>
+                        <h2>Bienvenido al Sistema Excelia</h2>
                     </div>
                     <div class="card-body">
-                        <p>Utiliza la navegación para acceder a las diferentes secciones.</p>
-                        <a href="#" class="btn btn-primary">Acción Principal</a>
-                        <a href="#" class="btn btn-secondary">Acción Secundaria</a>
+                        <p>Navega por las opciones del menú para gestionar exámenes, notas y usuarios.</p>
+                        {# Ejemplo de botones #}
+                        <div style="margin-top: 1rem;">
+                             <a href="#" class="btn btn-primary">Acción Principal</a>
+                             <a href="#" class="btn btn-secondary">Acción Secundaria</a>
+                        </div>
                     </div>
                 </div>
 
                  <div class="card">
                     <div class="card-header">
-                        <h3>Últimas Novedades</h3>
+                        <h3>Novedades</h3>
                     </div>
                     <div class="card-body">
                         <ul>
-                            <li>Actualización del calendario de exámenes.</li>
-                            <li>Nueva función de solicitud de revisión disponible.</li>
+                            <li>Calendario académico actualizado.</li>
+                            <li>Proceso de solicitud de revisión mejorado.</li>
+                            <li>Nueva sección de reportes disponible para administradores.</li>
                         </ul>
                     </div>
                 </div>
+                {# Fin del ejemplo #}
             {% endblock %}
-         </div>
+         {# </div> #}
     </main>
 
     <!-- Scripts Globales -->
     <script>
-        // Mobile Menu Toggle Script (mejorado ligeramente)
+        // Mobile Menu Toggle Script (Refinado)
         const menuToggle = document.querySelector('.menu-toggle');
         const closeMenuBtn = document.querySelector('.close-menu-btn');
         const mobileSidebar = document.querySelector('.mobile-sidebar');
@@ -219,15 +237,17 @@
         function openMenu() {
             mobileSidebar.classList.add('open');
             mobileOverlay.classList.add('open');
-            body.classList.add('no-scroll');
+            body.classList.add('no-scroll'); // Evita scroll del body
             menuToggle.setAttribute('aria-expanded', 'true');
+            menuToggle.setAttribute('aria-label', 'Cerrar menú'); // Cambiar label
         }
 
         function closeMenu() {
             mobileSidebar.classList.remove('open');
             mobileOverlay.classList.remove('open');
-            body.classList.remove('no-scroll');
+            body.classList.remove('no-scroll'); // Permite scroll del body
             menuToggle.setAttribute('aria-expanded', 'false');
+            menuToggle.setAttribute('aria-label', 'Abrir menú'); // Restaurar label
         }
 
         if (menuToggle && mobileSidebar && closeMenuBtn && mobileOverlay) {
@@ -249,16 +269,55 @@
             });
         }
 
-        // Close menu if clicking on a link inside it
-        const mobileLinks = document.querySelectorAll('.mobile-menu .menu-item');
+        // Close menu if clicking on a link inside it (optional but good UX)
+        const mobileLinks = document.querySelectorAll('.mobile-menu a.mobile-menu-item');
         mobileLinks.forEach(link => {
             link.addEventListener('click', () => {
-                // Evitar cerrar si es un link que no navega (raro en este menú)
+                 // Solo cierra si es un enlace de navegación real
                 if (link.getAttribute('href') && link.getAttribute('href') !== '#') {
-                   setTimeout(closeMenu, 150); // Pequeño delay para ver el click
+                   // Pequeño delay para que se vea el click antes de cerrar
+                   setTimeout(closeMenu, 150);
                 }
             });
         });
+
+        // Script para resaltar el enlace activo en la barra de navegación (opcional, si la lógica de Django no es suficiente)
+        /*
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.main-nav .menu-item');
+            const mobileNavLinks = document.querySelectorAll('.mobile-menu .mobile-menu-item');
+
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active'); // Asegura que otros no estén activos
+                }
+            });
+            mobileNavLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+             // Caso especial para la raíz "/"
+            if (currentPath === '/') {
+                 const homeLink = document.querySelector('.main-nav .menu-item[href="/"]');
+                 const mobileHomeLink = document.querySelector('.mobile-menu .mobile-menu-item[href="/"]');
+                 if (homeLink) homeLink.classList.add('active');
+                 if (mobileHomeLink) mobileHomeLink.classList.add('active');
+            } else {
+                 // Quitar activo de principal si no es la página principal
+                 const homeLink = document.querySelector('.main-nav .menu-item[href="/"].active');
+                 const mobileHomeLink = document.querySelector('.mobile-menu .mobile-menu-item[href="/"].active');
+                 if (homeLink && currentPath !== '/') homeLink.classList.remove('active');
+                 if (mobileHomeLink && currentPath !== '/') mobileHomeLink.classList.remove('active');
+            }
+
+        });
+        */
 
     </script>
     {% block extra_js %}{% endblock %}

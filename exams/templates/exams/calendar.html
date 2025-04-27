@@ -1,21 +1,168 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
-{% block content %}
+{% block extra_css %}
+{# Link base CSS first #}
+<link rel="stylesheet" href="{% static 'css/base.css' %}"> {# Ensure base.css is linked #}
+{# Link calendar CSS #}
 <link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+{# Add specific styles if needed, potentially borrowing from request_exam.html if applicable #}
+<style>
+    /* Styles specific to teacher's edit view (can be in calendar.css) */
+    .calendar-day .exam-entry {
+        margin-bottom: 4px;
+        padding: 4px 6px;
+        border-radius: var(--radio-borde-pequeno);
+        display: flex;
+        align-items: center;
+        transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border-left: 3px solid var(--azul); /* Default blue border for editable exams */
+        cursor: pointer; /* Indicate clickable */
+    }
+     .calendar-day .exam-entry:hover {
+        background-color: var(--azul-suave);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
 
+    .exam-badge {
+        font-size: 0.7em;
+        padding: 2px 5px;
+        margin-right: 5px;
+        border-radius: var(--radio-borde-pequeno);
+        color: white;
+        flex-shrink: 0;
+    }
+    .exam-badge.suficiencia { background-color: var(--azul); }
+    .exam-badge.premio { background-color: var(--verde-oscuro); } /* Example */
+
+    .exam-details {
+        display: flex;
+        flex-direction: column;
+        font-size: 0.8rem;
+        line-height: 1.2;
+        flex-grow: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .exam-details span {
+        font-weight: 600;
+    }
+    .exam-details small {
+        color: var(--gris-oscuro);
+    }
+
+    .exam-past { /* Style past exams slightly differently even for teachers */
+        opacity: 0.7;
+        border-left-color: var(--gris-borde);
+        cursor: default; /* Maybe not editable directly? Or keep pointer? */
+    }
+    .exam-past:hover {
+         background-color: inherit; /* Remove hover effect for past */
+         box-shadow: none;
+    }
+
+    /* Add button styling */
+    .add-exam-btn {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background-color: var(--naranja);
+        color: white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        opacity: 0; /* Hide initially */
+        visibility: hidden;
+        transition: opacity 0.2s, visibility 0.2s;
+    }
+    .calendar-day:hover .add-exam-btn {
+        opacity: 1;
+        visibility: visible;
+    }
+    .add-exam-btn:hover {
+        background-color: var(--naranja-oscuro); /* Darker orange on hover */
+    }
+    .calendar-day.other-month .add-exam-btn {
+        display: none; /* Hide add button in other months */
+    }
+
+    /* Day Highlighting */
+    .calendar-day.today .day-number {
+      background-color: var(--naranja);
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      font-weight: bold;
+      margin: 0 auto 5px auto;
+    }
+    .calendar-day.other-month .day-number {
+      color: var(--gris-borde);
+    }
+    .modal-content .form-actions {
+        display: flex;          /* Usa Flexbox */
+        align-items: center;    /* Alinea verticalmente */
+        gap: 10px;              /* Espacio entre botones (afectará Guardar y Eliminar) */
+        margin-top: 1.5rem;
+    }
+    .modal-content .form-actions .btn-delete {
+        background-color: #dc3545; /* Un color rojo estándar (ajusta a tu var(--rojo)) */
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px; /* Ajusta a tu var(--radio-borde) */
+        cursor: pointer;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        order: 2; /* Asegura que sea el último en el orden flex por defecto */
+        /* Quitamos margin-left: auto por ahora para evitar problemas de layout */
+    }
+    .modal-content .form-actions .btn-delete:hover {
+        background-color: #c82333;
+    }
+
+    .modal-content .form-actions .btn-cancel {
+        margin-left: auto; 
+        order: 3; /* 
+   }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
 <div class="main-content">
+    {# Display Django Messages #}
+    {% if messages %}
+        <div class="messages-container" style="padding: 0 1rem 1rem;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert" style="padding: 0.75rem 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: var(--radio-borde); background-color: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'warning' %}#fff3cd{% elif message.tags == 'error' %}#f8d7da{% else %}#cfe2ff{% endif %}; border-color: {% if message.tags == 'success' %}#c3e6cb{% elif message.tags == 'warning' %}#ffeeba{% elif message.tags == 'error' %}#f5c6cb{% else %}#b6d4fe{% endif %}; color: {% if message.tags == 'success' %}#155724{% elif message.tags == 'warning' %}#856404{% elif message.tags == 'error' %}#721c24{% else %}#0c5460{% endif %};">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <div class="widget">
         <!-- Cabecera y controles de navegación -->
         <div class="management-header">
-            <h2>Calendario de {{ current_month|date:"F Y"|capfirst }}</h2>
-            {% if not modo_lectura %}
+            {# Use the date object passed in context #}
+            <h2>Calendario de {{ current_month_date|date:"F Y"|capfirst }}</h2>
+            {# Navigation only for teachers (edit mode) - Already handled by modo_lectura check in view #}
             <div class="actions">
-                <a href="?month={{ prev_month }}" class="btn-primary">&lt; Mes anterior</a>
-                <a href="?month={{ next_month }}" class="btn-primary">Mes siguiente &gt;</a>
+                <a href="?month={{ prev_month }}" class="btn-primary btn-sm">< Mes anterior</a>
+                <a href="?month={{ next_month }}" class="btn-primary btn-sm">Mes siguiente ></a>
             </div>
-            {% endif %}
         </div>
 
         <!-- Grid del calendario -->
@@ -30,74 +177,161 @@
                 <div class="header-day">Dom</div>
             </div>
 
+            {# Loop through weeks and days passed from the view #}
             {% for week in weeks %}
             <div class="calendar-week">
-                {% for day in week %}
-                <div class="calendar-day {% if day.month != current_month.month %}other-month{% endif %}" >
-                <div class="day-number">{{ day.day }}</div>
-                    
+                {% for day_info in week %}
+                {# Use day_info which contains date and flags #}
+                <div class="calendar-day {% if not day_info.is_current_month %}other-month{% endif %} {% if day_info.is_today %}today{% endif %}">
+                    <div class="day-number">{{ day_info.date.day }}</div>
+
                     <!-- Exámenes del día -->
                     <div class="exams-container">
-                    {% for exam in exams %}
-                        {% if exam.date == day %}
-                        <div class="exam-entry" data-exam-id="{{ exam.id }}">
-                            <div class="exam-badge {{ exam.exam_type }}">
-                                {{ exam.get_exam_type_display }}
+                    {# *** CHANGE: Iterate through exams_data *** #}
+                    {% for exam_data in exams_data %}
+                        {# *** CHANGE: Check against exam_data.instance.date and day_info.date *** #}
+                        {% if exam_data.instance.date == day_info.date %}
+                        {# Add classes and data attributes #}
+                        <div class="exam-entry {% if exam_data.is_past %}exam-past{% endif %}"
+                             {# *** CHANGE: Use exam_data.instance.id for modal target *** #}
+                             data-exam-id="{{ exam_data.instance.id }}"
+                             {# *** CHANGE: Use exam_data.instance for details *** #}
+                             data-exam-subject="{{ exam_data.instance.subject }}"
+                             data-exam-type="{{ exam_data.instance.get_exam_type_display }}"
+                             data-exam-date="{{ exam_data.instance.date|date:'d/m/Y' }}"
+                             data-exam-turn="{{ exam_data.instance.get_turn_display }}"
+                             {# *** CHANGE: Trigger modal using exam_data.instance.id *** #}
+                             {# Only make non-past exams easily clickable to edit #}
+                             {% if not exam_data.is_past %}
+                             onclick="showModal('examModal{{ exam_data.instance.id }}')"
+                             title="Clic para editar este examen"
+                             {% else %}
+                             title="Examen pasado (no editable aquí)"
+                             {% endif %}
+                             >
+
+                            {# *** CHANGE: Use exam_data.instance *** #}
+                            <div class="exam-badge {{ exam_data.instance.exam_type }}">
+                                {{ exam_data.instance.get_exam_type_display }}
                             </div>
                             <div class="exam-details">
-                                <span>{{ exam.subject }}</span>
-                                <small>{{ exam.get_turn_display }}</small>
+                                <span>{{ exam_data.instance.subject }}</span>
+                                <small>{{ exam_data.instance.get_turn_display }}</small>
                             </div>
                         </div>
                         {% endif %}
                     {% endfor %}
-                    </div>
-                    {% if not modo_lectura %}
-                    <div class="add-exam-btn" onclick="handleAddExam(event, '{{ day|date:"Y-m-d" }}')">+</div>
+                    </div> {# End exams-container #}
+
+                    {# Add Exam Button - Only for current month days #}
+                    {# Check if user is teacher is implicit because this is edit_calendar #}
+                    {% if day_info.is_current_month %}
+                    <div class="add-exam-btn" onclick="handleAddExam(event, '{{ day_info.date|date:"Y-m-d" }}')" title="Añadir examen en esta fecha">+</div>
                     {% endif %}
-                </div>
-                {% endfor %}
+
+                </div> {# End calendar-day #}
+                {% endfor %} {# End day loop #}
+            </div> {# End calendar-week #}
+            {% endfor %} {# End week loop #}
+        </div> {# End calendar-grid #}
+    </div> {# End widget #}
+</div> {# End main-content #}
+
+<!-- Modales para Profesores (Editar y Crear) -->
+{# *** CHANGE: Loop through exams_data to generate modals *** #}
+{% for exam_data in exams_data %}
+    {% if exam_data.form %}
+    <div id="examModal{{ exam_data.instance.id }}" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('examModal{{ exam_data.instance.id }}')">×</span>
+            <h3>Editar Examen</h3>
+
+            {# Formulario para ACTUALIZAR el examen #}
+            <form id="editForm{{ exam_data.instance.id }}" method="post" action="{% url 'exams:edit_exam' exam_data.instance.id %}">
+                {% csrf_token %}
+                {{ exam_data.form.as_p }}
+                {# Los botones irán fuera de este form, pero agrupados #}
+            </form>
+
+            {# Formulario específico para BORRAR el examen #}
+            <form id="deleteForm{{ exam_data.instance.id }}" method="post" action="{% url 'exams:delete_exam' exam_data.instance.id %}" style="display: none;"> {# Oculto, se envía con JS #}
+                {% csrf_token %}
+            </form>
+
+            {# Grupo de botones de acción #}
+            <div class="form-actions">
+                {# Botón para enviar el form de ACTUALIZAR #}
+                <button type="submit" form="editForm{{ exam_data.instance.id }}" class="btn-primary">Guardar Cambios</button>
+
+                {# Botón para borrar - Llama a JS para confirmar y enviar el form de BORRAR #}
+                <button type="button" class="btn-delete"
+                        onclick="confirmDelete('{{ exam_data.instance.id }}', '{{ exam_data.instance.subject|escapejs }}', '{{ exam_data.instance.date|date:'d/m/Y'|escapejs }}')">
+                    Eliminar
+                </button>
+                {# Botón para cancelar (cierra modal) #}
+                <button type="button" class="btn-cancel" onclick="closeModal('examModal{{ exam_data.instance.id }}')">Cancelar</button>
+
             </div>
-            {% endfor %}
+
         </div>
     </div>
-</div>
-
-<!-- Modales dinámicos -->
-{% if not modo_lectura %}
-{% for exam in exams %}
-<div id="examModal{{ exam.id }}" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('examModal{{ exam.id }}')">&times;</span>
-        <h3>Editar Examen</h3>
-        <form method="post" action="{% url 'exams:edit_exam' exam.id %}">
-            {% csrf_token %}
-            {{ exam.form.as_p }}
-            <div class="form-actions">
-                <button type="submit" class="btn-primary">Guardar</button>
-                <button type="button" class="btn-cancel" onclick="closeModal('examModal{{ exam.id }}')">Cancelar</button>
-            </div>
-        </form>
-    </div>
-</div>
+    {% endif %}
 {% endfor %}
 
+{# Modal for creating new exams (remains the same) #}
+{% if new_exam_form %}
 <div id="newExamModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeModal('newExamModal')">&times;</span>
+        <span class="close" onclick="closeModal('newExamModal')">×</span>
         <h3>Nuevo Examen</h3>
+         {# Use the correct URL for creating #}
         <form method="post" action="{% url 'exams:create_exam' %}">
             {% csrf_token %}
             {{ new_exam_form.as_p }}
             <div class="form-actions">
-                <button type="submit" class="btn-primary">Crear</button>
+                <button type="submit" class="btn-primary">Crear Examen</button>
                 <button type="button" class="btn-cancel" onclick="closeModal('newExamModal')">Cancelar</button>
             </div>
         </form>
     </div>
 </div>
+{% endif %} {# End if new_exam_form #}
 
+
+{# Always include modals.js #}
 <script src="{% static 'js/modals.js' %}"></script>
-{% endif %}
+
+
+<script>
+
+        // Función para confirmar eliminación
+        function confirmDelete(examId, examSubject, examDate) {
+            const message = `¿Estás seguro de que deseas eliminar el examen de "${examSubject}" del ${examDate}?\n\nEsta acción no se puede deshacer.`;
+            if (confirm(message)) {
+                // Si confirma, busca y envía el formulario de borrado correspondiente
+                const deleteForm = document.getElementById(`deleteForm${examId}`);
+                if (deleteForm) {
+                    deleteForm.submit();
+                } else {
+                    console.error(`Delete form with ID "deleteForm${examId}" not found.`);
+                    alert("Error: No se pudo encontrar el formulario de eliminación.");
+                }
+            }
+        }
+
+        // Script para re-abrir modales en error (si lo tienes)
+        {% if error_in_modal_pk or error_in_new_modal %}
+        document.addEventListener('DOMContentLoaded', () => {
+            {% if error_in_modal_pk %}
+            // console.log("Re-opening edit modal for PK:", {{ error_in_modal_pk }});
+            showModal('examModal{{ error_in_modal_pk }}');
+            {% elif error_in_new_modal %}
+            // console.log("Re-opening new exam modal");
+            showModal('newExamModal');
+            {% endif %}
+        });
+        {% endif %}
+</script>
+
 
 {% endblock %}

@@ -48,12 +48,11 @@ class ExamRequest(models.Model):
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="exam_requests"
     )
-
     calendar_exam = models.ForeignKey(
         CalendarExam, on_delete=models.CASCADE, related_name="requests",
-        null=True, 
+        null=False, # Should not be null if a request exists for a specific exam
     )
-    request_timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Solicitud",null=True)
+    request_timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Solicitud") # Removed null=True
     status = models.CharField(max_length=10, choices=REQUEST_STATUS, default='Pending', verbose_name="Estado")
 
     class Meta:
@@ -62,5 +61,6 @@ class ExamRequest(models.Model):
         ordering = ['-request_timestamp']
 
     def __str__(self):
-        return f"Solicitud de {self.student.get_full_name()} para {self.calendar_exam}"
+        student_name = self.student.get_full_name() if hasattr(self.student, 'get_full_name') else str(self.student)
+        return f"Solicitud de {student_name} para {self.calendar_exam}"
 

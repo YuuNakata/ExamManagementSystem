@@ -16,6 +16,44 @@
     --sombra-fuerte: 0 6px 15px rgba(0, 0, 0, 0.12);
     --sombra-elevada: 0 10px 25px rgba(0, 0, 0, 0.1);
 
+    --azul: #007bff;          /* Azul primario */
+    --azul-oscuro: #0056b3;
+    --azul-suave: #cfe2ff;
+    --azul-borde: #b6d4fe;
+  
+    --naranja: #fd7e14;       /* Naranja usado en el calendario */
+    --naranja-oscuro: #e66800;
+    --naranja-suave: #ffe8d1;
+  
+    --verde: #28a745;         /* Verde para éxito */
+    --verde-oscuro: #218838;
+    --verde-suave: #d4edda;   /* Verde para fondo de mensaje success */
+    --verde-borde: #c3e6cb;
+  
+    --rojo: #dc3545;          /* Rojo para peligro/eliminar */
+    --rojo-oscuro: #c82333;
+    --rojo-suave: #f8d7da;    /* Rojo para fondo de mensaje error */
+    --rojo-borde: #f5c6cb;
+  
+    /* Paleta de Grises */
+    --blanco: #ffffff;
+    --gris-muy-claro: #f8f9fa;
+    --gris-muy-claro-alternativo: #f1f3f5; /* Para filas alternas */
+    --gris-claro: #e9ecef;
+    --gris-borde: #dee2e6;    /* Borde de tablas, inputs */
+    --gris: #adb5bd;
+    --gris-oscuro: #6c757d;   /* Texto secundario, cabeceras tabla */
+    --negro: #212529;         /* Texto principal */
+  
+    /* Otros */
+    --amarillo-suave: #fff3cd; /* Amarillo para fondo de mensaje warning */
+    --amarillo-borde: #ffeeba;
+  
+    
+    --radio-borde-pequeno: 0.2rem; /* Borde pequeño */
+  
+    /* Sombras */
+    --sombra-caja: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Sombra suave */
     --radio-borde: 8px; /* Un poco más grande */
     --fuente-principal: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --header-height: 70px;
@@ -83,6 +121,14 @@ a:hover {
     font-weight: 600;
     color: var(--negro);
     margin: 0;
+}
+.title-text{
+    color: #212529;
+    line-height: 0.8;
+}
+.title-text p {
+    font-style: italic;
+    color: var(--gris-oscuro);
 }
 
 .header-actions {
@@ -533,6 +579,7 @@ a:hover {
     .logo-title h1 {
         font-size: 1.1rem;
     }
+
     .user-info-header span, .user-info-header small {
         display: none; /* Ocultar texto del usuario, dejar avatar */
     }
@@ -711,11 +758,12 @@ a:hover {
 }
 /* Estilos para el logo en el header */
 .main-header .logo-title img {
-    width:  3rem;
-    height: 3rem;
+    width:  3.5rem;
+    height: 3.5rem;
     object-fit: contain; /* Mantiene la proporción sin distorsión */
     vertical-align: middle; /* Alinea verticalmente con el texto adyacente */
     margin-right: 8px; /* Espacio entre el logo y el título */
+    margin-top: 10px; /* Espacio entre el logo y el título */
     
     /* Opcional: efectos hover */
     transition: transform 0.2s ease;
