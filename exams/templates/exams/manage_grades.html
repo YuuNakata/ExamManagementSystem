@@ -1,4 +1,130 @@
 {% extends 'base.html' %}
-{% block content %}
-<h1>Gestionar Notas de Exámenes</h1>
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/manage_grades.css' %}">
 {% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="widget">
+        <!-- Cabecera y controles -->
+        <div class="management-header">
+            <h2>Gestionar Notas de Exámenes</h2>
+            <div class="actions filters">
+                <select name="subject_filter" id="subject_filter" class="filter-select">
+                    <option value="">Todas las Asignaturas</option>
+                    <option value="RSI">RSI</option>
+                    <option value="IA">IA</option>
+                    <option value="IO">IO</option>
+                    {# Add more subjects dynamically if needed #}
+                </select>
+                <select name="exam_type_filter" id="exam_type_filter" class="filter-select">
+                    <option value="">Todos los Tipos</option>
+                    <option value="parcial">Parcial</option>
+                    <option value="final">Final</option>
+                    {# Add more types dynamically if needed #}
+                </select>
+                 <input type="date" id="date_filter" name="date_filter" class="filter-input">
+                <button class="btn-primary btn-sm" onclick="applyFilters()">Filtrar</button>
+            </div>
+        </div>
+
+        <!-- Tabla de Notas -->
+        <div class="grades-table-container">
+            <table class="grades-table">
+                <thead>
+                    <tr>
+                        <th>Estudiante</th>
+                        <th>Asignatura</th>
+                        <th>Tipo Examen</th>
+                        <th>Fecha</th>
+                        <th>Nota</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# Example Row 1 (Loop through actual data in backend) #}
+                    <tr>
+                        <td>Nombre Apellido Estudiante 1</td>
+                        <td>Inteligencia Artificial</td>
+                        <td>Parcial</td>
+                        <td>15/11/2023</td>
+                        <td>
+                            <input type="number" class="grade-input" value="2" min="2" max="5" step="1" placeholder="-" data-grade-id="1">
+                            {# Alternatively, just display the grade if editing is done via modal #}
+                            {# <span>3</span> #}
+                        </td>
+                        <td>
+                            <button class="btn-primary btn-sm" onclick="saveGrade('1')">Guardar</button>
+                            {# Or an edit button to open a modal #}
+                            {# <button class="btn-secondary btn-sm" onclick="showEditGradeModal('1')">Editar</button> #}
+                        </td>
+                    </tr>
+                    {# Example Row 2 #}
+                     <tr>
+                        <td>Nombre Apellido Estudiante 2</td>
+                        <td>Redes y Sistemas Inteligentes</td>
+                        <td>Final</td>
+                        <td>20/11/2023</td>
+                        <td>
+                            <input type="number" class="grade-input" value="2" min="2" max="5" step="1" placeholder="-" data-grade-id="2">
+                        </td>
+                        <td>
+                            <button class="btn-primary btn-sm" onclick="saveGrade('2')">Guardar</button>
+                        </td>
+                    </tr>
+                    {# Example Row 3 - Already graded #}
+                    <tr>
+                        <td>Nombre Apellido Estudiante 3</td>
+                        <td>Investigación Operativa</td>
+                        <td>Parcial</td>
+                        <td>10/11/2023</td>
+                        <td>
+                            <input type="number" class="grade-input" value="3.0" min="2" max="5" step="1" placeholder="-" data-grade-id="3" disabled>
+                             {# Add a 'disabled' attribute or style if already finalized #}
+                        </td>
+                        <td>
+                            <button class="btn-secondary btn-sm" onclick="editGrade('3')">Modificar</button> {# Button to enable input #}
+                        </td>
+                    </tr>
+                    {# Add more rows dynamically based on backend data #}
+                    {% comment %}
+                    {% for grade_info in grades_list %}
+                    <tr>
+                        <td>{{ grade_info.student.full_name }}</td>
+                        <td>{{ grade_info.exam.subject }}</td>
+                        <td>{{ grade_info.exam.get_exam_type_display }}</td>
+                        <td>{{ grade_info.exam.date|date:"d/m/Y" }}</td>
+                        <td>
+                            <input type="number" class="grade-input" value="{{ grade_info.score|default:'' }}" min="0" max="10" step="0.1" placeholder="-" data-grade-id="{{ grade_info.id }}">
+                        </td>
+                        <td>
+                            <button class="btn-primary btn-sm" onclick="saveGrade('{{ grade_info.id }}')">Guardar</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="no-results">No hay notas para mostrar con los filtros actuales.</td>
+                    </tr>
+                    {% endfor %}
+                    {% endcomment %}
+                </tbody>
+            </table>
+        </div>
+        
+        {# Optional: Pagination if list is long #}
+        {# <div class="pagination"> ... </div> #}
+
+    </div> {# End widget #}
+</div> {# End main-content #}
+
+{% comment %} Optional: Modal for editing grades could be added here {% endcomment %}
+{# <div id="editGradeModal" class="modal"> ... </div> #}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/manage_grades.js' %}"></script>
+{% endblock %}
+--- END OF FILE manage_grades.html ---

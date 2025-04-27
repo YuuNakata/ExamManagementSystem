@@ -1,0 +1,235 @@
+/* --- START OF FILE reports.css --- */
+
+/* Inherits styles from base.css */
+
+.widget {
+    background-color: var(--blanco);
+    padding: 1.5rem;
+    border-radius: var(--radio-borde);
+    box-shadow: var(--sombra-suave);
+}
+
+.management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.management-header h2 {
+    margin: 0;
+    color: var(--negro);
+    font-size: 1.5rem;
+}
+
+/* Style for messages container if needed */
+.messages-container {
+    margin-bottom: 1.5rem;
+}
+
+.reports-list-container {
+    margin-top: 2rem; /* More space after header/messages */
+}
+.reports-list-container h3 {
+    margin-bottom: 1rem;
+    color: var(--negro);
+    font-size: 1.2rem;
+    border-bottom: 2px solid var(--naranja-suave);
+    padding-bottom: 0.5rem;
+}
+
+
+.reports-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.report-item {
+    background-color: var(--blanco);
+    border: 1px solid var(--gris-medio);
+    border-radius: var(--radio-borde);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    transition: box-shadow var(--transition-speed) ease, border-left var(--transition-speed) ease;
+    border-left: 4px solid var(--gris-medio); /* Subtle left border */
+}
+
+.report-item:hover {
+    box-shadow: var(--sombra-suave);
+    border-left: 4px solid var(--naranja);
+}
+
+.report-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem; /* Space between lines of info */
+    flex-grow: 1; /* Take available space */
+    overflow: hidden; /* Prevent long text overflowing */
+}
+
+.report-title {
+    font-weight: 600;
+    color: var(--negro);
+    font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Add ellipsis for long titles */
+}
+
+.report-details {
+    font-size: 0.85rem;
+    color: var(--gris-oscuro);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.report-date {
+    font-size: 0.8rem;
+    color: var(--gris-oscuro);
+    font-style: italic;
+}
+
+.report-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+.report-actions .btn-sm {
+     padding: 0.4rem 0.9rem; /* Slightly more padding for better icon spacing */
+     font-size: 0.8rem;
+}
+.report-actions .icono {
+    width: 16px;
+    height: 16px;
+    background-color: var(--blanco); /* Default white icon on buttons */
+}
+/* Specific icon colors if needed */
+.report-actions .btn-secondary .icono {
+    background-color: var(--negro); /* Icon color matching text */
+}
+.report-actions .btn-danger .icono {
+     background-color: var(--blanco);
+}
+
+.report-actions .btn-secondary {
+    background-color: var(--gris-claro);
+    color: var(--negro) !important;
+    border: 1px solid var(--gris-medio);
+}
+.report-actions .btn-secondary:hover {
+    background-color: var(--gris-medio);
+    border-color: var(--gris-oscuro);
+}
+
+.btn-danger {
+    background-color: #dc3545; /* Bootstrap red */
+    border: 1px solid #dc3545;
+}
+.btn-danger:hover {
+     background-color: #c82333; /* Darker red */
+     border-color: #bd2130;
+     transform: translateY(-1px);
+     box-shadow: var(--sombra-suave);
+}
+
+.no-results {
+    text-align: center;
+    padding: 2rem;
+    color: var(--gris-oscuro);
+    font-style: italic;
+    background-color: var(--gris-claro);
+    border: 1px dashed var(--gris-medio);
+    border-radius: var(--radio-borde);
+}
+
+/* Modal Styles (reusing base modal structure) */
+#generateReportModal .modal-content {
+    max-width: 550px; /* Slightly wider modal for form */
+}
+
+#generateReportModal .form-group {
+    margin-bottom: 1rem;
+}
+
+#generateReportModal label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--negro);
+}
+
+#generateReportModal input[type="date"],
+#generateReportModal select {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid var(--gris-medio);
+    border-radius: var(--radio-borde);
+    font-size: 0.95rem;
+    background-color: var(--blanco);
+    transition: border-color var(--transition-speed) ease;
+}
+#generateReportModal input[type="date"]:focus,
+#generateReportModal select:focus {
+    outline: none;
+    border-color: var(--naranja);
+    box-shadow: 0 0 0 2px var(--naranja-suave);
+}
+
+#generateReportModal .form-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+}
+
+/* Define download icon */
+.icono-descargar {
+     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z'/%3E%3C/svg%3E");
+     /* background-color is set by button context */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .management-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .actions {
+        width: 100%;
+    }
+    .actions .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+    .report-item {
+        flex-direction: column;
+        align-items: flex-start;
+        border-left-width: 3px; /* Slightly thinner border */
+    }
+    .report-title, .report-details {
+        white-space: normal; /* Allow wrapping on mobile */
+    }
+    .report-actions {
+        margin-top: 0.8rem;
+        width: 100%;
+        justify-content: flex-end; /* Actions align to the right */
+    }
+     .report-actions .btn-sm {
+        padding: 0.5rem 1rem; /* Slightly larger touch targets */
+        font-size: 0.85rem;
+     }
+}
+
+
+/* --- END OF FILE reports.css --- */

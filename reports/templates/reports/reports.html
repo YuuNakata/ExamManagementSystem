@@ -1,4 +1,138 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/reports.css' %}">
+{% endblock %}
+
 {% block content %}
-<h1>Generar Reportes</h1>
+<div class="main-content">
+    <div class="widget">
+        <!-- Cabecera y controles -->
+        <div class="management-header">
+            <h2>Generar y Gestionar Reportes</h2>
+            <div class="actions">
+                <button class="btn-primary" onclick="showModal('generateReportModal')">
+                    <span class="icono icono-reportes"></span> Generar Nuevo Reporte
+                </button>
+            </div>
+        </div>
+
+
+        <div class="messages-container" style="margin-bottom: 1.5rem;">
+            <div class="alert alert-success" role="alert" style="padding: 0.75rem 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: var(--radio-borde); background-color: #d4edda; border-color: #c3e6cb; color: #155724;">
+                Reporte "Reporte de Notas Finales - Curso 2023/24" generado con éxito.
+            </div>
+        </div>
+
+
+
+        <!-- Lista de Reportes Generados -->
+        <div class="reports-list-container">
+            <h3>Reportes Existentes</h3>
+             <ul class="reports-list">
+
+                <li class="report-item" id="report-item-1">
+                    <div class="report-info">
+                        <span class="report-title">Reporte de Notas Finales - Curso 2023/24</span>
+                        <span class="report-details">Tipo: Notas Finales | Rango: 01/09/2023 - 30/06/2024</span>
+                        <span class="report-date">Generado el: 15/07/2024 11:45</span>
+                    </div>
+                    <div class="report-actions">
+ 
+                        <a href="#" onclick="alert('Descarga : Reporte_Notas_Finales_2023_24.pdf'); return false;" download="Reporte_Notas_Finales_2023_24.pdf" class="btn-secondary btn-sm interactive-icon" title="Descargar Reporte">
+                            <span class="icono icono-descargar"></span> Descargar
+                        </a>
+            
+                        <button class="btn-danger btn-sm interactive-icon" onclick="confirmDelete('1', 'Reporte de Notas Finales - Curso 2023/24')" title="Eliminar Reporte">
+                            <span class="icono icono-eliminar"></span> Eliminar
+                        </button>
+     
+                    </div>
+                </li>
+
+
+                <li class="report-item" id="report-item-2">
+                    <div class="report-info">
+                         <span class="report-title">Reporte de Solicitudes de Examen - Nov 2023</span>
+                         <span class="report-details">Tipo: Solicitudes | Rango: 01/11/2023 - 30/11/2023</span>
+                         <span class="report-date">Generado el: 01/12/2023 09:00</span>
+                    </div>
+                    <div class="report-actions">
+                        <a href="#" onclick="alert('Descarga: Reporte_Solicitudes_Nov_2023.xlsx'); return false;" download="Reporte_Solicitudes_Nov_2023.xlsx" class="btn-secondary btn-sm interactive-icon" title="Descargar Reporte">
+                            <span class="icono icono-descargar"></span> Descargar
+                        </a>
+                        <button class="btn-danger btn-sm interactive-icon" onclick="confirmDelete('2', 'Reporte de Solicitudes de Examen - Nov 2023')" title="Eliminar Reporte">
+                             <span class="icono icono-eliminar"></span> Eliminar
+                         </button>
+     
+                    </div>
+                </li>
+
+
+                 <li class="no-results">No hay reportes generados disponibles.</li>
+
+             </ul>
+        </div>
+
+
+
+    </div>
+</div> 
+
+<!-- Modal para Generar Reporte -->
+<div id="generateReportModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('generateReportModal')">×</span>
+        <h3>Generar Nuevo Reporte</h3>
+
+        <form method="post" action="#" id="generateReportForm">
+
+
+            <div class="form-group">
+                <label for="report_type">Tipo de Reporte:</label>
+                <select id="report_type" name="report_type" required>
+                    <option value="" disabled selected>Seleccione un tipo...</option>
+                    <option value="final_grades">Notas Finales por Curso</option>
+                    <option value="exam_requests">Solicitudes de Examen</option>
+                    <option value="student_performance">Rendimiento Estudiantil</option>
+
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="start_date">Fecha de Inicio (Opcional):</label>
+                <input type="date" id="start_date" name="start_date">
+            </div>
+
+            <div class="form-group">
+                <label for="end_date">Fecha de Fin (Opcional):</label>
+                <input type="date" id="end_date" name="end_date">
+            </div>
+
+             <div class="form-group">
+                <label for="output_format">Formato (Opcional):</label>
+                <select id="output_format" name="output_format">
+                    <option value="pdf">PDF</option>
+                    <option value="xlsx">Excel (XLSX)</option>
+                    <option value="csv">CSV</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <span class="icono icono-reportes"></span> Generar Reporte
+                </button>
+                <button type="button" class="btn-cancel" onclick="closeModal('generateReportModal')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="{% static 'js/modals.js' %}"></script> 
+<script src="{% static 'js/reports.js' %}"></script>
 {% endblock %}
