@@ -3,13 +3,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test # Added user_passes_test
-from .forms import CalendarExamForm
-from .models import CalendarExam, ExamRequest # Added ExamRequest
+from .forms import CalendarExamForm, GradeForm, ReviewRequestForm
+from .models import CalendarExam, ExamRequest, ReviewRequest # Added ExamRequest
 from datetime import date, timedelta, datetime # Added datetime
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.urls import reverse # To build URLs for redirection
 from django.views.decorators.http import require_POST
+
 
 # Helper function to check if user is a student
 def is_student(user):
@@ -388,13 +389,101 @@ def reject_request(request, pk):
 # If you keep calendar_view, ensure its URL points here or remove the URL entry
 
 @login_required
+@user_passes_test(is_student, login_url='/login/')
 def list_grades(request):
-     # Placeholder - Requires implementation
-    return render(request, "exams/list_grades.html")
+    """
+    Muestra las calificaciones del estudiante logueado con detalles de revisiones.
+    """
+    # Obtener todos los exámenes calificados del estudiante
+    graded_exams = ExamRequest.objects.filter(
+        student=request.user,
+        status='Approved',
+        grade__isnull=False
+    ).select_related('calendar_exam').order_by('-calendar_exam__date')
+
+    # Obtener todas las revisiones relacionadas
+    reviews = ReviewRequest.objects.filter(
+        exam_request__student=request.user
+    ).select_related('exam_request')
+
+    context = {
+        'graded_exams': graded_exams,
+        'reviews': reviews,
+    }
+    return render(request, "exams/list_grades.html", context)
 
 @login_required
+@user_passes_test(is_teacher, login_url='/login/')
+def manage_grades(request):
+    """
+    Vista para que los profesores asignen calificaciones a exámenes aprobados.
+    """
+    # Obtener exámenes aprobados sin calificar
+    approved_requests = ExamRequest.objects.filter(
+        status='Approved',
+        grade__isnull=True
+    ).select_related('student', 'calendar_exam')
+
+    # Crear un formulario para cada solicitud
+    grading_forms = []
+    for exam_request in approved_requests:
+        grading_forms.append({
+            'exam_request': exam_request,
+            'form': GradeForm(instance=exam_request)
+        })
+
+    context = {
+        'grading_forms': grading_forms,
+    }
+    return render(request, "exams/manage_grades.html", context)
+
+
+@login_required
+@user_passes_test(is_student, login_url='/login/')
+@require_POST
+def submit_review_request(request):
+    """
+    Envía una solicitud de revisión para un examen calificado.
+    """
+    exam_request_id = request.POST.get('exam_request_id')
+    exam_request = get_object_or_404(ExamRequest, pk=exam_request_id, student=request.user)
+    
+    form = ReviewRequestForm(request.POST)
+    if form.is_valid():
+        ReviewRequest.objects.create(
+            exam_request=exam_request,
+            reason=form.cleaned_data['reason'],
+            status='Pending'
+        )
+        messages.success(request, "Solicitud de revisión enviada.")
+    else:
+        messages.error(request, "Error al enviar. Completa el motivo.")
+    
+    return redirect('exams:request_review')
+@login_required
+@user_passes_test(is_student, login_url='/login/')
 def request_review(request):
-     # Placeholder - Requires implementation
-    return render(request, "exams/request_review.html")
+    """
+    Vista para que estudiantes soliciten revisión de exámenes calificados.
+    """
+    # Obtener exámenes calificados del estudiante
+    graded_exams = ExamRequest.objects.filter(
+        student=request.user,
+        status='Approved',
+        grade__isnull=False
+    ).exclude(review_requests__status='Pending') 
+
+    # Obtener revisiones pendientes del estudiante
+    pending_reviews = ReviewRequest.objects.filter( 
+        exam_request__student=request.user,
+        status='Pending'
+    ).select_related('exam_request')
+
+    context = {
+        'graded_exams': graded_exams,
+        'pending_reviews': pending_reviews,
+        'review_form': ReviewRequestForm(),
+    }
+    return render(request, "exams/request_review.html", context)
 
 # --- END OF FILE views.py ---

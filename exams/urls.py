@@ -11,6 +11,7 @@ urlpatterns = [
     path("submit-request/", views.submit_exam_request, name="submit_exam_request"), # New URL for submitting request
     path("list-grades/", views.list_grades, name="list_grades"),
     path("request-review/", views.request_review, name="request_review"),
+    path('submit-review-request/', views.submit_review_request, name='submit_review_request'),
 
     # Teacher URLs
     path("edit-calendar/", views.edit_calendar, name="edit_calendar"), # Teacher's calendar view
@@ -21,6 +22,8 @@ urlpatterns = [
     path("verify-requests/", views.verify_requests, name="verify_requests"), # Vista principal
     path("approve-request/<int:pk>/", views.approve_request, name="approve_request"), # Acción Aprobar
     path("reject-request/<int:pk>/", views.reject_request, name="reject_request"),   # Acción Rechazar
+    path('request-review/', views.request_review, name='request_review'),
+    path('submit-review-request/', views.submit_review_request, name='submit_review_request'),
 
     # Generic Calendar URL - remove or make it redirect based on role if needed
     # path("calendar/", views.calendar_view, name="calendar"), # This might be confusing, consider removing

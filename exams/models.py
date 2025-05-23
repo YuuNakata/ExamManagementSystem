@@ -4,6 +4,7 @@ from django.db import models
 from users.models import User # Make sure this import is correct for your project
 from datetime import date
 from django.core.exceptions import ValidationError # Add this import
+from django.db.models import Q, UniqueConstraint
 
 class CalendarExam(models.Model): # Keep CalendarExam as is
     class Meta:
@@ -48,6 +49,18 @@ class ExamRequest(models.Model):
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="exam_requests"
     )
+    grade = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name='Calificación'
+    )
+    comments = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name='Comentarios del Profesor'
+    )
     calendar_exam = models.ForeignKey(
         CalendarExam, on_delete=models.CASCADE, related_name="requests",
         null=False, # Should not be null if a request exists for a specific exam
@@ -64,3 +77,63 @@ class ExamRequest(models.Model):
         student_name = self.student.get_full_name() if hasattr(self.student, 'get_full_name') else str(self.student)
         return f"Solicitud de {student_name} para {self.calendar_exam}"
 
+
+
+class ReviewRequest(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'Pending', 'Pendiente'
+        APPROVED = 'Approved', 'Aprobada'
+        REJECTED = 'Rejected', 'Rechazada'
+    
+    exam_request = models.ForeignKey(
+        'ExamRequest',
+        on_delete=models.CASCADE,
+        related_name='review_requests',
+        verbose_name='Solicitud de Examen'
+    )
+    reason = models.TextField(
+        verbose_name='Motivo de la Revisión'
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING,
+        verbose_name='Estado'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Fecha de Creación'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Última Actualización'
+    )
+
+    class Meta:
+        verbose_name = 'Solicitud de Revisión'
+        verbose_name_plural = 'Solicitudes de Revisión'
+        ordering = ['-created_at']
+        constraints = [
+            # Restricción única: Solo 1 revisión pendiente por solicitud de examen
+            UniqueConstraint(
+                fields=['exam_request'],
+                condition=Q(status='Pending'),
+                name='unique_pending_review_per_exam'
+            )
+        ]
+
+    def __str__(self):
+        return f"Revisión de {self.exam_request.student} - {self.get_status_display()}"
+
+    def clean(self):
+        # Validación adicional: El examen debe estar calificado
+        if not self.exam_request.grade:
+            raise ValidationError("El examen debe tener una calificación para solicitar revisión.")
+        
+        # Validación: Solo el estudiante puede solicitar revisión
+        if self.pk is None and self.exam_request.student != self._state.user:
+            raise ValidationError("Solo el estudiante puede solicitar una revisión.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # Ejecuta validaciones antes de guardar
+        super().save(*args, **kwargs)
