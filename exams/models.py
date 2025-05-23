@@ -7,6 +7,8 @@ from django.core.exceptions import ValidationError # Add this import
 from django.db.models import Q, UniqueConstraint
 
 class CalendarExam(models.Model): # Keep CalendarExam as is
+    
+
     class Meta:
         ordering = ['date', 'turn'] # Good practice to add ordering
 
