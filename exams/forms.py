@@ -54,8 +54,8 @@ class GradeForm(forms.ModelForm):
         model = ExamRequest
         fields = ['grade', 'comments']
         widgets = {
-            'grade': forms.NumberInput(attrs={'min': 0, 'max': 100, 'step': 0.1}),
-            'comments': forms.Textarea(attrs={'rows': 3}),
+            'grade': forms.NumberInput(attrs={'min': 0, 'max': 100, 'step': 0.1, 'class': 'form-control'}),
+            'comments': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
         }
 
 class ReviewRequestForm(forms.ModelForm):

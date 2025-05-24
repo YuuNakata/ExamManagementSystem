@@ -85,10 +85,10 @@
                 <span class="icono icono-inicio"></span><span class="menu-item-text">Principal</span>
             </a>
             {% if user.is_student %}
-            <a href="{% url 'exams:list_grades' %}" class="menu-item {% if 'mis-notas' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:my_grades' %}" class="menu-item {% if 'my-grades' in request.path or 'mis-notas' in request.path %}active{% endif %}">
                 <span class="icono icono-examen"></span><span class="menu-item-text">Mis Notas</span>
             </a>
-            <a href="{% url 'exams:request_exam' %}" class="menu-item {% if 'solicitar-examen' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:request_exam' %}" class="menu-item {% if 'solicitar-examen' in request.path or 'request-exam' in request.path %}active{% endif %}">
                 <span class="icono icono-solicitar"></span><span class="menu-item-text">Solicitar Examen</span>
             </a>
             <a href="{% url 'exams:request_review' %}" class="menu-item {% if 'solicitar-revision' in request.path %}active{% endif %}">
@@ -154,10 +154,10 @@
                 <span class="icono icono-inicio"></span> Principal
             </a>
             {% if user.is_student %}
-            <a href="{% url 'exams:list_grades' %}" class="mobile-menu-item {% if 'mis-notas' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:my_grades' %}" class="mobile-menu-item {% if 'my-grades' in request.path or 'mis-notas' in request.path %}active{% endif %}">
                 <span class="icono icono-examen"></span> Mis Notas
             </a>
-            <a href="{% url 'exams:request_exam' %}" class="mobile-menu-item {% if 'solicitar-examen' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:request_exam' %}" class="mobile-menu-item {% if 'solicitar-examen' in request.path or 'request-exam' in request.path %}active{% endif %}">
                 <span class="icono icono-solicitar"></span> Solicitar Examen
             </a>
             <a href="{% url 'exams:request_review' %}" class="mobile-menu-item {% if 'solicitar-revision' in request.path %}active{% endif %}">
