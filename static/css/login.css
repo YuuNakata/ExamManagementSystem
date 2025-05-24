@@ -44,6 +44,11 @@ body {
     color: var(--text-color);
     font-size: 2rem;
 }
+.login-form h2{
+    text-align: center;
+    color: var(--text-color);
+    font-size: 1.2rem;
+}
 
 
 .input-group {
