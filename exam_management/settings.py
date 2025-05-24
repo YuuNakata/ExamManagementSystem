@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "users",
     "exams",
     "reports",
+    "exam_management",
 ]
 
 MIDDLEWARE = [

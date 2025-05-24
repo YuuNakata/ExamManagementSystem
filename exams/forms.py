@@ -1,5 +1,6 @@
 from django import forms
 from .models import ExamRequest, CalendarExam
+from .models import ExamRequest, ReviewRequest
 from django.core.exceptions import ValidationError
 
 
@@ -48,3 +49,19 @@ class CalendarExamForm(forms.ModelForm):
         
 
         return cleaned_data
+class GradeForm(forms.ModelForm):
+    class Meta:
+        model = ExamRequest
+        fields = ['grade', 'comments']
+        widgets = {
+            'grade': forms.NumberInput(attrs={'min': 0, 'max': 100, 'step': 0.1}),
+            'comments': forms.Textarea(attrs={'rows': 3}),
+        }
+
+class ReviewRequestForm(forms.ModelForm):
+    class Meta:
+        model = ReviewRequest
+        fields = ['reason']
+        widgets = {
+            'reason': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Explica los motivos de tu revisión...'}),
+        }

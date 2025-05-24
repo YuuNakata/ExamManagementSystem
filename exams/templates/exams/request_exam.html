@@ -1,311 +1,45 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block extra_css %}
-{# Link base CSS first #}
-<link rel="stylesheet" href="{% static 'css/base.css' %}"> {# Ensure base.css is linked #}
-{# Link calendar CSS #}
-<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
-<style>
-    /* Styles for student request view */
-    .calendar-day .exam-entry {
-        margin-bottom: 4px;
-        padding: 4px 6px;
-        border-radius: var(--radio-borde-pequeno);
-        display: flex;
-        align-items: center;
-        transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        border-left: 3px solid transparent; /* Default */
-    }
-
-    .exam-badge {
-        font-size: 0.7em;
-        padding: 2px 5px;
-        margin-right: 5px;
-        border-radius: var(--radio-borde-pequeno);
-        color: white;
-        flex-shrink: 0; /* Prevent shrinking */
-    }
-    .exam-badge.suficiencia { background-color: var(--azul); }
-    .exam-badge.premio { background-color: var(--verde-oscuro); } /* Example color */
-
-    .exam-details {
-        display: flex;
-        flex-direction: column;
-        font-size: 0.8rem;
-        line-height: 1.2;
-        flex-grow: 1; /* Allow details to take space */
-        overflow: hidden; /* Prevent long text overflow */
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .exam-details span {
-        font-weight: 600;
-    }
-    .exam-details small {
-        color: var(--gris-oscuro);
-    }
-
-    /* Exam Status Styles */
-    .exam-requestable {
-        cursor: pointer;
-        border-left: 3px solid var(--naranja); /* Highlight requestable */
-    }
-    .exam-requestable:hover {
-        background-color: var(--naranja-suave);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .exam-requested {
-        border-left: 3px solid var(--verde); /* Indicate already requested */
-        opacity: 0.7;
-        cursor: default; /* No action */
-    }
-    .exam-requested .exam-status-indicator { /* Small indicator */
-        font-size: 0.65em;
-        color: var(--verde-oscuro);
-        display: block;
-        margin-top: 1px;
-        font-style: italic;
-    }
-
-
-    .exam-past {
-        opacity: 0.6;
-        cursor: not-allowed;
-        border-left: 3px solid var(--gris-claro); /* Indicate past */
-        background-color: #f8f9fa; /* Slightly grey out background */
-    }
-    .exam-past:hover {
-        background-color: #f8f9fa; /* No hover effect */
-    }
-
-
-    /* Confirmation Modal Specific Styles */
-    .modal-content p.confirmation-intro {
-        margin-bottom: 1rem;
-        font-size: 1rem;
-        color: var(--gris-oscuro);
-    }
-    .modal-content .confirmation-details {
-        background-color: var(--gris-muy-claro);
-        padding: 1rem;
-        border-radius: var(--radio-borde);
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--gris-borde);
-    }
-    .modal-content .confirmation-details p {
-        margin-bottom: 0.5rem;
-        line-height: 1.5;
-    }
-     .modal-content .confirmation-details strong {
-        color: var(--negro);
-        font-weight: 600;
-        margin-left: 5px; /* Space out label and value */
-    }
-    .modal-content .confirmation-details span.label {
-        color: var(--gris-oscuro);
-        display: inline-block;
-        width: 80px; /* Align labels */
-    }
-
-    /* Day Highlighting */
-    .calendar-day.today .day-number {
-      background-color: var(--naranja);
-      color: white;
-      border-radius: 50%;
-      width: 24px; /* Adjust size as needed */
-      height: 24px;
-      line-height: 24px;
-      text-align: center;
-      font-weight: bold;
-      margin: 0 auto 5px auto; /* Center and add margin */
-    }
-    .calendar-day.other-month .day-number {
-      color: var(--gris-borde); /* Mute day numbers of other months */
-    }
-
-
-</style>
-{% endblock %}
-
-
 {% block content %}
-<div class="main-content">
-    {# Display Django Messages #}
-    {% if messages %}
-        <div class="messages-container" style="padding: 0 1rem 1rem;">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}" role="alert" style="padding: 0.75rem 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: var(--radio-borde); background-color: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'warning' %}#fff3cd{% elif message.tags == 'error' %}#f8d7da{% else %}#cfe2ff{% endif %}; border-color: {% if message.tags == 'success' %}#c3e6cb{% elif message.tags == 'warning' %}#ffeeba{% elif message.tags == 'error' %}#f5c6cb{% else %}#b6d4fe{% endif %}; color: {% if message.tags == 'success' %}#155724{% elif message.tags == 'warning' %}#856404{% elif message.tags == 'error' %}#721c24{% else %}#0c5460{% endif %};">
-                    {{ message }}
-                </div>
+<div class="content-header">
+    <h1>Solicitar Revisión</h1>
+</div>
+
+<form method="post" class="exam-form">
+    {% csrf_token %}
+    
+    {% if form.errors %}
+        <div class="error-list">
+            {% for error in form.errors.values %}
+                <div class="error-message">{{ error }}</div>
             {% endfor %}
         </div>
     {% endif %}
 
-    <div class="widget">
-        <!-- Cabecera y controles de navegación -->
-        <div class="management-header">
-            <h2>Calendario de {{ current_month_date|date:"F Y"|capfirst }}</h2>
-            <div class="actions">
-                <a href="?month={{ prev_month }}" class="btn-primary btn-sm">< Mes anterior</a>
-                <a href="?month={{ next_month }}" class="btn-primary btn-sm">Mes siguiente ></a>
-            </div>
-        </div>
-
-        <!-- Grid del calendario -->
-        <div class="calendar-grid">
-            <div class="calendar-header">
-                <div class="header-day">Lun</div>
-                <div class="header-day">Mar</div>
-                <div class="header-day">Mié</div>
-                <div class="header-day">Jue</div>
-                <div class="header-day">Vie</div>
-                <div class="header-day">Sáb</div>
-                <div class="header-day">Dom</div>
-            </div>
-
-            {% for week in weeks %}
-            <div class="calendar-week">
-                {% for day_info in week %}
-                <div class="calendar-day {% if not day_info.is_current_month %}other-month{% endif %} {% if day_info.is_today %}today{% endif %}">
-                    <div class="day-number">{{ day_info.date.day }}</div>
-
-                    <!-- Exámenes del día -->
-                    <div class="exams-container">
-                        {% for exam_data in exams_data %}
-                            {% if exam_data.instance.date == day_info.date %}
-                            <div class="exam-entry
-                                    {% if exam_data.is_past %}exam-past{% endif %}
-                                    {% if exam_data.is_requestable %}exam-requestable{% endif %}
-                                    {% if exam_data.is_requested_by_user %}exam-requested{% endif %}"
-                                 data-exam-id="{{ exam_data.instance.id }}"
-                                 data-exam-subject="{{ exam_data.instance.subject }}"
-                                 data-exam-type="{{ exam_data.instance.get_exam_type_display }}"
-                                 data-exam-date="{{ exam_data.instance.date|date:'d/m/Y' }}"
-                                 data-exam-turn="{{ exam_data.instance.get_turn_display }}"
-                                 {# Add onclick ONLY for requestable exams #}
-                                 {% if exam_data.is_requestable %}onclick="handleRequestClick(this)"{% endif %}
-                                 {# Add title for clarity #}
-                                 title="{% if exam_data.is_past %}Examen pasado{% elif exam_data.is_requested_by_user %}Ya solicitado{% elif exam_data.is_requestable %}Clic para solicitar este examen{% endif %}"
-                                 >
-
-                                <div class="exam-badge {{ exam_data.instance.exam_type }}">
-                                    {{ exam_data.instance.get_exam_type_display }}
-                                </div>
-                                <div class="exam-details">
-                                    <span>{{ exam_data.instance.subject }}</span>
-                                    <small>{{ exam_data.instance.get_turn_display }}</small>
-                                     {# Indicate status for requested exams #}
-                                    {% if exam_data.is_requested_by_user %}
-                                        <span class="exam-status-indicator">Solicitado</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div> {# End exams-container #}
-
-                    {# NO Add Exam Button for students #}
-
-                </div> {# End calendar-day #}
-                {% endfor %} {# End day loop #}
-            </div> {# End calendar-week #}
-            {% endfor %} {# End week loop #}
-        </div> {# End calendar-grid #}
-    </div> {# End widget #}
-</div> {# End main-content #}
-
-
-<!-- Modal para Confirmar Solicitud (Solo Estudiantes) -->
-<div id="requestConfirmModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('requestConfirmModal')">×</span>
-        <h3>Confirmar Solicitud de Examen</h3>
-        <p class="confirmation-intro">¿Deseas solicitar el siguiente examen?</p>
-
-        <div class="confirmation-details">
-            <p><span class="label">Asignatura:</span><strong id="confirmExamSubject"></strong></p>
-            <p><span class="label">Tipo:</span><strong id="confirmExamType"></strong></p>
-            <p><span class="label">Fecha:</span><strong id="confirmExamDate"></strong></p>
-            <p><span class="label">Turno:</span><strong id="confirmExamTurn"></strong></p>
-        </div>
-
-        {# Form to submit the request #}
-        <form id="requestConfirmForm" method="post" action="{% url 'exams:submit_exam_request' %}">
-            {% csrf_token %}
-            {# Hidden input to send the ID of the CalendarExam #}
-            <input type="hidden" name="calendar_exam_id" id="confirmExamId" value="">
-            <div class="form-actions">
-                <button type="submit" class="btn-primary">Confirmar Solicitud</button>
-                <button type="button" class="btn-cancel" onclick="closeModal('requestConfirmModal')">Cancelar</button>
-            </div>
-        </form>
+    <div class="form-group">
+        <label for="subject">Asignatura:</label>
+        <select id="subject" name="subject">
+            <option value="RSI">RSI</option>
+            <option value="IA">IA</option>
+            <option value="IO">IO</option>
+        </select>
     </div>
-</div>
+    
+    <div class="form-group">
+        <label for="exam_type">Tipo de Examen:</label>
+        <select id="exam_type" name="exam_type">
+            <option value="parcial">Suficiencia</option>
+            <option value="final">Premio</option>
+        </select>
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Aceptar</button>
+    </div>
+</form>
+{% endblock %}
 
-{# Always include modals.js - Assuming it has showModal/closeModal #}
-<script src="{% static 'js/modals.js' %}"></script>
-<script>
-    // Function to handle clicking on a requestable exam entry
-    function handleRequestClick(element) {
-        // Get data from the clicked element's data attributes
-        const examId = element.dataset.examId;
-        const subject = element.dataset.examSubject;
-        const type = element.dataset.examType;
-        const date = element.dataset.examDate;
-        const turn = element.dataset.examTurn;
-
-        // Populate the confirmation modal
-        document.getElementById('confirmExamId').value = examId;
-        document.getElementById('confirmExamSubject').textContent = subject;
-        document.getElementById('confirmExamType').textContent = type;
-        document.getElementById('confirmExamDate').textContent = date;
-        document.getElementById('confirmExamTurn').textContent = turn;
-
-        // Show the modal
-        showModal('requestConfirmModal');
-    }
-
-     // Make sure showModal and closeModal are defined (e.g., in modals.js)
-    // Example basic implementation (should be in modals.js ideally):
-    /*
-    function showModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'block';
-        }
-    }
-
-    function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.style.display = 'none';
-        }
-        // Optional: Close modal on clicking outside
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                 event.target.style.display = "none";
-            }
-        }
-    }
-    */
-
-    // Add event listeners to close buttons if not handled by closeModal directly
-    document.querySelectorAll('.modal .close').forEach(button => {
-        button.onclick = function() {
-            const modalId = this.closest('.modal').id;
-            closeModal(modalId);
-        }
-    });
-     document.querySelectorAll('.modal .btn-cancel').forEach(button => {
-        button.onclick = function() {
-            const modalId = this.closest('.modal').id;
-            closeModal(modalId);
-        }
-    });
-
-
-</script>
-
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/exams.css' %}">
 {% endblock %}
