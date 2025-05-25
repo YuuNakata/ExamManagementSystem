@@ -1,5 +1,6 @@
 # --- START OF FILE views.py ---
 
+from django.forms import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import (
@@ -16,6 +17,9 @@ from users.models import User
 from .forms import CalendarExamForm, GradeForm, ReviewRequestForm
 from .models import CalendarExam, ExamRequest, ReviewRequest  
 from exam_management.models import Notification
+from django.db import IntegrityError
+
+
 
 # Helper function to check if user is a student
 def is_student(user):
@@ -307,21 +311,19 @@ def delete_exam(request, pk):
 
 
 # Was: class VerifyRequestsView(LoginRequiredMixin, ProfessorRequiredMixin, ListView):
+# exams/views.py
 @login_required
 @user_passes_test(is_teacher, login_url="/login/")
 def verify_requests_fbv(request):
-    """Muestra ambas solicitudes: exámenes pendientes y revisiones, separadas por pestañas"""
-    # Obtener solicitudes de exámenes pendientes
+    # Obtener TODAS las solicitudes pendientes sin filtrar por asignatura
     exam_requests = ExamRequest.objects.filter(
         status="Pending"
-    ).select_related('student', 'calendar_exam').order_by('calendar_exam__date')
-    
-    # Obtener solicitudes de revisión pendientes (filtrar por asignaturas del profesor)
+    ).select_related('student', 'calendar_exam')
+
     review_requests = ReviewRequest.objects.filter(
-        status="Pending",
-        exam_request__calendar_exam__subject__in=["RSI", "IA", "IO"]  # Ajustar según asignaturas del profesor
-    ).select_related('exam_request__student', 'exam_request__calendar_exam').order_by('-created_at')
-    
+        status="Pending"
+    ).select_related('exam_request__student', 'exam_request__calendar_exam')
+
     context = {
         'exam_requests': exam_requests,
         'review_requests': review_requests,
@@ -502,6 +504,7 @@ def reject_request_fbv(request, pk):
     return redirect("exams:verify_requests")
 
 # BLOQUE DE REVISION ---------------JAVIER
+# exams/views.py
 @login_required
 @user_passes_test(is_student, login_url="/login/")
 @require_POST
@@ -509,15 +512,7 @@ def submit_review_request(request):
     exam_request_id = request.POST.get("exam_request")
     reason = request.POST.get("reason", "").strip()
 
-    # Debug: Mostrar datos reales recibidos
-    print(f"\n--- DATOS POST REALES ---\n{request.POST}\n")
-    
-    if not exam_request_id or not reason:
-        messages.error(request, "Todos los campos son obligatorios")
-        return redirect("exams:request_review")
-
     try:
-        # Convertir a entero explícitamente
         exam_request = ExamRequest.objects.get(
             pk=int(exam_request_id),
             student=request.user,
@@ -525,71 +520,74 @@ def submit_review_request(request):
             grade__isnull=False
         )
         
-        # Crear sin validación manual
-        ReviewRequest.objects.create(
-            exam_request=exam_request,
-            reason=reason,
-            status="Pending"
-        )
+        # Eliminar verificación de profesor para la asignatura
+        review = ReviewRequest(exam_request=exam_request, reason=reason)
+        review.full_clean()
+        review.save()
         
-        messages.success(request, "¡Solicitud creada correctamente!")
-        return redirect("exams:request_review")  # Redirección GET después de POST
+        messages.success(request, "Solicitud de revisión creada.")
+        return redirect("exams:request_review")
 
-    except (ValueError, ExamRequest.DoesNotExist):
-        messages.error(request, "Examen no válido o no disponible")
-    except IntegrityError:
-        messages.error(request, "Ya tienes una revisión pendiente para este examen")
-    except Exception as e:
-        messages.error(request, f"Error interno: {str(e)}")
-    
-    # Conservar datos del formulario en caso de error
-    return render(request, "exams/request_review.html", {
-        "graded_exams": ExamRequest.objects.filter(
-            student=request.user,
-            status="Approved",
-            grade__isnull=False
-        ),
-        "pending_reviews": ReviewRequest.objects.filter(
-            exam_request__student=request.user,
-            status="Pending"
-        )
-    })
+    except (ValidationError, ExamRequest.DoesNotExist, IntegrityError) as e:
+        messages.error(request, f"Error: {str(e)}")
+        return redirect("exams:request_review")
 
-
+# exams/views.py
 @login_required
-@user_passes_test(is_student, login_url="/login/")
+@user_passes_test(is_student)
 def request_review(request):
+    # Obtener exámenes calificados sin revisiones pendientes
     graded_exams = ExamRequest.objects.filter(
-        student=request.user, status="Approved", grade__isnull=False
-    ).exclude(review_requests__status="Pending")
+        student=request.user,
+        status='Approved',
+        grade__isnull=False
+    ).exclude(reviews__status='Pending')
 
+    # Solicitudes pendientes del estudiante
     pending_reviews = ReviewRequest.objects.filter(
-        exam_request__student=request.user, status="Pending"
-    ).select_related("exam_request")
+        exam_request__student=request.user,
+        status='Pending'
+    )
+
+    if request.method == 'POST':
+        exam_request_id = request.POST.get('exam_request')
+        reason = request.POST.get('reason', '')
+        
+        try:
+            exam_request = ExamRequest.objects.get(
+                pk=exam_request_id,
+                student=request.user
+            )
+            
+            # Crear solicitud de revisión
+            ReviewRequest.objects.create(
+                exam_request=exam_request,
+                reason=reason
+            )
+            messages.success(request, "¡Solicitud de revisión creada exitosamente!")
+            return redirect('exams:request_review')
+            
+        except Exception as e:
+            messages.error(request, f"Error: {str(e)}")
 
     context = {
-        "graded_exams": graded_exams,
-        "pending_reviews": pending_reviews,
-        "review_form": ReviewRequestForm(),
+        'graded_exams': graded_exams,
+        'pending_reviews': pending_reviews
     }
-    return render(request, "exams/request_review.html", context)
+    return render(request, 'exams/request_review.html', context)
+
 @login_required
-@user_passes_test(is_teacher, login_url="/login/")
-def manage_review_requests(request):
-    # Obtener todas las solicitudes pendientes, sin filtrar por asignatura
-    review_requests = ReviewRequest.objects.filter(
-        status="Pending"
-    ).select_related(
-        'exam_request__student',
-        'exam_request__calendar_exam'
-    ).order_by('-created_at')
-
+@user_passes_test(is_teacher)
+def verify_requests_fbv(request):
+    # Obtener todas las solicitudes pendientes
+    exam_requests = ExamRequest.objects.filter(status='Pending')
+    review_requests = ReviewRequest.objects.filter(status='Pending')
+    
     context = {
-        'review_requests': review_requests,
-        'page_title': 'Solicitudes de Revisión Pendientes'
+        'exam_requests': exam_requests,
+        'review_requests': review_requests
     }
-    return render(request, 'exams/manage_review_requests.html', context)
-
+    return render(request, 'exams/verify_requests.html', context)
 
 @login_required
 @user_passes_test(is_teacher, login_url="/login/")

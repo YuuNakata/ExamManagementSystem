@@ -2,6 +2,7 @@
 
 from django.urls import path
 from . import views
+from .views import request_review, verify_requests_fbv
 
 app_name = "exams"
 
@@ -20,7 +21,6 @@ urlpatterns = [
     path("approve-review/<int:pk>/", views.approve_review, name="approve_review"),
     path("reject-review/<int:pk>/", views.reject_review, name="reject_review"),
     path("manage-grades/", views.manage_grades_list_fbv, name="manage_grades"),
-    path("manage-review-requests/", views.manage_review_requests, name="manage_review_requests"),
     path("grade-exam/<int:pk>/", views.grade_exam_request_fbv, name="grade_exam_request"),# URL for Students to View Their Grades
     path("my-grades/", views.list_my_grades_fbv, name="my_grades"),# URLs for Review Requests
     path("request-review/", views.request_review, name="request_review"),
