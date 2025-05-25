@@ -477,6 +477,11 @@ def approve_request_fbv(request, pk):
     if exam_request.status == "Pending":
         exam_request.status = "Approved"
         exam_request.save()
+        # Notificar al estudiante
+        notificar(
+            exam_request.student,
+            f"Tu solicitud para el examen '{exam_request.calendar_exam.subject}' fue APROBADA."
+        )
         messages.success(
             request,
             f"Solicitud de {exam_request.student.get_full_name()} para {exam_request.calendar_exam} aprobada.",
@@ -495,6 +500,11 @@ def reject_request_fbv(request, pk):
     if exam_request.status == "Pending":
         exam_request.status = "Rejected"
         exam_request.save()
+        # Notificar al estudiante
+        notificar(
+            exam_request.student,
+            f"Tu solicitud para el examen '{exam_request.calendar_exam.subject}' fue RECHAZADA."
+        )
         messages.warning(
             request,
             f"Solicitud de {exam_request.student.get_full_name()} para {exam_request.calendar_exam} rechazada.",

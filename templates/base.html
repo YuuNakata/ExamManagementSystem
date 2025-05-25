@@ -33,17 +33,9 @@
                 {% if user.is_authenticated %}
                 <a href="{% url 'notifications' %}" class="notification-bell interactive-icon" aria-label="Notificaciones" title="Notificaciones">
                     <span class="icono icono-notificacion"></span>
-                    {% if unread_notifications %}
+                    {% if unread_notifications > 0 %}
                     <span class="badge">{{ unread_notifications }}</span>
                     {% endif %}
-                    <script>
-                    window.Notification = {
-                        count: "{% url 'notifications_count' %}",
-                        list:  "{% url 'notifications_list' %}",
-                        read:  "{% url 'notifications_read' 0 %}",
-                    };
-                    </script>
-                    <script src="{% static 'js/notifications.js' %}"></script>
 
                     {# <span class="notification-count">3</span> #} {# Contador opcional #}
                 </a>
