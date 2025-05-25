@@ -2,44 +2,126 @@
 {% load static %}
 
 {% block content %}
-<div class="content-header">
-    <h1>Solicitar Revisión</h1>
-</div>
+<div class="container">
+    <div class="content-header mb-4">
+        <h1 class="text-center"><i class="fas fa-file-signature"></i> Solicitar Revisión de Examen</h1>
+    </div>
 
-<form method="post" class="exam-form">
-    {% csrf_token %}
-    
-    {% if form.errors %}
-        <div class="error-list">
-            {% for error in form.errors.values %}
-                <div class="error-message">{{ error }}</div>
-            {% endfor %}
+    <!-- Mensajes de alerta unificados -->
+    {% if messages or review_form.errors %}
+    <div class="alert-messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+        {% endfor %}
+        
+        {% if review_form.errors %}
+        <div class="alert alert-danger alert-dismissible fade show">
+            <strong>Errores en el formulario:</strong>
+            <ul class="mb-0">
+                {% for error in review_form.errors.values %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+    </div>
     {% endif %}
 
-    <div class="form-group">
-        <label for="subject">Asignatura:</label>
-        <select id="subject" name="subject">
-            <option value="RSI">RSI</option>
-            <option value="IA">IA</option>
-            <option value="IO">IO</option>
-        </select>
+    <!-- Formulario principal -->
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="post" class="review-form">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label for="exam_request" class="form-label fw-bold">
+                        <i class="fas fa-file-circle-question me-2"></i>Selecciona un examen
+                    </label>
+                    <select name="exam_request" id="exam_request" class="form-select form-select-lg" required>
+                        <option value="" disabled selected>-- Elige un examen de la lista --</option>
+                        {% for exam in graded_exams %}
+                            <option value="{{ exam.id }}" 
+                                {% if request.POST.exam_request == exam.id|stringformat:"s" %}selected{% endif %}>
+                                {{ exam.calendar_exam.subject }} - Calificación: {{ exam.grade }}
+                            </option>
+                        {% empty %}
+                            <option value="" disabled>No tienes exámenes disponibles para revisión</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="reason" class="form-label fw-bold">
+                        <i class="fas fa-comment-dots me-2"></i>Motivo de la revisión
+                    </label>
+                    <textarea 
+                        name="reason" 
+                        id="reason" 
+                        class="form-control form-control-lg" 
+                        rows="5"
+                        placeholder="Describe detalladamente los motivos de tu solicitud de revisión..."
+                        required
+                    >{{ request.POST.reason }}</textarea>
+                </div>
+                
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane me-2"></i>Enviar Solicitud
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-    
-    <div class="form-group">
-        <label for="exam_type">Tipo de Examen:</label>
-        <select id="exam_type" name="exam_type">
-            <option value="parcial">Suficiencia</option>
-            <option value="final">Premio</option>
-        </select>
+
+    <!-- Solicitudes pendientes -->
+    {% if pending_reviews %}
+    <div class="mt-5">
+        <h3 class="mb-4"><i class="fas fa-hourglass-half me-2"></i>Solicitudes Pendientes</h3>
+        <div class="list-group">
+            {% for review in pending_reviews %}
+            <div class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ review.exam_request.calendar_exam.subject }}</h5>
+                    <small>{{ review.created_at|date:"d/m/Y H:i" }}</small>
+                </div>
+                <p class="mb-1 mt-2">{{ review.reason }}</p>
+                <div class="mt-2">
+                    <span class="badge bg-warning text-dark">
+                        <i class="fas fa-clock me-1"></i>Pendiente de revisión
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle me-2"></i>No tienes solicitudes pendientes
+            </div>
+            {% endfor %}
+        </div>
     </div>
-    
-    <div class="form-actions">
-        <button type="submit" class="btn-primary">Aceptar</button>
-    </div>
-</form>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/exams.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Deshabilitar doble envío
+    const forms = document.querySelectorAll('.review-form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+        });
+    });
+});
+</script>
 {% endblock %}

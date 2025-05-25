@@ -310,17 +310,24 @@ def delete_exam(request, pk):
 @login_required
 @user_passes_test(is_teacher, login_url="/login/")
 def verify_requests_fbv(request):
-    """Displays pending exam requests for professors to review."""
-    pending_requests = (
-        ExamRequest.objects.filter(status="Pending")
-        .select_related("student", "calendar_exam")
-        .order_by("calendar_exam__date", "student__last_name")
-    )
+    """Muestra ambas solicitudes: exámenes pendientes y revisiones, separadas por pestañas"""
+    # Obtener solicitudes de exámenes pendientes
+    exam_requests = ExamRequest.objects.filter(
+        status="Pending"
+    ).select_related('student', 'calendar_exam').order_by('calendar_exam__date')
+    
+    # Obtener solicitudes de revisión pendientes (filtrar por asignaturas del profesor)
+    review_requests = ReviewRequest.objects.filter(
+        status="Pending",
+        exam_request__calendar_exam__subject__in=["RSI", "IA", "IO"]  # Ajustar según asignaturas del profesor
+    ).select_related('exam_request__student', 'exam_request__calendar_exam').order_by('-created_at')
+    
     context = {
-        "pending_requests": pending_requests,  # Changed key here
-        "page_title": "Verificar Solicitudes de Examen",
+        'exam_requests': exam_requests,
+        'review_requests': review_requests,
+        'page_title': 'Verificar Solicitudes'
     }
-    return render(request, "exams/verify_requests.html", context)
+    return render(request, 'exams/verify_requests.html', context)
 
 
 # Was: class ManageGradesListView(LoginRequiredMixin, ProfessorRequiredMixin, ListView):
@@ -494,28 +501,59 @@ def reject_request_fbv(request, pk):
         messages.warning(request, "La solicitud ya no estaba pendiente.")
     return redirect("exams:verify_requests")
 
-
+# BLOQUE DE REVISION ---------------JAVIER
 @login_required
 @user_passes_test(is_student, login_url="/login/")
 @require_POST
 def submit_review_request(request):
-    exam_request_id = request.POST.get("exam_request_id")
-    exam_request = get_object_or_404(
-        ExamRequest, pk=exam_request_id, student=request.user
-    )
+    exam_request_id = request.POST.get("exam_request")
+    reason = request.POST.get("reason", "").strip()
 
-    form = ReviewRequestForm(request.POST)
-    if form.is_valid():
+    # Debug: Mostrar datos reales recibidos
+    print(f"\n--- DATOS POST REALES ---\n{request.POST}\n")
+    
+    if not exam_request_id or not reason:
+        messages.error(request, "Todos los campos son obligatorios")
+        return redirect("exams:request_review")
+
+    try:
+        # Convertir a entero explícitamente
+        exam_request = ExamRequest.objects.get(
+            pk=int(exam_request_id),
+            student=request.user,
+            status="Approved",
+            grade__isnull=False
+        )
+        
+        # Crear sin validación manual
         ReviewRequest.objects.create(
             exam_request=exam_request,
-            reason=form.cleaned_data["reason"],
-            status="Pending",
+            reason=reason,
+            status="Pending"
         )
-        messages.success(request, "Solicitud de revisión enviada.")
-    else:
-        messages.error(request, "Error al enviar. Completa el motivo.")
+        
+        messages.success(request, "¡Solicitud creada correctamente!")
+        return redirect("exams:request_review")  # Redirección GET después de POST
 
-    return redirect("exams:request_review")
+    except (ValueError, ExamRequest.DoesNotExist):
+        messages.error(request, "Examen no válido o no disponible")
+    except IntegrityError:
+        messages.error(request, "Ya tienes una revisión pendiente para este examen")
+    except Exception as e:
+        messages.error(request, f"Error interno: {str(e)}")
+    
+    # Conservar datos del formulario en caso de error
+    return render(request, "exams/request_review.html", {
+        "graded_exams": ExamRequest.objects.filter(
+            student=request.user,
+            status="Approved",
+            grade__isnull=False
+        ),
+        "pending_reviews": ReviewRequest.objects.filter(
+            exam_request__student=request.user,
+            status="Pending"
+        )
+    })
 
 
 @login_required
@@ -535,6 +573,71 @@ def request_review(request):
         "review_form": ReviewRequestForm(),
     }
     return render(request, "exams/request_review.html", context)
+@login_required
+@user_passes_test(is_teacher, login_url="/login/")
+def manage_review_requests(request):
+    # Obtener todas las solicitudes pendientes, sin filtrar por asignatura
+    review_requests = ReviewRequest.objects.filter(
+        status="Pending"
+    ).select_related(
+        'exam_request__student',
+        'exam_request__calendar_exam'
+    ).order_by('-created_at')
 
+    context = {
+        'review_requests': review_requests,
+        'page_title': 'Solicitudes de Revisión Pendientes'
+    }
+    return render(request, 'exams/manage_review_requests.html', context)
+
+
+@login_required
+@user_passes_test(is_teacher, login_url="/login/")
+def approve_review(request, pk):
+    review = get_object_or_404(ReviewRequest, pk=pk)
+    
+    if request.method == "POST":
+        new_grade = request.POST.get("new_grade")
+        try:
+            # Actualizar calificación
+            review.exam_request.grade = new_grade
+            review.exam_request.save()
+            
+            # Marcar revisión como aprobada
+            review.status = "Approved"
+            review.save()
+            
+            # Notificar estudiante
+            Notification.objects.create(
+                user=review.exam_request.student,
+                message=f"Revisión aprobada en {review.exam_request.calendar_exam.subject}. Nueva calificación: {new_grade}"
+            )
+            
+            messages.success(request, "Revisión aprobada y calificación actualizada")
+        except Exception as e:
+            messages.error(request, f"Error: {str(e)}")
+        
+        return redirect("exams:verify_requests")
+    
+    # Mostrar formulario de ajuste de calificación
+    context = {'review': review}
+    return render(request, 'exams/adjust_grade.html', context)
+
+@login_required
+@user_passes_test(is_teacher, login_url="/login/")
+@require_POST
+def reject_review(request, pk):
+    review = get_object_or_404(ReviewRequest, pk=pk)
+    review.status = "Rejected"
+    review.save()
+    
+    # Notificar estudiante
+    Notification.objects.create(
+        user=review.exam_request.student,
+        message=f"Revisión rechazada en {review.exam_request.calendar_exam.subject}"
+    )
+    
+    messages.warning(request, "Revisión rechazada")
+    return redirect("exams:verify_requests")
 
 # --- END OF FILE views.py ---

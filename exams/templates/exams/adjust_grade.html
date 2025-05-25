@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content-header">
+    <h1>Ajustar Calificación</h1>
+</div>
+
+<form method="post" class="grade-adjust-form">
+    {% csrf_token %}
+    
+    <div class="form-group">
+        <label>Estudiante:</label>
+        <p>{{ review.exam_request.student.get_full_name }}</p>
+    </div>
+    
+    <div class="form-group">
+        <label>Asignatura:</label>
+        <p>{{ review.exam_request.calendar_exam.subject }}</p>
+    </div>
+    
+    <div class="form-group">
+        <label>Calificación Actual:</label>
+        <p>{{ review.exam_request.grade }}</p>
+    </div>
+    
+    <div class="form-group">
+        <label for="new_grade">Nueva Calificación:</label>
+        <input type="number" 
+               name="new_grade" 
+               step="0.01" 
+               min="0" 
+               max="10" 
+               value="{{ review.exam_request.grade }}" 
+               required>
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Guardar Cambios</button>
+        <a href="{% url 'exams:verify_requests' %}" class="btn-cancel">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

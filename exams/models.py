@@ -127,14 +127,7 @@ class ReviewRequest(models.Model):
     def __str__(self):
         return f"Revisión de {self.exam_request.student} - {self.get_status_display()}"
 
-    def clean(self):
-        # Validación adicional: El examen debe estar calificado
-        if not self.exam_request.grade:
-            raise ValidationError("El examen debe tener una calificación para solicitar revisión.")
-        
-        # Validación: Solo el estudiante puede solicitar revisión
-        if self.pk is None and self.exam_request.student != self._state.user:
-            raise ValidationError("Solo el estudiante puede solicitar una revisión.")
+    
 
     def save(self, *args, **kwargs):
         self.full_clean()  # Ejecuta validaciones antes de guardar

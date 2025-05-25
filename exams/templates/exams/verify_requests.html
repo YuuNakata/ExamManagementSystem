@@ -1,61 +1,45 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
-
-<link rel="stylesheet" href="{% static 'css/verify_requests.css' %}">
-
-{% endblock %}
-
 {% block content %}
-<div class="main-content">
+<div class="content-header">
+    <h1>{{ page_title }}</h1>
+</div>
 
-    
-    {% if messages %}
-        <div class="messages-container" style="padding: 0 0 1rem;"> 
-            {% for message in messages %}
-                
-                <div class="alert alert-{{ message.tags }}" role="alert" style="padding: 0.75rem 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: var(--radio-borde); background-color: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'warning' %}#fff3cd{% elif message.tags == 'error' %}#f8d7da{% else %}#cfe2ff{% endif %}; border-color: {% if message.tags == 'success' %}#c3e6cb{% elif message.tags == 'warning' %}#ffeeba{% elif message.tags == 'error' %}#f5c6cb{% else %}#b6d4fe{% endif %}; color: {% if message.tags == 'success' %}#155724{% elif message.tags == 'warning' %}#856404{% elif message.tags == 'error' %}#721c24{% else %}#0c5460{% endif %};">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
+<div class="requests-tabs">
+    <div class="tab-buttons">
+        <button class="tab-btn active" data-tab="exam-requests">Solicitudes de Exámenes ({{ exam_requests|length }})</button>
+        <button class="tab-btn" data-tab="review-requests">Solicitudes de Revisión ({{ review_requests|length }})</button>
+    </div>
 
-    <div class="widget">
-
-
-        {% if pending_requests %}
+    <!-- Pestaña Solicitudes de Exámenes -->
+    <div id="exam-requests" class="tab-content active">
+        {% if exam_requests %}
             <table class="requests-table">
                 <thead>
                     <tr>
                         <th>Estudiante</th>
                         <th>Asignatura</th>
                         <th>Fecha Examen</th>
-                        <th>Turno</th>
-                        <th>Fecha Solicitud</th>
+                        <th>Tipo</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for req in pending_requests %}
+                    {% for req in exam_requests %}
                     <tr>
-                        <td>{{ req.student.get_full_name|default:req.student.username }}</td>
+                        <td>{{ req.student.get_full_name }}</td>
                         <td>{{ req.calendar_exam.subject }}</td>
                         <td>{{ req.calendar_exam.date|date:"d/m/Y" }}</td>
-                        <td>{{ req.calendar_exam.get_turn_display }}</td>
-                        <td>{{ req.request_timestamp|date:"d/m/Y H:i" }}</td>
+                        <td>{{ req.calendar_exam.get_exam_type_display }}</td>
                         <td class="actions">
-                            
-                            <form action="{% url 'exams:approve_request' req.pk %}" method="post">
+                            <form method="post" action="{% url 'exams:approve_request' req.pk %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn-success btn-sm" title="Aprobar solicitud">Aprobar</button>
+                                <button type="submit" class="btn-approve">✓ Aprobar</button>
                             </form>
-                            
-                            <form action="{% url 'exams:reject_request' req.pk %}" method="post">
+                            <form method="post" action="{% url 'exams:reject_request' req.pk %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn-danger btn-sm" title="Rechazar solicitud">Rechazar</button>
+                                <button type="submit" class="btn-reject">✗ Rechazar</button>
                             </form>
                         </td>
                     </tr>
@@ -63,8 +47,70 @@
                 </tbody>
             </table>
         {% else %}
-            <p class="no-requests">No hay solicitudes de examen pendientes para verificar en este momento.</p>
+            <p class="no-requests">No hay solicitudes de examen pendientes</p>
+        {% endif %}
+    </div>
+
+    <!-- Pestaña Solicitudes de Revisión -->
+    <div id="review-requests" class="tab-content">
+        {% if review_requests %}
+            <table class="requests-table">
+                <thead>
+                    <tr>
+                        <th>Estudiante</th>
+                        <th>Asignatura</th>
+                        <th>Calificación</th>
+                        <th>Motivo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rev in review_requests %}
+                    <tr>
+                        <td>{{ rev.exam_request.student.get_full_name }}</td>
+                        <td>{{ rev.exam_request.calendar_exam.subject }}</td>
+                        <td>{{ rev.exam_request.grade }}</td>
+                        <td>{{ rev.reason|truncatechars:40 }}</td>
+                        <td class="actions">
+                            <a href="{% url 'exams:approve_review' rev.pk %}" class="btn-approve">Revisar</a>
+                            <form method="post" action="{% url 'exams:reject_review' rev.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-reject">Rechazar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-requests">No hay solicitudes de revisión pendientes</p>
         {% endif %}
     </div>
 </div>
+
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/verify_requests.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Remover clase active de todos
+            document.querySelectorAll('.tab-btn, .tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Activar elementos correspondientes
+            const tabId = tab.dataset.tab;
+            tab.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+});
+</script>
 {% endblock %}
