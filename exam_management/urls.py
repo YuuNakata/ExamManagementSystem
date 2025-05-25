@@ -22,9 +22,6 @@ from .views import (
     dashboard_view,
     logout_view,
     notifications_view,
-    notifications_count,
-    notifications_list,
-    mark_notification_read,
 )
 
 
@@ -34,9 +31,6 @@ urlpatterns = [
     path("login/", CustomLoginView.as_view(), name="login"),
     path("logout/", logout_view, name="logout"),
     path("notifications/", notifications_view, name="notifications"),
-    path('api/notifications/count/', notifications_count, name='notifications_count'),
-    path('api/notifications/list/',  notifications_list,  name='notifications_list'),
-    path('api/notifications/read/<int:pk>/', mark_notification_read, name='notifications_read'),
     path("users/", include("users.urls")),
     path("exams/", include("exams.urls")),
     path("reports/", include("reports.urls")),

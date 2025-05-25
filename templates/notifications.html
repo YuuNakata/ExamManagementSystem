@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Notificaciones</h1>
-<div id="notif-panel"
-    style="display:none;position:absolute;right:0;top:100%;
-            width:300px;max-height:400px;overflow-y:auto;
-            background:white;border:1px solid #ccc;
-            box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-    <ul id="notif-list" style="list-style:none;margin:0;padding:0;">
-    </ul>
-</div>
+<ul>
+    {% for n in notifications %}
+    <li style="margin-bottom:10px;{% if n.is_read %}opacity:0.6;{% endif %}">
+        <div>{{ n.message }}</div>
+        <small style="color:#666;">{{ n.timestamp|date:"Y-m-d H:i" }}</small>
+    </li>
+    {% empty %}
+    <li>No tienes notificaciones.</li>
+    {% endfor %}
+</ul>
 {% endblock %}

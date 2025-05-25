@@ -16,6 +16,7 @@ from users.models import User
 from .forms import CalendarExamForm, GradeForm, ReviewRequestForm
 from .models import CalendarExam, ExamRequest, ReviewRequest  
 from exam_management.models import Notification
+from exam_management.utils import notificar
 
 # Helper function to check if user is a student
 def is_student(user):
@@ -468,6 +469,11 @@ def approve_request_fbv(request, pk):
     if exam_request.status == "Pending":
         exam_request.status = "Approved"
         exam_request.save()
+        # Notificar al estudiante
+        notificar(
+            exam_request.student,
+            f"Tu solicitud para el examen '{exam_request.calendar_exam.subject}' fue APROBADA."
+        )
         messages.success(
             request,
             f"Solicitud de {exam_request.student.get_full_name()} para {exam_request.calendar_exam} aprobada.",
@@ -486,6 +492,11 @@ def reject_request_fbv(request, pk):
     if exam_request.status == "Pending":
         exam_request.status = "Rejected"
         exam_request.save()
+        # Notificar al estudiante
+        notificar(
+            exam_request.student,
+            f"Tu solicitud para el examen '{exam_request.calendar_exam.subject}' fue RECHAZADA."
+        )
         messages.warning(
             request,
             f"Solicitud de {exam_request.student.get_full_name()} para {exam_request.calendar_exam} rechazada.",
@@ -506,11 +517,18 @@ def submit_review_request(request):
 
     form = ReviewRequestForm(request.POST)
     if form.is_valid():
-        ReviewRequest.objects.create(
+        review = ReviewRequest.objects.create(
             exam_request=exam_request,
-            reason=form.cleaned_data["reason"],
-            status="Pending",
+            reason=form.cleaned_data['reason'],
+            status='Pending'
         )
+        # Notificar a los profesores (o solo al responsable si lo tienes)
+        professors = User.objects.filter(role="profesor")
+        for prof in professors:
+            notificar(
+                prof,
+                f"El estudiante {request.user.get_full_name()} ha solicitado una revisión para el examen '{exam_request.calendar_exam.subject}'."
+            )
         messages.success(request, "Solicitud de revisión enviada.")
     else:
         messages.error(request, "Error al enviar. Completa el motivo.")
