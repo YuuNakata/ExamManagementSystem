@@ -8,12 +8,14 @@
     <title>Excelia - Sistema de Gestión</title> {# Título más específico #}
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {# Favicon - ¡Añade tu favicon real aquí! #}
-    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
     {# Fuentes (Opcional, si quieres usar una específica como Inter o Lato) #}
     {# <link rel="preconnect" href="https://fonts.googleapis.com"> #}
     {# <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> #}
     {# <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"> #}
     {% block extra_css %}{% endblock %}
+    
+
 </head>
 <body>
     <header class="main-header">
@@ -31,6 +33,10 @@
                 {% if user.is_authenticated %}
                 <a href="{% url 'notifications' %}" class="notification-bell interactive-icon" aria-label="Notificaciones" title="Notificaciones">
                     <span class="icono icono-notificacion"></span>
+                    {% if unread_notifications > 0 %}
+                    <span class="badge">{{ unread_notifications }}</span>
+                    {% endif %}
+
                     {# <span class="notification-count">3</span> #} {# Contador opcional #}
                 </a>
                 <div class="user-profile-header"> {# Quitada clase interactive-element si no hay dropdown #}
@@ -48,15 +54,15 @@
                         </span>
                         <small>{{ user.get_role_display }}</small>
                     </div>
-                     <a href="{% url 'logout' %}" class="logout-link-header interactive-icon" title="Cerrar sesión">
+                    <a href="{% url 'logout' %}" class="logout-link-header interactive-icon" title="Cerrar sesión">
                         <span class="icono icono-logout"></span>
                     </a>
                 </div>
-                 {% else %}
-                     <a href="{% url 'login' %}" class="btn btn-secondary login-btn-header"> {# Cambiado a btn-secondary para diferenciarlo? O mantener primary #}
-                         <span class="icono icono-login"></span> Iniciar sesión
-                     </a>
-                 {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-secondary login-btn-header"> {# Cambiado a btn-secondary para diferenciarlo? O mantener primary #}
+                        <span class="icono icono-login"></span> Iniciar sesión
+                    </a>
+                {% endif %}
                 <button class="menu-toggle interactive-icon" aria-label="Abrir menú" aria-expanded="false">
                     <span class="icono icono-menu"></span>
                 </button>
@@ -71,10 +77,10 @@
                 <span class="icono icono-inicio"></span><span class="menu-item-text">Principal</span>
             </a>
             {% if user.is_student %}
-            <a href="{% url 'exams:list_grades' %}" class="menu-item {% if 'mis-notas' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:my_grades' %}" class="menu-item {% if 'my-grades' in request.path or 'mis-notas' in request.path %}active{% endif %}">
                 <span class="icono icono-examen"></span><span class="menu-item-text">Mis Notas</span>
             </a>
-            <a href="{% url 'exams:request_exam' %}" class="menu-item {% if 'solicitar-examen' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:request_exam' %}" class="menu-item {% if 'solicitar-examen' in request.path or 'request-exam' in request.path %}active{% endif %}">
                 <span class="icono icono-solicitar"></span><span class="menu-item-text">Solicitar Examen</span>
             </a>
             <a href="{% url 'exams:request_review' %}" class="menu-item {% if 'solicitar-revision' in request.path %}active{% endif %}">
@@ -140,10 +146,10 @@
                 <span class="icono icono-inicio"></span> Principal
             </a>
             {% if user.is_student %}
-            <a href="{% url 'exams:list_grades' %}" class="mobile-menu-item {% if 'mis-notas' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:my_grades' %}" class="mobile-menu-item {% if 'my-grades' in request.path or 'mis-notas' in request.path %}active{% endif %}">
                 <span class="icono icono-examen"></span> Mis Notas
             </a>
-            <a href="{% url 'exams:request_exam' %}" class="mobile-menu-item {% if 'solicitar-examen' in request.path %}active{% endif %}">
+            <a href="{% url 'exams:request_exam' %}" class="mobile-menu-item {% if 'solicitar-examen' in request.path or 'request-exam' in request.path %}active{% endif %}">
                 <span class="icono icono-solicitar"></span> Solicitar Examen
             </a>
             <a href="{% url 'exams:request_review' %}" class="mobile-menu-item {% if 'solicitar-revision' in request.path %}active{% endif %}">
@@ -276,7 +282,7 @@
                  // Solo cierra si es un enlace de navegación real
                 if (link.getAttribute('href') && link.getAttribute('href') !== '#') {
                    // Pequeño delay para que se vea el click antes de cerrar
-                   setTimeout(closeMenu, 150);
+                setTimeout(closeMenu, 150);
                 }
             });
         });

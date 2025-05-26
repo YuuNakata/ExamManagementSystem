@@ -3,6 +3,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/manage_grades.css' %}">
+<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -12,103 +13,68 @@
         <div class="management-header">
             <h2>Gestionar Notas de Exámenes</h2>
             <div class="actions filters">
-                <select name="subject_filter" id="subject_filter" class="filter-select">
-                    <option value="">Todas las Asignaturas</option>
-                    <option value="RSI">RSI</option>
-                    <option value="IA">IA</option>
-                    <option value="IO">IO</option>
-                    {# Add more subjects dynamically if needed #}
-                </select>
-                <select name="exam_type_filter" id="exam_type_filter" class="filter-select">
-                    <option value="">Todos los Tipos</option>
-                    <option value="parcial">Parcial</option>
-                    <option value="final">Final</option>
-                    {# Add more types dynamically if needed #}
-                </select>
-                 <input type="date" id="date_filter" name="date_filter" class="filter-input">
-                <button class="btn-primary btn-sm" onclick="applyFilters()">Filtrar</button>
+                <form method="GET" action="{% url 'exams:manage_grades' %}" class="form-inline">
+                    <input type="text" name="subject_query" class="form-control filter-input mr-2" placeholder="Asignatura..." value="{{ request.GET.subject_query|default:'' }}">
+                    <input type="text" name="student_query" class="form-control filter-input mr-2" placeholder="Estudiante..." value="{{ request.GET.student_query|default:'' }}">
+                    <input type="date" id="date_filter" name="date_filter" class="form-control filter-input mr-2" value="{{ request.GET.date_filter|default:'' }}">
+                    <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+                </form>
             </div>
         </div>
 
         <!-- Tabla de Notas -->
         <div class="grades-table-container">
             <table class="grades-table">
-                <thead>
+                <thead class="thead-light">
                     <tr>
                         <th>Estudiante</th>
-                        <th>Asignatura</th>
-                        <th>Tipo Examen</th>
-                        <th>Fecha</th>
-                        <th>Nota</th>
+                        <th>Examen</th>
+                        <th>Fecha del Examen</th>
+                        <th>Turno</th>
+                        <th>Estado Solicitud</th>
+                        <th>Calificación Actual</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {# Example Row 1 (Loop through actual data in backend) #}
-                    <tr>
-                        <td>Nombre Apellido Estudiante 1</td>
-                        <td>Inteligencia Artificial</td>
-                        <td>Parcial</td>
-                        <td>15/11/2023</td>
-                        <td>
-                            <input type="number" class="grade-input" value="2" min="2" max="5" step="1" placeholder="-" data-grade-id="1">
-                            {# Alternatively, just display the grade if editing is done via modal #}
-                            {# <span>3</span> #}
-                        </td>
-                        <td>
-                            <button class="btn-primary btn-sm" onclick="saveGrade('1')">Guardar</button>
-                            {# Or an edit button to open a modal #}
-                            {# <button class="btn-secondary btn-sm" onclick="showEditGradeModal('1')">Editar</button> #}
-                        </td>
-                    </tr>
-                    {# Example Row 2 #}
-                     <tr>
-                        <td>Nombre Apellido Estudiante 2</td>
-                        <td>Redes y Sistemas Inteligentes</td>
-                        <td>Final</td>
-                        <td>20/11/2023</td>
-                        <td>
-                            <input type="number" class="grade-input" value="2" min="2" max="5" step="1" placeholder="-" data-grade-id="2">
-                        </td>
-                        <td>
-                            <button class="btn-primary btn-sm" onclick="saveGrade('2')">Guardar</button>
-                        </td>
-                    </tr>
-                    {# Example Row 3 - Already graded #}
-                    <tr>
-                        <td>Nombre Apellido Estudiante 3</td>
-                        <td>Investigación Operativa</td>
-                        <td>Parcial</td>
-                        <td>10/11/2023</td>
-                        <td>
-                            <input type="number" class="grade-input" value="3.0" min="2" max="5" step="1" placeholder="-" data-grade-id="3" disabled>
-                             {# Add a 'disabled' attribute or style if already finalized #}
-                        </td>
-                        <td>
-                            <button class="btn-secondary btn-sm" onclick="editGrade('3')">Modificar</button> {# Button to enable input #}
-                        </td>
-                    </tr>
-                    {# Add more rows dynamically based on backend data #}
-                    {% comment %}
-                    {% for grade_info in grades_list %}
-                    <tr>
-                        <td>{{ grade_info.student.full_name }}</td>
-                        <td>{{ grade_info.exam.subject }}</td>
-                        <td>{{ grade_info.exam.get_exam_type_display }}</td>
-                        <td>{{ grade_info.exam.date|date:"d/m/Y" }}</td>
-                        <td>
-                            <input type="number" class="grade-input" value="{{ grade_info.score|default:'' }}" min="0" max="10" step="0.1" placeholder="-" data-grade-id="{{ grade_info.id }}">
-                        </td>
-                        <td>
-                            <button class="btn-primary btn-sm" onclick="saveGrade('{{ grade_info.id }}')">Guardar</button>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="no-results">No hay notas para mostrar con los filtros actuales.</td>
-                    </tr>
-                    {% endfor %}
-                    {% endcomment %}
+                    {% if exam_requests %}
+                        {% for req in exam_requests %}
+                            <tr data-request-id="{{ req.pk }}">
+                                <td>{{ req.student.get_full_name|default:req.student.username }}</td>
+                                <td>{{ req.calendar_exam.subject }} ({{ req.calendar_exam.get_exam_type_display }})</td>
+                                <td>{{ req.calendar_exam.date|date:"d/m/Y" }}</td>
+                                <td>{{ req.calendar_exam.get_turn_display }}</td>
+                                <td><span class="badge {% if req.status == 'Approved' %}bg-success{% elif req.status == 'Pending' %}bg-warning text-dark{% elif req.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %} ">{{ req.get_status_display }}</span></td>
+                                <td>
+                                    {% if req.grade is not None %}
+                                        {{ req.grade }}
+                                    {% else %}
+                                        <span class="text-muted">Pendiente</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-primary btn-sm" 
+                                            onclick="openGradeModal(
+                                                '{{ req.pk }}', 
+                                                '{{ req.student.get_full_name|default:req.student.username|escapejs }}', 
+                                                '{{ req.calendar_exam.subject|escapejs }}', 
+                                                '{{ req.calendar_exam.get_exam_type_display|escapejs }}', 
+                                                '{{ req.calendar_exam.date|date:"d/m/Y"|escapejs }}',
+                                                '{{ req.grade|default_if_none:""|escapejs }}',
+                                                '{{ req.comments|default_if_none:""|escapejs }}'
+                                            )">
+                                        {% if req.grade is not None %}Editar Calificación{% else %}Asignar Calificación{% endif %}
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="no-results text-center p-3">
+                                No hay solicitudes de examen aprobadas pendientes de calificación en este momento.
+                            </td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -119,12 +85,108 @@
     </div> {# End widget #}
 </div> {# End main-content #}
 
-{% comment %} Optional: Modal for editing grades could be added here {% endcomment %}
-{# <div id="editGradeModal" class="modal"> ... </div> #}
+{# Modal for Grading #}
+<div id="gradeExamModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('gradeExamModal')">&times;</span>
+        <h3>Asignar/Editar Calificación</h3>
+        <hr>
+        <div id="modalStudentInfo" class="mb-2"></div>
+        <div id="modalExamInfo" class="mb-3"></div>
+
+        <form id="gradeFormInModal" method="post" action="">
+            {% csrf_token %}
+            
+            {% comment %} Prioritize displaying the form with errors if it exists {% endcomment %}
+            {% with form_to_display=grade_form_with_errors|default:grade_form %}
+                {% if form_to_display.non_field_errors %}
+                    <div class="messages-container mt-1 mb-1-5">
+                        <ul class="errorlist alert alert-error">
+                            {% for error in form_to_display.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="{{ form_to_display.grade.id_for_label }}">{{ form_to_display.grade.label }}</label>
+                    {{ form_to_display.grade }}
+                    {% if form_to_display.grade.help_text %}
+                        <small class="form-text text-muted">{{ form_to_display.grade.help_text }}</small>
+                    {% endif %}
+                    {% if form_to_display.grade.errors %}
+                        <ul class="errorlist">
+                            {% for error in form_to_display.grade.errors %}
+                                <li class="error-message">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form_to_display.comments.id_for_label }}">{{ form_to_display.comments.label }}</label>
+                    {{ form_to_display.comments }}
+                    {% if form_to_display.comments.help_text %}
+                        <small class="form-text text-muted">{{ form_to_display.comments.help_text }}</small>
+                    {% endif %}
+                    {% if form_to_display.comments.errors %}
+                        <ul class="errorlist">
+                            {% for error in form_to_display.comments.errors %}
+                                <li class="error-message">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endwith %}
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Guardar Calificación</button>
+                <button type="button" class="btn btn-cancel" onclick="closeModal('gradeExamModal')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/modals.js' %}"></script> {# Assuming showModal/closeModal are here #}
 <script src="{% static 'js/manage_grades.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if exam_request_id_with_error and grade_form_with_errors %}
+        // Find the row and extract data to reopen modal with errors
+        const errorRow = document.querySelector(`tr[data-request-id='{{ exam_request_id_with_error }}']`);
+        if (errorRow) {
+            const cells = errorRow.cells;
+            const studentName = cells[0].textContent.trim();
+            const examDetailsFull = cells[1].textContent.trim(); // e.g., "Subject (Type)"
+            const examDate = cells[2].textContent.trim();
+            
+            // Extract subject and type from examDetailsFull
+            let examSubject = examDetailsFull;
+            let examType = '';
+            const typeMatch = examDetailsFull.match(/(.*) \((.*)\)/);
+            if (typeMatch && typeMatch.length === 3) {
+                examSubject = typeMatch[1];
+                examType = typeMatch[2];
+            }
+
+            // Grade and comments will be pre-filled by the form_with_errors passed to the template
+            // So we pass empty strings for currentGrade and currentComments to openGradeModal
+            // as the form itself will render the erroneous values.
+            openGradeModal(
+                '{{ exam_request_id_with_error }}',
+                studentName,
+                examSubject,
+                examType,
+                examDate,
+                '{{ grade_form_with_errors.grade.value|default_if_none:""|escapejs }}', // Use submitted value
+                '{{ grade_form_with_errors.comments.value|default_if_none:""|escapejs }}' // Use submitted value
+            );
+        }
+    {% endif %}
+});
+</script>
 {% endblock %}
---- END OF FILE manage_grades.html ---

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-header">
+    <h1>{{ page_title }}</h1>
+</div>
+
+<div class="review-requests-list">
+    {% if review_requests %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Estudiante</th>
+                    <th>Asignatura</th>
+                    <th>Calificación Actual</th>
+                    <th>Motivo</th>
+                    <th>Fecha Solicitud</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for review in review_requests %}
+                <tr>
+                    <td>{{ review.exam_request.student.get_full_name }}</td>
+                    <td>{{ review.exam_request.calendar_exam.subject }}</td>
+                    <td>{{ review.exam_request.grade }}</td>
+                    <td>{{ review.reason|truncatechars:50 }}</td>
+                    <td>{{ review.created_at|date:"d/m/Y" }}</td>
+                    <td class="actions">
+                        <a href="{% url 'exams:approve_review' review.pk %}" class="btn btn-success">
+                            Aprobar
+                        </a>
+                        <a href="{% url 'exams:reject_review' review.pk %}" class="btn btn-danger">
+                            Rechazar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="no-requests">
+            No hay solicitudes de revisión pendientes.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/review_requests.css' %}">
+{% endblock %}

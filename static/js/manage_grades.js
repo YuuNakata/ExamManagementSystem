@@ -1,17 +1,5 @@
 /* --- START OF FILE manage_grades.js --- */
 
-function applyFilters() {
-    // In a real application, this would likely trigger a page reload
-    // with query parameters or use AJAX to fetch filtered data.
-    const subject = document.getElementById('subject_filter').value;
-    const examType = document.getElementById('exam_type_filter').value;
-    const date = document.getElementById('date_filter').value;
-    console.log("Applying filters:", { subject, examType, date });
-    alert("Filtrado activado (simulación). Recarga la página con parámetros o usa AJAX.");
-    // Example URL construction (for page reload):
-    // window.location.search = `?subject=${subject}&type=${examType}&date=${date}`;
-}
-
 function saveGrade(gradeId) {
     // In a real application, this would use AJAX to send the updated grade
     // associated with gradeId to the backend.
@@ -56,9 +44,64 @@ function editGrade(gradeId) {
      if(editButton) editButton.style.display = 'none';
 }
 
+// Ensure this file is loaded after modals.js if showModal/closeModal are defined there
 
-// Initialize: Hide "Modificar" buttons initially if the input is not disabled
+function openGradeModal(examRequestId, studentName, examSubject, examType, examDate, currentGrade, currentComments) {
+    const modal = document.getElementById('gradeExamModal');
+    if (!modal) {
+        console.error('Grade exam modal not found!');
+        return;
+    }
+
+    // Populate student and exam information
+    const studentInfoDiv = modal.querySelector('#modalStudentInfo');
+    if (studentInfoDiv) {
+        studentInfoDiv.innerHTML = `<strong>Estudiante:</strong> ${studentName}`;
+    }
+    const examInfoDiv = modal.querySelector('#modalExamInfo');
+    if (examInfoDiv) {
+        examInfoDiv.innerHTML = `<strong>Examen:</strong> ${examSubject} (${examType}) - ${examDate}`;
+    }
+
+    // Set the form action URL
+    const form = modal.querySelector('#gradeFormInModal');
+    if (form) {
+        form.action = `/exams/grade-exam/${examRequestId}/`; // Construct the URL dynamically
+    }
+
+    // Pre-fill form fields
+    // Assumes grade_form.grade and grade_form.comments are the IDs/names used in the template
+    const gradeInput = modal.querySelector('[name="grade"]'); // Or use ID: #id_grade
+    if (gradeInput) {
+        gradeInput.value = currentGrade || '';
+    }
+    const commentsTextarea = modal.querySelector('[name="comments"]'); // Or use ID: #id_comments
+    if (commentsTextarea) {
+        commentsTextarea.value = currentComments || '';
+    }
+
+    // Show the modal (assuming showModal is globally available from modals.js)
+    if (typeof showModal === 'function') {
+        showModal('gradeExamModal');
+    } else {
+        console.error('showModal function is not defined. Make sure modals.js is loaded before manage_grades.js');
+        // Fallback to basic display if showModal is missing, for basic testing
+        // modal.style.display = 'flex'; 
+    }
+}
+
+// Optional: Add event listener for the modal's close button if not handled by a generic one in modals.js
 document.addEventListener('DOMContentLoaded', () => {
+    const gradeModal = document.getElementById('gradeExamModal');
+    if (gradeModal) {
+        const closeBtn = gradeModal.querySelector('.close');
+        if (closeBtn && typeof closeModal === 'function') {
+            // This might be redundant if modals.js already handles all .close buttons
+            // Check modals.js to avoid double event listeners
+            // closeBtn.addEventListener('click', () => closeModal('gradeExamModal'));
+        }
+    }
+
     document.querySelectorAll('.grades-table tbody tr').forEach(row => {
         const inputElement = row.querySelector('.grade-input');
         const saveButton = row.querySelector('.btn-primary'); // Assumes save is default
