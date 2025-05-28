@@ -56,10 +56,10 @@
                 </div>
                 
                 <div>
-                    <form id="deleteForm{{ user.id }}" method="post" action="{% url 'users:delete_user' user.id %}" onsubmit="return confirm('¿Está seguro que desea eliminar este usuario?')">
+                    <form id="formEliminar{{ user.id }}" method="post" action="{% url 'users:delete_user' user.id %}" onsubmit="event.preventDefault(); confirmDelete('formEliminar{{ user.id }}');"> 'users:delete_user' user.id %}" onsubmit="return confirm('¿Está seguro que desea eliminar este usuario?')">
                         {% csrf_token %}
                         <button type="submit" class="btn-delete">
-                            <span class="icono icono-eliminar"></span>
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
                         </button>            
                     </form>
                 </div>

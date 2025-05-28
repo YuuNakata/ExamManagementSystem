@@ -28,9 +28,15 @@ function performSearch() {
 
 // Confirmación de eliminación
 function confirmDelete(formId) {
-    if (confirm('¿Está seguro que desea eliminar este usuario?')) {
-        document.getElementById(formId).submit();
-    }
+    showMainModal({
+        message: "¿Está seguro que desea eliminar este usuario?",
+        type: "warning",
+        onConfirm: function() {
+            document.getElementById(formId).submit();
+        },
+        confirmText: "Eliminar",
+        cancelText: "Cancelar"
+    });
 }
 // Event listeners
 document.getElementById('searchInput').addEventListener('keypress', (e) => {

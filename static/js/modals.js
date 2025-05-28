@@ -40,7 +40,7 @@ function handleAddExam(event, dateStr) {
         if (dateInput) {
             dateInput.value = dateStr;
         } else {
-             console.warn("Date input not found in newExamModal form.");
+            console.warn("Date input not found in newExamModal form.");
         }
         showModal('newExamModal');
     } else {
@@ -69,3 +69,45 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+function showMainModal({message, type="info", onConfirm=null, onCancel=null, confirmText="Aceptar", cancelText="Cancelar"}) {
+    const modal = document.getElementById('mainModal');
+    const text = document.getElementById('mainModalText');
+    const actions = document.getElementById('mainModalActions');
+    text.innerText = message;
+    actions.innerHTML = "";
+
+    // Color según tipo
+    modal.querySelector('.modal-content').style.borderLeft = 
+        type === "success" ? "5px solid #4caf50" :
+        type === "error" ? "5px solid #f44336" :
+        type === "warning" ? "5px solid #ff9800" : "none";
+
+    if (onConfirm) {
+        // Confirmación (ej: eliminar)
+        const btnConfirm = document.createElement('button');
+        btnConfirm.innerText = confirmText;
+        btnConfirm.className = "btn btn-danger";
+        btnConfirm.onclick = function() { closeMainModal(); onConfirm(); };
+        actions.appendChild(btnConfirm);
+
+        const btnCancel = document.createElement('button');
+        btnCancel.innerText = cancelText;
+        btnCancel.className = "btn btn-secondary";
+        btnCancel.onclick = closeMainModal;
+        actions.appendChild(btnCancel);
+    } else {
+        // Solo info/éxito/error
+        const btnOk = document.createElement('button');
+        btnOk.innerText = "Cerrar";
+        btnOk.className = "btn btn-primary";
+        btnOk.onclick = closeMainModal;
+        actions.appendChild(btnOk);
+    }
+
+    modal.style.display = "flex";
+}
+
+function closeMainModal() {
+    document.getElementById('mainModal').style.display = "none";
+}

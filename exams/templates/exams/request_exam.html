@@ -133,16 +133,6 @@
 {% block content %}
 <div class="main-content">
     {# Display Django Messages #}
-    {% if messages %}
-        <div class="messages-container" style="padding: 0 1rem 1rem;">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}" role="alert" style="padding: 0.75rem 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: var(--radio-borde); background-color: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'warning' %}#fff3cd{% elif message.tags == 'error' %}#f8d7da{% else %}#cfe2ff{% endif %}; border-color: {% if message.tags == 'success' %}#c3e6cb{% elif message.tags == 'warning' %}#ffeeba{% elif message.tags == 'error' %}#f5c6cb{% else %}#b6d4fe{% endif %}; color: {% if message.tags == 'success' %}#155724{% elif message.tags == 'warning' %}#856404{% elif message.tags == 'error' %}#721c24{% else %}#0c5460{% endif %};">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
     <div class="widget">
         <!-- Cabecera y controles de navegación -->
         <div class="management-header">
