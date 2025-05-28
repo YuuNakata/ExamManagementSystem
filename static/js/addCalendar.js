@@ -14,8 +14,8 @@ function addExam() {
         `;
 
         tableBody.appendChild(newRow);
-        alert('Examen agregado exitosamente.');
+        showMainModal({message: "Examen agregado exitosamente.", type: "success"});
     } else {
-        alert('Por favor, completa todos los campos.');
+        showMainModal({message: "Por favor, completa todos los campos.", type: "warning"});
     }
 }

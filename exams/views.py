@@ -18,7 +18,7 @@ from .forms import CalendarExamForm, GradeForm, ReviewRequestForm
 from .models import CalendarExam, ExamRequest, ReviewRequest  
 from exam_management.models import Notification
 from django.db import IntegrityError
-
+from exam_management.utils import notificar 
 
 
 # Helper function to check if user is a student
@@ -141,6 +141,13 @@ def submit_exam_request(request):
 
     try:
         exam = get_object_or_404(CalendarExam, pk=int(calendar_exam_id))
+        ExamRequest.objects.create(student=request.user, calendar_exam=exam)
+        professors = User.objects.filter(role="profesor")
+        for prof in professors:
+            notificar(
+                prof,
+                f"El estudiante {request.user.get_full_name()} ha solicitado inscribirse en el examen '{exam.subject}'."
+        )
     except (ValueError, TypeError):
         messages.error(request, "ID de examen inválido.")
         return redirect("exams:request_exam")
@@ -170,7 +177,13 @@ def submit_exam_request(request):
         messages.success(
             request,
             f"Solicitud para el examen de '{exam.subject}' el {exam.date.strftime('%d/%m/%Y')} registrada correctamente.",
-        )
+        )  
+        professors = User.objects.filter(role="profesor")
+        for prof in professors:
+            notificar(
+                prof,
+                f"El estudiante {request.user.get_full_name()} ha solicitado inscribirse en el examen '{exam:CalendarExam.subject}'."
+            )
     except Exception as e:
         messages.error(request, f"Ocurrió un error al registrar la solicitud: {e}")
 
