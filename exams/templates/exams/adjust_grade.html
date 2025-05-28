@@ -1,42 +1,513 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* ============ ESTILOS ESPECÍFICOS PARA AJUSTAR CALIFICACIÓN ============ */
+.grade-adjust-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    background-color: var(--blanco);
+    border-radius: var(--radio-borde);
+    box-shadow: var(--sombra-elevada);
+    overflow: hidden;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.content-header {
+    background: linear-gradient(135deg, #ff6b00, #e05e00);
+    padding: 1.5rem 2rem;
+    color: var(--blanco);
+    position: relative;
+    overflow: hidden;
+}
+
+.content-header::before {
+    content: "";
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.content-header::after {
+    content: "";
+    position: absolute;
+    bottom: -30px;
+    left: -30px;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.content-header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.content-header h1::before {
+    content: "";
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z'/%3E%3C/svg%3E");
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+}
+
+.grade-adjust-form {
+    padding: 2rem;
+}
+
+.student-info-card {
+    background-color: var(--gris-muy-claro);
+    border-radius: var(--radio-borde);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--naranja);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gris-oscuro);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-label::before {
+    content: "";
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E");
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    color: var(--negro);
+    font-weight: 500;
+    padding: 0.5rem 0;
+}
+
+.grade-adjust-section {
+    background-color: var(--blanco);
+    border-radius: var(--radio-borde);
+    padding: 1.5rem;
+    box-shadow: var(--sombra-suave);
+    border: 1px solid var(--gris-borde);
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--negro);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--gris-claro);
+}
+
+.section-title::before {
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z'/%3E%3C/svg%3E");
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+}
+
+.grade-input-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.grade-input-container label {
+    font-weight: 600;
+    color: var(--gris-oscuro);
+    min-width: 150px;
+}
+
+.grade-input-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.grade-input-wrapper input {
+    width: 100%;
+    padding: 0.9rem 1.2rem 0.9rem 3rem;
+    border: 2px solid var(--gris-borde);
+    border-radius: var(--radio-borde);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--negro);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.grade-input-wrapper input:focus {
+    outline: none;
+    border-color: var(--naranja);
+    box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
+}
+
+.grade-input-wrapper::before {
+    content: "Nota";
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    color: var(--gris-oscuro);
+    background-color: var(--gris-muy-claro);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.grade-range-container {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: var(--gris-muy-claro-alternativo);
+    border-radius: var(--radio-borde);
+    text-align: center;
+}
+
+.grade-range-display {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--naranja);
+    margin: 0.5rem 0;
+}
+
+.grade-range-slider {
+    width: 100%;
+    height: 10px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(to right, #dc3545, #fd7e14, #28a745);
+    border-radius: 5px;
+    outline: none;
+    margin-top: 1rem;
+}
+
+.grade-range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: var(--blanco);
+    border: 3px solid var(--naranja);
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+.grade-range-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--gris-oscuro);
+    padding: 0 0.5rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ff6b00, #e05e00);
+    color: var(--blanco);
+    border: none;
+    padding: 0.9rem 2rem;
+    border-radius: var(--radio-borde);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    min-width: 200px;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #e05e00, #c55200);
+    transform: translateY(-3px);
+    box-shadow: var(--sombra);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/%3E%3C/svg%3E");
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+}
+
+.btn-cancel {
+    background-color: var(--gris-claro);
+    color: var(--gris-oscuro);
+    border: none;
+    padding: 0.9rem 2rem;
+    border-radius: var(--radio-borde);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    min-width: 200px;
+}
+
+.btn-cancel:hover {
+    background-color: var(--gris-medio);
+    transform: translateY(-3px);
+    box-shadow: var(--sombra);
+}
+
+.btn-cancel:active {
+    transform: translateY(0);
+}
+
+.btn-cancel::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+}
+
+/* Validación */
+.validation-message {
+    margin-top: 0.5rem;
+    color: #dc3545;
+    font-size: 0.9rem;
+    display: none;
+}
+
+.grade-input-wrapper.error input {
+    border-color: #dc3545;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .grade-adjust-container {
+        margin: 1rem;
+    }
+    
+    .content-header, .grade-adjust-form {
+        padding: 1.5rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn-primary, .btn-cancel {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .content-header h1 {
+        font-size: 1.4rem;
+    }
+    
+    .student-info-card {
+        grid-template-columns: 1fr;
+    }
+    
+    .grade-input-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="content-header">
-    <h1>Ajustar Calificación</h1>
+<div class="grade-adjust-container">
+    <div class="content-header">
+        <h1>Ajustar Calificación</h1>
+    </div>
+    
+    <form method="post" class="grade-adjust-form">
+        {% csrf_token %}
+        
+        <div class="student-info-card">
+            <div class="info-item">
+                <span class="info-label">Estudiante</span>
+                <span class="info-value">{{ review.exam_request.student.get_full_name }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Asignatura</span>
+                <span class="info-value">{{ review.exam_request.calendar_exam.subject }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Calificación Actual</span>
+                <span class="info-value">{{ review.exam_request.grade }}</span>
+            </div>
+        </div>
+        
+        <div class="grade-adjust-section">
+            <div class="section-title">Ajuste de Calificación</div>
+            
+            <div class="grade-input-container">
+                <label for="new_grade">Nueva Calificación:</label>
+                <div class="grade-input-wrapper">
+                    <input type="number" 
+                           name="new_grade" 
+                           id="new_grade"
+                           step="1" 
+                           min="2" 
+                           max="5" 
+                           value="{{ review.exam_request.grade }}" 
+                           required>
+                </div>
+            </div>
+            
+            <div class="grade-range-container">
+                <div class="grade-range-display" id="grade-display">
+                    Calificación seleccionada: <strong>{{ review.exam_request.grade }}</strong>
+                </div>
+                <input type="range" 
+                       id="grade-slider" 
+                       min="2" 
+                       max="5" 
+                       step="1" 
+                       value="{{ review.exam_request.grade }}"
+                       class="grade-range-slider">
+                <div class="grade-range-labels">
+                    <span>2</span>
+                    <span>3</span>
+                    <span>4</span>
+                    <span>5</span>
+                </div>
+            </div>
+            
+            <div class="validation-message" id="validation-message">
+                La calificación debe ser un número entero entre 2 y 5
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Guardar Cambios</button>
+            <a href="{% url 'exams:verify_requests' %}" class="btn-cancel">Cancelar</a>
+        </div>
+    </form>
 </div>
 
-<form method="post" class="grade-adjust-form">
-    {% csrf_token %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const newGradeInput = document.getElementById('new_grade');
+    const gradeSlider = document.getElementById('grade-slider');
+    const gradeDisplay = document.getElementById('grade-display');
+    const validationMessage = document.getElementById('validation-message');
+    const inputWrapper = newGradeInput.parentElement;
     
-    <div class="form-group">
-        <label>Estudiante:</label>
-        <p>{{ review.exam_request.student.get_full_name }}</p>
-    </div>
+    // Actualizar el campo numérico cuando cambia el slider
+    gradeSlider.addEventListener('input', function() {
+        newGradeInput.value = this.value;
+        updateGradeDisplay();
+        validateInput();
+    });
     
-    <div class="form-group">
-        <label>Asignatura:</label>
-        <p>{{ review.exam_request.calendar_exam.subject }}</p>
-    </div>
+    // Actualizar el slider cuando cambia el campo numérico
+    newGradeInput.addEventListener('input', function() {
+        gradeSlider.value = this.value;
+        updateGradeDisplay();
+        validateInput();
+    });
     
-    <div class="form-group">
-        <label>Calificación Actual:</label>
-        <p>{{ review.exam_request.grade }}</p>
-    </div>
+    // Función para actualizar la visualización
+    function updateGradeDisplay() {
+        gradeDisplay.innerHTML = `Calificación seleccionada: <strong>${newGradeInput.value}</strong>`;
+    }
     
-    <div class="form-group">
-        <label for="new_grade">Nueva Calificación:</label>
-        <input type="number" 
-               name="new_grade" 
-               step="0.01" 
-               min="0" 
-               max="10" 
-               value="{{ review.exam_request.grade }}" 
-               required>
-    </div>
+    // Función para validar la entrada
+    function validateInput() {
+        const value = parseInt(newGradeInput.value);
+        
+        if (isNaN(value) || value < 2 || value > 5) {
+            inputWrapper.classList.add('error');
+            validationMessage.style.display = 'block';
+            return false;
+        } else {
+            inputWrapper.classList.remove('error');
+            validationMessage.style.display = 'none';
+            return true;
+        }
+    }
     
-    <div class="form-actions">
-        <button type="submit" class="btn-primary">Guardar Cambios</button>
-        <a href="{% url 'exams:verify_requests' %}" class="btn-cancel">Cancelar</a>
-    </div>
-</form>
+    // Validar al enviar el formulario
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!validateInput()) {
+            e.preventDefault();
+        }
+    });
+    
+    // Validar al perder el foco
+    newGradeInput.addEventListener('blur', validateInput);
+    
+    // Inicializar
+    updateGradeDisplay();
+});
+</script>
 {% endblock %}
