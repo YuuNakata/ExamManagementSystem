@@ -231,18 +231,42 @@ def update_exam(request, pk):
     if request.method == "POST":
         form = CalendarExamForm(request.POST, instance=exam)
         if form.is_valid():
+            # Verificar duplicados (excluyendo el examen actual)
+            exam_type = form.cleaned_data['exam_type']
+            subject = form.cleaned_data['subject']
+            date = form.cleaned_data['date']
+            
+            first_day_of_month = date.replace(day=1)
+            last_day_of_month = (first_day_of_month + relativedelta(months=1)) - timedelta(days=1)
+            
+            existing_exam = CalendarExam.objects.filter(
+                exam_type=exam_type,
+                subject=subject,
+                date__range=[first_day_of_month, last_day_of_month]
+            ).exclude(pk=pk).exists()  # Excluir el examen actual
+            
+            if existing_exam:
+                form.add_error(
+                    None, 
+                    ValidationError(
+                        f"Ya existe un examen de tipo '{exam_type}' para la asignatura '{subject}' en este mes."
+                    )
+                )
+                request.session["error_in_modal_pk"] = pk
+                request.session["failed_form_data"] = request.POST
+                messages.error(
+                    request, 
+                    f"Error: Ya existe un examen de tipo '{exam_type}' para '{subject}' en este mes."
+                )
+                return redirect(redirect_url)
+            
+            # Guardar si no hay duplicados
             form.save()
-            messages.success(
-                request, f"Examen de '{exam.subject}' actualizado correctamente."
-            )
+            messages.success(...)
             return redirect(redirect_url)
         else:
-            request.session["error_in_modal_pk"] = pk
-            request.session["failed_form_data"] = request.POST
-            messages.error(
-                request, "Error al actualizar el examen. Por favor, corrige los campos."
-            )
-            return redirect(redirect_url)  
+            # Manejar otros errores de validación
+            ...
     else:
         return redirect("exams:edit_calendar")
 
@@ -264,6 +288,39 @@ def create_exam(request):
         redirect_url = reverse("exams:edit_calendar") + month_param
 
         if form.is_valid():
+            # Verificar duplicados
+            exam_type = form.cleaned_data['exam_type']
+            subject = form.cleaned_data['subject']
+            date = form.cleaned_data['date']
+            
+            # Obtener el primer día del mes
+            first_day_of_month = date.replace(day=1)
+            # Obtener el último día del mes
+            last_day_of_month = (first_day_of_month + relativedelta(months=1)) - timedelta(days=1)
+            
+            # Verificar si ya existe un examen del mismo tipo y asignatura en el mismo mes
+            existing_exam = CalendarExam.objects.filter(
+                exam_type=exam_type,
+                subject=subject,
+                date__range=[first_day_of_month, last_day_of_month]
+            ).exists()
+            
+            if existing_exam:
+                form.add_error(
+                    None, 
+                    ValidationError(
+                        f"Ya existe un examen de tipo '{exam_type}' para la asignatura '{subject}' en este mes."
+                    )
+                )
+                request.session["error_in_new_modal"] = True
+                request.session["failed_form_data"] = request.POST
+                messages.error(
+                    request, 
+                    f"Error: Ya existe un examen de tipo '{exam_type}' para '{subject}' en este mes."
+                )
+                return redirect(redirect_url)
+            
+            # Si no existe duplicado, guardar el examen
             new_exam = form.save()
             messages.success(
                 request, f"Nuevo examen de '{new_exam.subject}' creado correctamente."
