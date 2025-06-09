@@ -23,5 +23,8 @@ def notifications_view(request):
 
 def dashboard_view(request):
     context = get_calendar_data(request)
-    context['unread_notifications'] = Notification.objects.filter(user=request.user, is_read=False).count()
+    if request.user.is_authenticated:
+        context['unread_notifications'] = Notification.objects.filter(user=request.user, is_read=False).count()
+    else:
+        context['unread_notifications'] = 0
     return render(request, "dashboard.html", context=context)

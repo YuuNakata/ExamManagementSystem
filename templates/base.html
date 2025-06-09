@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excelia - Sistema de Gestión</title> {# Título más específico #}
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/notification.css' %}">
     {# Favicon - ¡Añade tu favicon real aquí! #}
@@ -15,10 +16,16 @@
     {# <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> #}
     {# <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"> #}
     {% block extra_css %}{% endblock %}
+    <style>
+      #messageModal {
+        z-index: 1060 !important;
+      }
+    </style>
     
 
 </head>
 <body>
+    <!-- Temporarily commented out mainModal
     <div id="mainModal" class="notification-modal" style="display:none;">
         <div class="notification-modal-content">
             <span id="mainModalClose" class="notification-close" onclick="closeMainModal()">&times;</span>
@@ -26,6 +33,7 @@
             <div id="mainModalActions"></div>
         </div>
     </div>
+    -->
     <header class="main-header">
         <div class="header-content">
             <a href="/" class="logo-title-link" aria-label="Ir a la página principal"> {# Enlace en el logo #}
@@ -203,6 +211,7 @@
 
     <!-- Main Content -->
     <main class="main-content">
+
          {# Contenedor interno opcional si necesitas más control #}
          {# <div class="content-wrapper"> #}
             {% block content %}
@@ -239,7 +248,82 @@
          {# </div> #}
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+<!-- Message Modal HTML -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" id="messageModalHeader">
+                <h5 class="modal-title" id="messageModalLabel">Notificación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="messageModalBody">
+                <!-- El contenido del mensaje se inyectará aquí -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Message Modal -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const messageModalElement = document.getElementById('messageModal');
+    if (typeof bootstrap === 'undefined' || typeof bootstrap.Modal === 'undefined') {
+        {% if messages %}
+            {% for message in messages %}
+                // Fallback si Bootstrap no está: console.log("{{ message.tags|capfirst }}: {{ message|escapejs }}");
+            {% endfor %}
+        {% endif %}
+        return;
+    }
+
+    if (!messageModalElement) {
+        return;
+    }
+
+    const messageModal = new bootstrap.Modal(messageModalElement, { backdrop: false });
+    const modalTitleElement = document.getElementById('messageModalLabel');
+    const modalBodyElement = document.getElementById('messageModalBody');
+    const modalHeaderElement = document.getElementById('messageModalHeader');
+
+    function showModalMessage(message, tags) {
+        if (!modalTitleElement || !modalBodyElement || !modalHeaderElement) {
+            return;
+        }
+        modalBodyElement.innerHTML = message;
+        
+        modalHeaderElement.className = 'modal-header'; 
+
+        if (tags.includes('error') || tags.includes('danger')) {
+            modalTitleElement.textContent = 'Error';
+            modalHeaderElement.classList.add('bg-danger', 'text-white');
+        } else if (tags.includes('success')) {
+            modalTitleElement.textContent = 'Éxito';
+            modalHeaderElement.classList.add('bg-success', 'text-white');
+        } else if (tags.includes('warning')) {
+            modalTitleElement.textContent = 'Advertencia';
+            modalHeaderElement.classList.add('bg-warning', 'text-dark');
+        } else { 
+            modalTitleElement.textContent = 'Notificación';
+            modalHeaderElement.classList.add('bg-info', 'text-white');
+        }
+        
+        messageModal.show();
+    }
+
+    {% if messages %}
+        {% for message in messages %}
+            showModalMessage("{{ message|escapejs }}", "{{ message.tags }}");
+        {% endfor %}
+    {% endif %}
+});
+</script>
+
+    <script src="{% static 'vendor/chartjs/chart.min.js' %}"></script>
     <script>
         // Mobile Menu Toggle Script (Refinado)
         const menuToggle = document.querySelector('.menu-toggle');

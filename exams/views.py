@@ -132,22 +132,16 @@ def request_exam(request):
 @user_passes_test(is_student, login_url="/login/")
 def submit_exam_request(request):
     if request.method != "POST":
-        return redirect("exams:request_exam")  
+        return redirect("exams:request_exam")
 
     calendar_exam_id = request.POST.get("calendar_exam_id")
     if not calendar_exam_id:
         messages.error(request, "No se especificó ningún examen.")
-        return redirect("exams:request_exam")  
+        return redirect("exams:request_exam")
 
     try:
-        exam = get_object_or_404(CalendarExam, pk=int(calendar_exam_id))
-        ExamRequest.objects.create(student=request.user, calendar_exam=exam)
-        professors = User.objects.filter(role="profesor")
-        for prof in professors:
-            notificar(
-                prof,
-                f"El estudiante {request.user.get_full_name()} ha solicitado inscribirse en el examen '{exam.subject}'."
-        )
+        exam_id_int = int(calendar_exam_id)
+        exam = get_object_or_404(CalendarExam, pk=exam_id_int)
     except (ValueError, TypeError):
         messages.error(request, "ID de examen inválido.")
         return redirect("exams:request_exam")
@@ -177,20 +171,20 @@ def submit_exam_request(request):
         messages.success(
             request,
             f"Solicitud para el examen de '{exam.subject}' el {exam.date.strftime('%d/%m/%Y')} registrada correctamente.",
-        )  
+        )
         professors = User.objects.filter(role="profesor")
         for prof in professors:
             notificar(
                 prof,
-                f"El estudiante {request.user.get_full_name()} ha solicitado inscribirse en el examen '{exam:CalendarExam.subject}'."
+                f"El estudiante {request.user.get_full_name()} ha solicitado inscribirse en el examen '{exam.subject}'."
             )
     except Exception as e:
         messages.error(request, f"Ocurrió un error al registrar la solicitud: {e}")
 
-    redirect_url = (
+    final_redirect_url = (
         reverse("exams:request_exam") + f'?month={exam.date.strftime("%Y-%m")}'
     )
-    return redirect(redirect_url)
+    return redirect(final_redirect_url)
 
 
 # TEACHER VIEW: Edit Calendar
