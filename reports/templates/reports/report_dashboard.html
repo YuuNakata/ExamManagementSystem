@@ -98,9 +98,7 @@
     <div class="mb-3 d-flex gap-2">
         <a href="{% url 'reports:generate_report' %}" class="btn btn-primary">Generar Nuevo Reporte</a>
         {% if report_exists %}
-            <a href="{{ report_file_url }}" class="btn btn-info ms-2" download>
-                Descargar Reporte {% if stats and stats.report_generation_date %}({{ stats.report_generation_date|date:"Y-m-d H:i" }}){% endif %}
-            </a>
+
             <a href="{% url 'reports:delete_last_report' %}" class="btn btn-danger ms-2">Eliminar Reporte</a>
         {% else %}
             <span class="ms-2"><em>No hay reporte generado.</em></span>
