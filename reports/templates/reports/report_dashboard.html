@@ -1,0 +1,397 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Reportes{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos específicos para la página de reportes si son necesarios */
+    /* Muchos de estos estilos podrían ir en un CSS global si son reutilizados */
+    .report-container {
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .button-group a, .button-group button {
+        display: inline-block;
+        margin: 10px 10px 10px 0;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        color: white;
+        cursor: pointer;
+        font-size: 0.9em;
+    }
+    .generate-btn {
+        background-color: #28a745; /* Verde */
+    }
+    .delete-btn {
+        background-color: #dc3545; /* Rojo */
+    }
+    .download-btn {
+        background-color: #007bff; /* Azul */
+    }
+    .stats-section {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    .stats-section h2 {
+        margin-top: 0;
+        color: #333;
+        font-size: 1.5em;
+    }
+    .stats-section h3 {
+        color: #555;
+        font-size: 1.2em;
+        margin-top: 15px;
+        margin-bottom: 5px;
+    }
+    .stats-section ul {
+        list-style-type: none;
+        padding-left: 10px;
+    }
+    .stats-section ul li {
+        padding: 6px 0;
+        border-bottom: 1px solid #eee;
+        font-size: 0.95em;
+    }
+    .stats-section ul li:last-child {
+        border-bottom: none;
+    }
+    .stats-section .stat-value {
+        font-weight: bold;
+        color: #0056b3;
+    }
+    .stat-subsection ul li {
+        padding-left: 15px;
+    }
+    .no-report-message {
+        padding: 15px;
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="background-color: #fff; padding: 20px; border-radius: 8px;">
+    <h1 class="mb-4">Panel de Reportes</h1>
+
+    <!-- Django Messages -->
+    {% if django_messages %}
+        {% for message in django_messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <!-- For debugging: Display raw stats -->
+    <!--
+    <div class="alert alert-secondary mt-2">
+        <strong>Raw Stats (for debugging):</strong>
+        <pre>{{ stats }}</pre>
+    </div>
+    -->
+
+    <div class="mb-3 d-flex gap-2">
+        <a href="{% url 'reports:generate_report' %}" class="btn btn-primary">Generar Nuevo Reporte</a>
+        {% if report_exists %}
+            <a href="{{ report_file_url }}" class="btn btn-info ms-2" download>
+                Descargar Reporte {% if stats and stats.report_generation_date %}({{ stats.report_generation_date|date:"Y-m-d H:i" }}){% endif %}
+            </a>
+            <a href="{% url 'reports:delete_last_report' %}" class="btn btn-danger ms-2">Eliminar Reporte</a>
+        {% else %}
+            <span class="ms-2"><em>No hay reporte generado.</em></span>
+        {% endif %}
+    </div>
+
+    {% if stats %}
+        <div class="card mb-4">
+            <div class="card-header">
+                Estadísticas del Reporte (Generado: {{ stats.report_generation_date }})
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Resumen General</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul>
+                            <li><strong>Total de Usuarios:</strong> {{ stats.total_users }}</li>
+                            <li><strong>Total de Exámenes en Calendario:</strong> {{ stats.total_calendar_exams }}</li>
+                            <li><strong>Total de Solicitudes de Examen:</strong> {{ stats.total_exam_requests }}</li>
+                            <li><strong>Calificación Promedio (Aprobadas):</strong> {{ stats.average_grade|floatformat:2|default:"N/A" }}</li>
+                            <li><strong>Total de Solicitudes de Revisión:</strong> {{ stats.total_review_requests }}</li>
+                            <li><strong>Total de Notificaciones:</strong> {{ stats.total_notifications }} (No leídas: {{ stats.unread_notifications }})</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Asignaturas Más Solicitadas:</strong>
+                        <ul>
+                            {% for subject, count in stats.most_requested_subjects.items %}
+                                <li>{{ subject }}: {{ count }}</li>
+                            {% empty %}
+                                <li>N/A</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+
+                    <div class="card-body">
+                        <canvas id="usersByRoleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+
+                    <div class="card-body">
+                        <canvas id="examsByTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+
+                    <div class="card-body">
+                        <canvas id="examRequestsByStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+
+                    <div class="card-body">
+                        <canvas id="reviewRequestsByStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% elif not report_exists and not stats %}
+        <div class="alert alert-info" role="alert">
+            No hay reportes generados. Haga clic en "Generar Nuevo Reporte" para comenzar.
+        </div>
+    {% endif %}
+
+</div>
+
+{% if stats %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const CHART_COLORS = {
+        red: 'rgb(255, 99, 132)',
+        orange: 'rgb(255, 159, 64)',
+        yellow: 'rgb(255, 205, 86)',
+        green: 'rgb(75, 192, 192)',
+        blue: 'rgb(54, 162, 235)',
+        purple: 'rgb(153, 102, 255)',
+        grey: 'rgb(201, 203, 207)'
+    };
+    const chartColorsArray = Object.values(CHART_COLORS);
+
+    // Users by Role Chart
+    const usersByRoleCtx = document.getElementById('usersByRoleChart')?.getContext('2d');
+    if (usersByRoleCtx && '{{ stats.chart_users_by_role_labels|yesno:"true,false" }}' === 'true') {
+        const usersByRoleLabelsJson = '{{ stats.chart_users_by_role_labels|escapejs }}';
+        const usersByRoleDataJson = '{{ stats.chart_users_by_role_data|escapejs }}';
+        try {
+            const usersByRoleLabels = JSON.parse(usersByRoleLabelsJson);
+            const usersByRoleData = JSON.parse(usersByRoleDataJson);
+
+            if (usersByRoleLabels.length > 0) {
+                new Chart(usersByRoleCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: usersByRoleLabels,
+                        datasets: [{
+                            label: 'Usuarios por Rol',
+                            data: usersByRoleData,
+                            backgroundColor: chartColorsArray
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Distribución de Usuarios por Rol'
+                            }
+                        }
+                    }
+                });
+            } else {
+                // console.log('Users by Role Chart: Parsed data is empty.');
+            }
+        } catch (e) {
+            console.error('Users by Role Chart: Error parsing JSON data:', e, usersByRoleLabelsJson, usersByRoleDataJson);
+        }
+    } else if (usersByRoleCtx) {
+        // console.log('Users by Role Chart: No data provided via stats, or canvas available but no data.');
+    } else {
+        console.log('Users by Role Chart: Canvas element not found.');
+    }
+
+    // Exams by Type Chart
+    const examsByTypeCtx = document.getElementById('examsByTypeChart')?.getContext('2d');
+    if (examsByTypeCtx && '{{ stats.chart_calendar_exams_by_type_labels|yesno:"true,false" }}' === 'true') {
+        const examsByTypeLabelsJson = '{{ stats.chart_calendar_exams_by_type_labels|escapejs }}';
+        const examsByTypeDataJson = '{{ stats.chart_calendar_exams_by_type_data|escapejs }}';
+        try {
+            const examsByTypeLabels = JSON.parse(examsByTypeLabelsJson);
+            const examsByTypeData = JSON.parse(examsByTypeDataJson);
+
+            if (examsByTypeLabels.length > 0) {
+                new Chart(examsByTypeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: examsByTypeLabels,
+                        datasets: [{
+                            label: 'Número de Exámenes',
+                            data: examsByTypeData,
+                            backgroundColor: CHART_COLORS.blue,
+                            borderColor: CHART_COLORS.blue,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true } },
+                        plugins: {
+                            legend: { display: false },
+                            title: {
+                                display: true,
+                                text: 'Exámenes Registrados por Tipo'
+                            }
+                        }
+                    }
+                });
+            } else {
+                // console.log('Exams by Type Chart: Parsed data is empty.');
+            }
+        } catch (e) {
+            console.error('Exams by Type Chart: Error parsing JSON data:', e, examsByTypeLabelsJson, examsByTypeDataJson);
+        }
+    } else if (examsByTypeCtx) {
+        // console.log('Exams by Type Chart: No data provided via stats, or canvas available but no data.');
+    } else {
+        console.log('Exams by Type Chart: Canvas element not found.');
+    }
+
+    // Exam Requests by Status Chart
+    const examRequestsByStatusCtx = document.getElementById('examRequestsByStatusChart')?.getContext('2d');
+    if (examRequestsByStatusCtx && '{{ stats.chart_exam_requests_by_status_labels|yesno:"true,false" }}' === 'true') {
+        const examRequestsByStatusLabelsJson = '{{ stats.chart_exam_requests_by_status_labels|escapejs }}';
+        const examRequestsByStatusDataJson = '{{ stats.chart_exam_requests_by_status_data|escapejs }}';
+        try {
+            const examRequestsByStatusLabels = JSON.parse(examRequestsByStatusLabelsJson);
+            const examRequestsByStatusData = JSON.parse(examRequestsByStatusDataJson);
+
+            if (examRequestsByStatusLabels.length > 0) {
+                new Chart(examRequestsByStatusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: examRequestsByStatusLabels,
+                        datasets: [{
+                            label: 'Solicitudes de Examen',
+                            data: examRequestsByStatusData,
+                            backgroundColor: chartColorsArray,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Estado de Solicitudes de Examen'
+                            }
+                        }
+                    }
+                });
+            } else {
+                // console.log('Exam Requests by Status Chart: Parsed data is empty.');
+            }
+        } catch (e) {
+            console.error('Exam Requests by Status Chart: Error parsing JSON data:', e, examRequestsByStatusLabelsJson, examRequestsByStatusDataJson);
+        }
+    } else if (examRequestsByStatusCtx) {
+        // console.log('Exam Requests by Status Chart: No data provided via stats, or canvas available but no data.');
+    } else {
+        console.log('Exam Requests by Status Chart: Canvas element not found.');
+    }
+
+    // Review Requests by Status Chart
+    const reviewRequestsByStatusCtx = document.getElementById('reviewRequestsByStatusChart')?.getContext('2d');
+    if (reviewRequestsByStatusCtx && '{{ stats.chart_review_requests_by_status_labels|yesno:"true,false" }}' === 'true') {
+        const reviewRequestsByStatusLabelsJson = '{{ stats.chart_review_requests_by_status_labels|escapejs }}';
+        const reviewRequestsByStatusDataJson = '{{ stats.chart_review_requests_by_status_data|escapejs }}';
+        try {
+            const reviewRequestsByStatusLabels = JSON.parse(reviewRequestsByStatusLabelsJson);
+            const reviewRequestsByStatusData = JSON.parse(reviewRequestsByStatusDataJson);
+
+            if (reviewRequestsByStatusLabels.length > 0) {
+                new Chart(reviewRequestsByStatusCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: reviewRequestsByStatusLabels,
+                        datasets: [{
+                            label: 'Revisiones por Estado',
+                            data: reviewRequestsByStatusData,
+                            backgroundColor: chartColorsArray
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Distribución de Solicitudes de Revisión por Estado'
+                            }
+                        }
+                    }
+                });
+            } else {
+                // console.log('Review Requests by Status Chart: Parsed data is empty.');
+            }
+        } catch (e) {
+            console.error('Review Requests by Status Chart: Error parsing JSON data:', e, reviewRequestsByStatusLabelsJson, reviewRequestsByStatusDataJson);
+        }
+    } else if (reviewRequestsByStatusCtx) {
+        // console.log('Review Requests by Status Chart: No data provided via stats, or canvas available but no data.');
+    } else {
+        console.log('Review Requests by Status Chart: Canvas element not found.');
+    }
+});
+</script>
+{% endif %}
+
+{% endblock %}

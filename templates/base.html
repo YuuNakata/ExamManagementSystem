@@ -115,7 +115,7 @@
             {% endif %}
 
             {% if user.is_admin %}
-            <a href="{% url 'reports:generate' %}" class="menu-item {% if 'reportes' in request.path %}active{% endif %}">
+            <a href="{% url 'reports:report_dashboard' %}" class="menu-item {% if 'reportes' in request.path %}active{% endif %}">
                 <span class="icono icono-reportes"></span><span class="menu-item-text">Reportes</span>
             </a>
             {% endif %}
@@ -181,7 +181,7 @@
             </a>
             {% endif %}
             {% if user.is_admin %}
-            <a href="{% url 'reports:generate' %}" class="mobile-menu-item {% if 'reportes' in request.path %}active{% endif %}">
+            <a href="{% url 'reports:report_dashboard' %}" class="menu-item {% if 'reportes' in request.path %}active{% endif %}">
                 <span class="icono icono-reportes"></span> Reportes
             </a>
             {% endif %}
@@ -239,7 +239,7 @@
          {# </div> #}
     </main>
 
-    <!-- Scripts Globales -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
     <script>
         // Mobile Menu Toggle Script (Refinado)
         const menuToggle = document.querySelector('.menu-toggle');
@@ -332,8 +332,7 @@
 
         });
         */
-
     </script>
     {% block extra_js %}{% endblock %}
-</body>
-</html>
+    </body>
+    </html>

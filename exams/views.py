@@ -262,7 +262,6 @@ def update_exam(request, pk):
             
             # Guardar si no hay duplicados
             form.save()
-            messages.success(...)
             return redirect(redirect_url)
         else:
             # Manejar otros errores de validación

@@ -1,8 +1,10 @@
 from django.urls import path
-from .views import GenerateReportsView
+from . import views
 
 app_name = "reports"
 
 urlpatterns = [
-    path("generate/", GenerateReportsView.as_view(), name="generate"),
+    path('', views.report_dashboard, name='report_dashboard'),
+    path('generate/', views.generate_report, name='generate_report'),
+    path('delete/', views.delete_last_report, name='delete_last_report'),
 ]
