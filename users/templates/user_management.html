@@ -5,6 +5,37 @@
 
 <link rel="stylesheet" href="{% static "css/user_management.css" %}">
 
+<style>
+    /* Soluciona el desbordamiento del modal en pantallas pequeñas */
+    .modal-content {
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+
+    /* Contenedor para cada grupo de campo (label, input, error) */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    /* Estilos para los mensajes de error de los formularios de Django */
+    .errorlist {
+        padding: 0;
+        margin: 0.25rem 0 0 0;
+        list-style-type: none; /* Elimina la viñeta/punto */
+        color: #dc3545; /* Color rojo para los errores */
+        font-size: 0.9em;
+        font-weight: normal; /* Cambiado de bold a normal */
+    }
+
+    /* Estilos para los textos de ayuda */
+    .help-text {
+        font-size: 0.8em;
+        color: #6c757d;
+        display: block;
+        margin-top: 0.25rem;
+    }
+</style>
+
 <div class="main-content">
     <div class="widget">
         <div class="management-header">
@@ -28,14 +59,30 @@
 
                     <form method="post" action="{% url 'users:update_user' user.id %}">
                         {% csrf_token %}
-                        {{ user.update_form.as_p }}
-                        {% if edit_modal_errors and editing_user_id == user.id|stringformat:"s" %}
-                            <div class="error-list">
-                                {% for error in edit_modal_errors.values %}
-                                    <p class="error-message">{{ error }}</p>
+                        {% if user.update_form.non_field_errors %}
+                            <div class="errorlist non-field-errors">
+                                {% for error in user.update_form.non_field_errors %}
+                                    <span>{{ error }}</span>
                                 {% endfor %}
                             </div>
                         {% endif %}
+
+                        {% for field in user.update_form %}
+                            <div class="form-group">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="errorlist field-errors">
+                                        {% for error in field.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {% if field.help_text %}
+                                    <small class="help-text">{{ field.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
                         <div class="form-actions">
                             <button type="submit" class="btn-primary">Guardar</button>
                             <button type="button" class="btn-cancel" onclick="closeModal('editModal{{ user.id }}')">Cancelar</button>
@@ -56,10 +103,11 @@
                 </div>
                 
                 <div>
-                    <form id="deleteForm{{ user.id }}" method="post" action="{% url 'users:delete_user' user.id %}" onsubmit="return confirm('¿Está seguro que desea eliminar este usuario?')">
-                        <button type="submit" class="btn-delete">
+                    <form id="deleteForm{{ user.id }}" method="post" action="{% url 'users:delete_user' user.id %}">
+                        {% csrf_token %}
+                        <button type="button" class="btn-delete" onclick="confirmDelete('deleteForm{{ user.id }}')">
                             <span class="icono icono-eliminar"></span>
-                        </button>            
+                        </button>
                     </form>
                 </div>
 
@@ -78,21 +126,36 @@
 <div id="registerModal" class="modal" {% if register_modal_errors %}style="display: flex;"{% endif %}>
     <div class="modal-content">
         <h3>Registrar Nuevo Usuario</h3>
-        <form method="post" action="{% url 'users:register' %}">
+        <form method="post" action="{% url 'users:register' %}" novalidate>
             {% csrf_token %}
-            {{ register_form.as_p }}
-            {% if register_modal_errors %}
-                <div class="error-list">
-                    {% for field, errors in register_modal_errors.items %}
-                        {% for error in errors %}
-                            <p class="error-message">{{ error }}</p>
-                        {% endfor %}
+            {% if register_form.non_field_errors %}
+                <div class="errorlist non-field-errors">
+                    {% for error in register_form.non_field_errors %}
+                        <span>{{ error }}</span>
                     {% endfor %}
                 </div>
             {% endif %}
+
+            {% for field in register_form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="errorlist field-errors">
+                            {% for error in field.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
             <div class="form-actions">
                 <button type="submit" class="btn-primary">Registrar</button>
-                <button type="submit" name ="cancel" class="btn-cancel" onclick="closeModal('registerModal')">Cancelar</button>
+                <button type="button" class="btn-cancel" onclick="closeModal('registerModal')">Cancelar</button>
             </div>
         </form>
     </div>

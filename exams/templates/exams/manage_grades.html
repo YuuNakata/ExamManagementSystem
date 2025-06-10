@@ -4,6 +4,101 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/manage_grades.css' %}">
 <link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+<style>
+    .grade-input-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .grade-range-container {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background-color: var(--gris-muy-claro-alternativo);
+        border-radius: var(--radio-borde);
+        text-align: center;
+    }
+    .grade-range-display {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--naranja);
+        margin: 0.5rem 0;
+    }
+    .grade-range-slider {
+        width: 100%;
+        height: 10px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: linear-gradient(to right, #dc3545, #fd7e14, #28a745);
+        border-radius: 5px;
+        outline: none;
+        margin-top: 1rem;
+    }
+    
+    .grade-range-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background: var(--blanco);
+        border: 3px solid var(--naranja);
+        cursor: pointer;
+        box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
+    .grade-range-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--gris-oscuro);
+        padding: 0 0.5rem;
+    }
+    .validation-message {
+        color: var(--rojo-texto);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: none;
+    }
+    .grade-input-wrapper {
+        position: relative;
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .grade-input-wrapper input {
+        width: 100%;
+        padding: 0.9rem 1.2rem 0.9rem 3rem;
+        border: 2px solid var(--gris-borde);
+        border-radius: var(--radio-borde);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--negro);
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .grade-input-wrapper input:focus {
+        outline: none;
+        border-color: var(--naranja);
+        box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
+    }
+    
+    .grade-input-wrapper::before {
+        content: "Nota";
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.85rem;
+        color: var(--gris-oscuro);
+        background-color: var(--gris-muy-claro);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+    }
+    
+</style>
 {% endblock %}
 
 {% block content %}
@@ -94,7 +189,7 @@
         <div id="modalStudentInfo" class="mb-2"></div>
         <div id="modalExamInfo" class="mb-3"></div>
 
-        <form id="gradeFormInModal" method="post" action="">
+        <form id="gradeFormInModal" method="post" action="" novalidate>
             {% csrf_token %}
             
             {% comment %} Prioritize displaying the form with errors if it exists {% endcomment %}
@@ -110,11 +205,22 @@
                 {% endif %}
 
                 <div class="form-group">
-                    <label for="{{ form_to_display.grade.id_for_label }}">{{ form_to_display.grade.label }}</label>
-                    {{ form_to_display.grade }}
-                    {% if form_to_display.grade.help_text %}
-                        <small class="form-text text-muted">{{ form_to_display.grade.help_text }}</small>
-                    {% endif %}
+                    {{ form_to_display.grade }} {# This is now a hidden input #}
+                    <div class="grade-range-container">
+                        <div class="grade-range-display" id="grade-display">
+                            Calificación seleccionada: <strong>...</strong>
+                        </div>
+                        <input type="range" id="grade-slider" min="2" max="5" step="1" class="grade-range-slider">
+                        <div class="grade-range-labels">
+                            <span>2</span>
+                            <span>3</span>
+                            <span>4</span>
+                            <span>5</span>
+                        </div>
+                    </div>
+                    <div class="validation-message" id="validation-message">
+                        La calificación debe ser un número entero entre 2 y 5.
+                    </div>
                     {% if form_to_display.grade.errors %}
                         <ul class="errorlist">
                             {% for error in form_to_display.grade.errors %}
@@ -187,6 +293,66 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
     {% endif %}
+
+    // Grade slider and input synchronization logic
+    function setupGradeSync() {
+        const gradeInput = document.getElementById('id_grade'); // This is now a hidden input
+        const gradeSlider = document.getElementById('grade-slider');
+        const gradeDisplay = document.getElementById('grade-display');
+        const validationMessage = document.getElementById('validation-message');
+
+        if (!gradeInput || !gradeSlider || !gradeDisplay || !validationMessage) {
+            return;
+        }
+
+        function updateGradeDisplay() {
+            // Use slider's value for display as it's the source of truth for the user
+            gradeDisplay.innerHTML = `Calificación seleccionada: <strong>${gradeSlider.value || '...'}</strong>`;
+        }
+
+        function validateSlider() {
+            const value = parseInt(gradeSlider.value, 10);
+            if (isNaN(value) || value < 2 || value > 5) {
+                validationMessage.style.display = 'block';
+                return false;
+            } else {
+                validationMessage.style.display = 'none';
+                return true;
+            }
+        }
+
+        // When the slider moves, update the hidden input and the display
+        gradeSlider.addEventListener('input', function() {
+            gradeInput.value = this.value;
+            updateGradeDisplay();
+            validateSlider();
+        });
+
+        // Set initial state when the modal opens
+        // The gradeInput (hidden) might have a value from the server (e.g., existing grade or error redisplay)
+        if (gradeInput.value && !isNaN(parseInt(gradeInput.value, 10))) {
+            gradeSlider.value = gradeInput.value;
+        } else {
+            // If no value, default to 2
+            const defaultValue = 2;
+            gradeSlider.value = defaultValue;
+            gradeInput.value = defaultValue;
+        }
+        
+        // Initial setup
+        updateGradeDisplay();
+        validateSlider();
+    }
+
+    const originalOpenGradeModal = window.openGradeModal;
+    window.openGradeModal = function(...args) {
+        originalOpenGradeModal(...args);
+        setTimeout(setupGradeSync, 50);
+    };
+    
+    if (document.getElementById('gradeExamModal').style.display === 'block') {
+        setupGradeSync();
+    }
 });
 </script>
 {% endblock %}

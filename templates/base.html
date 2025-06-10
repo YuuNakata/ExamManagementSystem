@@ -262,7 +262,8 @@
                 <!-- El contenido del mensaje se inyectará aquí -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+                <button type="button" class="btn btn-primary" id="modal-confirm-btn">Aceptar</button>
+                <button type="button" class="btn btn-secondary" id="modal-cancel-btn" data-bs-dismiss="modal">Cancelar</button>
             </div>
         </div>
     </div>
@@ -273,11 +274,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const messageModalElement = document.getElementById('messageModal');
     if (typeof bootstrap === 'undefined' || typeof bootstrap.Modal === 'undefined') {
-        {% if messages %}
-            {% for message in messages %}
-                // Fallback si Bootstrap no está: console.log("{{ message.tags|capfirst }}: {{ message|escapejs }}");
-            {% endfor %}
-        {% endif %}
         return;
     }
 
@@ -285,13 +281,18 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    const messageModal = new bootstrap.Modal(messageModalElement, { backdrop: false });
-    const modalTitleElement = document.getElementById('messageModalLabel');
-    const modalBodyElement = document.getElementById('messageModalBody');
-    const modalHeaderElement = document.getElementById('messageModalHeader');
+    const messageModal = new bootstrap.Modal(messageModalElement, { backdrop: 'static', keyboard: false });
 
-    function showModalMessage(message, tags) {
-        if (!modalTitleElement || !modalBodyElement || !modalHeaderElement) {
+    // Make the function globally accessible
+    window.showModalMessage = function(message, tags, onConfirm) {
+        const modalTitleElement = document.getElementById('messageModalLabel');
+        const modalBodyElement = document.getElementById('messageModalBody');
+        const modalHeaderElement = document.getElementById('messageModalHeader');
+        const confirmBtn = document.getElementById('modal-confirm-btn');
+        const cancelBtn = document.getElementById('modal-cancel-btn');
+
+        if (!modalTitleElement || !modalBodyElement || !modalHeaderElement || !confirmBtn || !cancelBtn) {
+            console.error('Modal elements not found!');
             return;
         }
         modalBodyElement.innerHTML = message;
@@ -311,13 +312,40 @@ document.addEventListener('DOMContentLoaded', function () {
             modalTitleElement.textContent = 'Notificación';
             modalHeaderElement.classList.add('bg-info', 'text-white');
         }
+
+        // Clone and replace to remove old event listeners from confirm button
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        
+        if (onConfirm && typeof onConfirm === 'function') {
+            // This is a confirmation dialog
+            newConfirmBtn.textContent = 'Aceptar';
+            cancelBtn.style.display = ''; // Show cancel button
+            newConfirmBtn.style.display = '';
+
+            newConfirmBtn.onclick = function() {
+                onConfirm();
+                messageModal.hide();
+            };
+            
+        } else {
+            // This is a simple notification
+            newConfirmBtn.textContent = 'Aceptar';
+            cancelBtn.style.display = 'none'; // Hide cancel button
+            newConfirmBtn.style.display = '';
+
+            newConfirmBtn.onclick = function() {
+                messageModal.hide();
+            };
+        }
         
         messageModal.show();
     }
 
     {% if messages %}
         {% for message in messages %}
-            showModalMessage("{{ message|escapejs }}", "{{ message.tags }}");
+            // Use the global function for Django messages
+            window.showModalMessage("{{ message|escapejs }}", "{{ message.tags }}");
         {% endfor %}
     {% endif %}
 });

@@ -88,7 +88,7 @@
 
                     
                     
-                    {% if day_info.is_current_month %}
+                    {% if day_info.is_current_month and not modo_lectura %}
                     <div class="add-exam-btn" onclick="handleAddExam(event, '{{ day_info.date|date:"Y-m-d" }}')" title="Añadir examen en esta fecha">+</div>
                     {% endif %}
 
@@ -148,7 +148,7 @@
         <span class="close" onclick="closeModal('newExamModal')">×</span>
         <h3>Nuevo Examen</h3>
          
-        <form method="post" action="{% url 'exams:create_exam' %}">
+        <form method="post" action="{% url 'exams:create_exam' %}" novalidate>
             {% csrf_token %}
             {{ new_exam_form.as_p }}
             <div class="form-actions">

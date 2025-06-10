@@ -49,14 +49,26 @@ class CalendarExamForm(forms.ModelForm):
         
 
         return cleaned_data
+
 class GradeForm(forms.ModelForm):
     class Meta:
         model = ExamRequest
         fields = ['grade', 'comments']
         widgets = {
-            'grade': forms.NumberInput(attrs={'min': 0, 'max': 100, 'step': 0.1, 'class': 'form-control'}),
+            
+            'grade': forms.HiddenInput(
+                attrs={
+                    'id': 'id_grade',
+                }
+            ),
             'comments': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
         }
+
+    def clean_grade(self):
+        grade = self.cleaned_data.get('grade')
+        if grade is not None and not (2 <= grade <= 5):
+            raise ValidationError("La calificación debe estar entre 2 y 5.")
+        return grade
 
 class ReviewRequestForm(forms.ModelForm):
     class Meta:

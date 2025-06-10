@@ -28,27 +28,15 @@ function performSearch() {
 
 // Confirmación de eliminación
 function confirmDelete(formId) {
-    showMainModal({
-        message: "¿Está seguro que desea eliminar este usuario?",
-        type: "warning",
-        onConfirm: function() {
+    window.showModalMessage(
+        '¿Está seguro que desea eliminar este usuario?',
+        'warning',
+        function() {
             document.getElementById(formId).submit();
-        },
-        confirmText: "Eliminar",
-        cancelText: "Cancelar"
-    });
+        }
+    );
 }
 // Event listeners
 document.getElementById('searchInput').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') performSearch();
 });
-
-window.onload = function() {
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        if (modal.style.display === 'block') {
-            modal.style.display = 'none';
-            console.log('Modal cerrado al cargar la página:', modal.id);
-        }
-    });
-}

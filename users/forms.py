@@ -9,6 +9,18 @@ class UserRegisterForm(UserCreationForm):
         required=True,
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
+    first_name = forms.CharField(
+        label="Nombres",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    last_name = forms.CharField(
+        label="Apellidos",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
     email = forms.EmailField(
         max_length=254,
         required=True,
@@ -109,6 +121,10 @@ class UserUpdateForm(forms.ModelForm):
         self.fields["role"].label = "Rol"
         self.fields["curso_programa"].label = "Curso/Programa"
         self.fields["departamento_facultad"].label = "Departamento/Facultad"
+
+        # Hacemos que los campos de nombre y apellidos sean obligatorios
+        self.fields['first_name'].required = True
+        self.fields['last_name'].required = True
 
         # Eliminar texto de ayuda del username
         self.fields["username"].help_text = ""

@@ -189,7 +189,6 @@
 }
 
 .grade-input-wrapper::before {
-    content: "Nota";
     position: absolute;
     left: 1rem;
     top: 50%;
@@ -409,8 +408,7 @@
         <div class="grade-adjust-section">
             <div class="section-title">Ajuste de Calificación</div>
             
-            <div class="grade-input-container">
-                <label for="new_grade">Nueva Calificación:</label>
+            <div class="grade-input-container"> 
                 <div class="grade-input-wrapper">
                     <input type="number" 
                            name="new_grade" 
@@ -419,7 +417,7 @@
                            min="2" 
                            max="5" 
                            value="{{ review.exam_request.grade }}" 
-                           required>
+                           hidden>
                 </div>
             </div>
             
