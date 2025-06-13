@@ -708,7 +708,7 @@ def reject_review(request, pk):
         message=f"Revisión rechazada en {review.exam_request.calendar_exam.subject}"
     )
     
-    messages.warning(request, "Revisión rechazada")
+
     return redirect("exams:verify_requests")
 
 # --- END OF FILE views.py ---
