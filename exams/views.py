@@ -250,7 +250,7 @@ def update_exam(request, pk):
                 request.session["failed_form_data"] = request.POST
                 messages.error(
                     request, 
-                    f"Error: Ya existe un examen de tipo '{exam_type}' para '{subject}' en este mes."
+                    f"Ya existe un examen de tipo '{exam_type}' para '{subject}' en este mes."
                 )
                 return redirect(redirect_url)
             
@@ -309,7 +309,7 @@ def create_exam(request):
                 request.session["failed_form_data"] = request.POST
                 messages.error(
                     request, 
-                    f"Error: Ya existe un examen de tipo '{exam_type}' para '{subject}' en este mes."
+                    f"Ya existe un examen de tipo '{exam_type}' para '{subject}' en este mes."
                 )
                 return redirect(redirect_url)
             
@@ -323,7 +323,7 @@ def create_exam(request):
             request.session["error_in_new_modal"] = True
             request.session["failed_form_data"] = request.POST
             messages.error(
-                request, "Error al crear el examen. Por favor, corrige los campos."
+                request, "Por favor, corrige los campos."
             )
             return redirect(redirect_url)  
     else:
@@ -444,55 +444,60 @@ def manage_grades_list_fbv(request):
 @login_required
 @user_passes_test(is_teacher, login_url="/login/")
 def grade_exam_request_fbv(request, pk):
-    """Allows professors to assign a grade to an approved exam request."""
-    exam_request = get_object_or_404(ExamRequest, pk=pk)
-
-    if exam_request.status != "Approved":
-        messages.error(request, "Solo se pueden calificar solicitudes aprobadas.")
-        return redirect("exams:manage_grades_list")
+    """Asigna o actualiza calificación de un examen"""
+    exam_request = get_object_or_404(
+        ExamRequest.objects.select_related('student', 'calendar_exam'),
+        pk=pk,
+        status='Approved'
+    )
 
     if request.method == "POST":
-        form = GradeForm(request.POST, instance=exam_request)
-        if form.is_valid():
-            form.save()
+        # Obtener el valor directamente del POST (ignorando el form.cleaned_data temporalmente)
+        raw_new_grade = request.POST.get('grade')
+        
+        try:
+            # Convertir a float con exactamente 1 decimal
+            new_grade = float(raw_new_grade)
+            current_grade = float(exam_request.grade) if exam_request.grade is not None else None
+            
+            # Comparación numérica exacta
+            if current_grade is not None and abs(new_grade - current_grade) < 0.05:  # Tolerancia mínima para floats
+                messages.warning(request,
+                    f"La calificación ingresada es igual a la actual ")
+                exam_requests = ExamRequest.objects.filter(status='Approved').order_by('-calendar_exam__date')
+                return render(request, 'exams/manage_grades.html', {
+                    'exam_requests': exam_requests,
+                    'grade_form': GradeForm(request.POST),
+                    'exam_request_id_with_error': pk
+                })
+            
+            # Si son diferentes, proceder con el guardado
+            exam_request.grade = round(new_grade, 1)  # Redondear a 1 decimal
+            exam_request.save()
+            
             messages.success(
                 request,
-                f"Calificación para {exam_request.student.get_full_name()} en {exam_request.calendar_exam.subject} guardada exitosamente.",
+                f"Calificación actualizada: {current_grade or 'N/A'} → {new_grade} "
+                f"({exam_request.calendar_exam.subject})"
             )
-            # Create notification for student
+            
             Notification.objects.create(
                 user=exam_request.student,
-                message=f"Tu calificación para {exam_request.calendar_exam.subject} ha sido registrada/actualizada."
+                message=f"Calificación actualizada en {exam_request.calendar_exam.subject}: {new_grade}"
             )
-            return redirect("exams:manage_grades")
-        else:
-            # Form is invalid, re-render manage_grades.html with errors and necessary context
-            messages.error(request, "Error al guardar la calificación. Por favor, corrige los errores.")
             
-            # Re-fetch the base context for manage_grades.html
-            exam_requests_to_grade = (
-                ExamRequest.objects.filter(status="Approved")
-                .select_related("student", "calendar_exam")
-                .order_by("-calendar_exam__date", "calendar_exam__subject")
-            )
-            # This is the generic, unbound form for other modals if needed, or if user closes error modal
-            unbound_grade_form = GradeForm() 
-
-            context = {
-                "exam_requests": exam_requests_to_grade,
-                "page_title": "Gestionar Calificaciones",
-                "grade_form": unbound_grade_form, # The generic form for new modal openings
-                "grade_form_with_errors": form, # The submitted form with errors
-                "exam_request_id_with_error": pk, # ID to re-open the correct modal
-            }
-            return render(request, "exams/manage_grades.html", context)
-    else:
-        # This GET case should ideally not be hit if all grading is via modal on manage_grades page.
-        # If it is, it means a direct navigation to /grade-exam/PK/ which is not the modal flow.
-        # For now, redirect to manage_grades, as the modal should handle form display.
-        # Alternatively, one could pre-populate the form for a non-modal GET, but that's not the current goal.
-        # messages.info(request, "Para asignar calificaciones, por favor usa la lista de 'Gestionar Calificaciones'.")
-        return redirect("exams:manage_grades") # Or render a simple page saying to use the modal
+            return redirect('exams:manage_grades')
+            
+        except (TypeError, ValueError):
+            messages.error(request, "Formato de calificación inválido")
+    
+    # Manejo de GET o errores
+    exam_requests = ExamRequest.objects.filter(status='Approved').order_by('-calendar_exam__date')
+    return render(request, 'exams/manage_grades.html', {
+        'exam_requests': exam_requests,
+        'grade_form': GradeForm(instance=exam_request),
+        'exam_request_id_with_error': None
+    })
 
 
 @login_required

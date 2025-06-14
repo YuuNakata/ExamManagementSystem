@@ -7,6 +7,32 @@
     <title>Login - Sistema de Exámenes</title>
     <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <style>
+        /* Estilos originales para el contenedor del input */
+        .input-group {
+            position: relative;
+            margin-bottom: 5px; /* Espacio mínimo entre campos */
+        }
+        
+        /* Estilos para mensajes de error que no afectan el layout */
+        .error-text {
+            color: #ff0000;
+            font-size: 12px;
+            margin-left: 40px; /* Alineado con el campo de entrada */
+            margin-top: 2px;
+            margin-bottom: 15px; /* Espacio reservado siempre */
+            height: 14px; /* Altura fija */
+            visibility: hidden; /* Oculto pero ocupando espacio */
+        }
+        
+        .error-text.show {
+            visibility: visible;
+        }
+        
+        .error-field {
+            border: 1px solid #ff0000 !important;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
@@ -16,34 +42,70 @@
         
         <form method="post" class="login-form" id="loginForm">
             {% csrf_token %}
-            <h1 class = "title-name">Excelia</h1>
-            <h2>Gestión de examenes de premio y suficiencia</h2>
+            <h1 class="title-name">Excelia</h1>
+            <h2>Gestión de exámenes de premio y suficiencia</h2>
             <h1>Iniciar Sesión</h1>
             
             <div class="input-group">
-                
                 <span class="icon">👤</span>
-                <input type="text" id="username" name="username" placeholder="Usuario o Correo electrónico" required>
+                <input type="text" id="username" name="username" placeholder="Usuario o Correo electrónico">
+                <div class="error-text" id="username-error">Por favor ingrese su usuario o correo electrónico</div>
             </div>
             
             <div class="input-group">
                 <span class="icon">🔒</span>
-                <input type="password" id="password" name="password" placeholder="Contraseña" required>
+                <input type="password" id="password" name="password" placeholder="Contraseña">
                 <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+                <div class="error-text" id="password-error">Por favor ingrese su contraseña</div>
             </div>
             
             {% if form.errors %}
-            <div class="error-message">
+            <div class="error-text show" style="margin-left: 0; margin-bottom: 15px;">
                 Usuario o contraseña incorrectos. Intente nuevamente.
             </div>
             {% endif %}
             
             <button type="submit" class="login-btn">Iniciar Sesión</button>
-            
-            
         </form>
     </div>
 
-    <script src="{% static 'js/login.js' %}"></script>
+    <script>
+        // Validación personalizada
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            let hasErrors = false;
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            const usernameError = document.getElementById('username-error');
+            const passwordError = document.getElementById('password-error');
+
+            // Resetear errores
+            username.classList.remove('error-field');
+            password.classList.remove('error-field');
+            usernameError.classList.remove('show');
+            passwordError.classList.remove('show');
+
+            // Validar campos
+            if (username.value.trim() === '') {
+                username.classList.add('error-field');
+                usernameError.classList.add('show');
+                hasErrors = true;
+            }
+
+            if (password.value.trim() === '') {
+                password.classList.add('error-field');
+                passwordError.classList.add('show');
+                hasErrors = true;
+            }
+
+            if (hasErrors) {
+                event.preventDefault();
+            }
+        });
+
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
+        }
+    </script>
 </body>
 </html>

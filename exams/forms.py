@@ -12,43 +12,56 @@ from django.core.exceptions import ValidationError
 #         }
 
 
+from django import forms
+from django.core.exceptions import ValidationError
+from .models import CalendarExam
+
+from django import forms
+from .models import CalendarExam
+
 class CalendarExamForm(forms.ModelForm):
+    # Campo subject personalizado
+    subject = forms.CharField(
+        label="Asignatura",
+        widget=forms.TextInput(attrs={
+            "placeholder": "Nombre de la asignatura",
+            "class": "form-control"
+        }),
+        error_messages={
+            'required': "El nombre de la asignatura es obligatorio",
+        }
+    )
 
     class Meta:
         model = CalendarExam
         fields = ["date", "turn", "exam_type", "subject"]
-
+        
         widgets = {
-            "turn": forms.Select(attrs={"class": "select-modal"}),
-            "exam_type": forms.Select(
-                attrs={
-                    "class": "select-modal",
-                }
-            ),
-            "subject": forms.TextInput(
-                attrs={
-                    "placeholder": "Nombre de la asignatura",
-                },
-            ),
+            "turn": forms.Select(attrs={"class": "select-modal form-control"}),
+            "exam_type": forms.Select(attrs={
+                "class": "select-modal form-control",
+            }),
             "date": forms.HiddenInput(),
+        }
+        
+        error_messages = {
+            'exam_type': {
+                'required': "Debe seleccionar un tipo de examen",
+            }
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["exam_type"].required = False
-        self.fields["subject"].required = False
-
-    def clean(self):
-        cleaned_data = super().clean()
-        exam_type = cleaned_data.get("exam_type")
-        subject = cleaned_data.get("subject")
-        if not exam_type:
-            raise ValidationError("El campo 'Tipo de examen' no puede estar vacío.")
-        if not subject:
-            raise ValidationError("El campo 'Asignatura' no puede estar vacío.")
         
-
-        return cleaned_data
+        # Configuración de campos requeridos
+        self.fields['exam_type'].required = True
+        self.fields['subject'].required = True
+        
+        # Estilos y clases para los campos
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'form-control'
+            })
 
 class GradeForm(forms.ModelForm):
     class Meta:
@@ -75,5 +88,14 @@ class ReviewRequestForm(forms.ModelForm):
         model = ReviewRequest
         fields = ['reason']
         widgets = {
-            'reason': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Explica los motivos de tu revisión...'}),
+            'reason': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'Explica los motivos de tu revisión...'
+            }),
         }
+        error_messages = {
+            'reason': {
+                'required': "Por favor ingresa el motivo de la revisión",
+            }
+        }
+       

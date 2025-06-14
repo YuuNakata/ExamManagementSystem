@@ -69,6 +69,9 @@ class UserRegisterForm(UserCreationForm):
             "curso_programa",
             "departamento_facultad",
         ]
+        error_messages={
+            'required': "ingrese el nombre de usuario",
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -108,6 +111,11 @@ class UserUpdateForm(forms.ModelForm):
             "role": forms.Select(attrs={"class": "form-control"}),
             "curso_programa": forms.TextInput(attrs={"class": "form-control"}),
             "departamento_facultad": forms.TextInput(attrs={"class": "form-control"}),
+        }
+        error_messages = {
+            'username': {
+                'required': "Rellene este campo",
+            }
         }
 
     def __init__(self, *args, **kwargs):

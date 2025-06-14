@@ -38,10 +38,22 @@ def user_management(request):
 @admin_required
 def delete_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
-    if request.method == "POST":
-        user.delete()
-        messages.success(request, f"Usuario {user.username} eliminado correctamente")
+    
+    # Verificar si el usuario intenta eliminarse a sí mismo
+    if request.user.id == user.id:
+        messages.error(request, "No puedes eliminarte a ti mismo")
         return redirect("users:user_management")
+    
+    if request.method == "POST":
+        try:
+            username = user.username
+            user.delete()
+            messages.success(request, f"Usuario {username} eliminado correctamente")
+        except Exception as e:
+            messages.error(request, f"Error al eliminar el usuario: {str(e)}")
+        
+        return redirect("users:user_management")
+    
     return redirect("users:user_management")
 
 
@@ -83,13 +95,40 @@ def update_user(request, user_id):
 @login_required
 @admin_required
 def register_user(request):
-    print(request)
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
+        
         if form.is_valid():
+            username = form.cleaned_data['username']
+            email = form.cleaned_data['email']
+            
+            # Verificar si ya existe el usuario o el correo
+            if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
+                messages.error(request, "Ya existe un usuario con este nombre/correo")
+                
+                if User.objects.filter(username=username).exists():
+                    form.add_error('username', 'Nombre de usuario ya registrado')
+                
+                if User.objects.filter(email=email).exists():
+                    form.add_error('email', 'Correo electrónico ya registrado')
+                
+                users = User.objects.all()
+                return render(
+                    request,
+                    "user_management.html",
+                    {
+                        "users": users,
+                        "register_form": form,
+                        "register_modal_errors": True,
+                    },
+                )
+            
+            # Si no hay duplicados, crear el usuario
             user = form.save()
             messages.success(request, f"Usuario {user.username} creado exitosamente.")
             return redirect("users:user_management")
+        
+        # Si el formulario no es válido
         users = User.objects.all()
         return render(
             request,
@@ -97,6 +136,9 @@ def register_user(request):
             {
                 "users": users,
                 "register_form": form,
-                "register_modal_errors": form.errors,
+                "register_modal_errors": True,
             },
         )
+    
+    # Si no es POST, redirigir al management
+    return redirect("users:user_management")
