@@ -27,12 +27,12 @@ class UserRegisterForm(UserCreationForm):
         widget=forms.EmailInput(attrs={"class": "form-control"}),
     )
     password1 = forms.CharField(
-        label="Password",
+        label="Contraseña",
         widget=forms.PasswordInput(attrs={"class": "form-control"}),
         required=True,
     )
     password2 = forms.CharField(
-        label="Confirm Password",
+        label="Confirmar contraseña",
         widget=forms.PasswordInput(attrs={"class": "form-control"}),
         required=True,
     )

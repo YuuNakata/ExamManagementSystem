@@ -21,10 +21,10 @@
     .errorlist {
         padding: 0;
         margin: 0.25rem 0 0 0;
-        list-style-type: none; /* Elimina la viñeta/punto */
-        color: #dc3545; /* Color rojo para los errores */
+        list-style-type: none;
+        color: #dc3545;
         font-size: 0.9em;
-        font-weight: normal; /* Cambiado de bold a normal */
+        font-weight: normal;
     }
 
     /* Estilos para los textos de ayuda */
@@ -33,6 +33,19 @@
         color: #6c757d;
         display: block;
         margin-top: 0.25rem;
+    }
+
+    /* Estilos para mensajes de error personalizados */
+    .error-message {
+        display: none;
+        color: #dc3545;
+        font-size: 0.8em;
+        margin-top: 0.25rem;
+    }
+
+    /* Estilo para campos inválidos */
+    .is-invalid {
+        border-color: #dc3545 !important;
     }
 </style>
 
@@ -57,7 +70,7 @@
                     <span class="close" onclick="closeModal('editModal{{ user.id }}')">&times;</span>
                     <h3>Modificar Usuario</h3>
 
-                    <form method="post" action="{% url 'users:update_user' user.id %}">
+                    <form method="post" action="{% url 'users:update_user' user.id %}" class="needs-validation" novalidate>
                         {% csrf_token %}
                         {% if user.update_form.non_field_errors %}
                             <div class="errorlist non-field-errors">
@@ -71,13 +84,9 @@
                             <div class="form-group">
                                 {{ field.label_tag }}
                                 {{ field }}
-                                {% if field.errors %}
-                                    <div class="errorlist field-errors">
-                                        {% for error in field.errors %}
-                                            <span>{{ error }}</span>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
+                                <div class="error-message" id="error_{{ field.name }}">
+                                    Este campo es obligatorio
+                                </div>
                                 {% if field.help_text %}
                                     <small class="help-text">{{ field.help_text }}</small>
                                 {% endif %}
@@ -110,8 +119,6 @@
                         </button>
                     </form>
                 </div>
-
-                <!-- Modal Edición -->
             </div>
             {% empty %}
             <div class="no-results">
@@ -126,7 +133,7 @@
 <div id="registerModal" class="modal" {% if register_modal_errors %}style="display: flex;"{% endif %}>
     <div class="modal-content">
         <h3>Registrar Nuevo Usuario</h3>
-        <form method="post" action="{% url 'users:register' %}" novalidate>
+        <form method="post" action="{% url 'users:register' %}" class="needs-validation" novalidate>
             {% csrf_token %}
             {% if register_form.non_field_errors %}
                 <div class="errorlist non-field-errors">
@@ -140,19 +147,14 @@
                 <div class="form-group">
                     {{ field.label_tag }}
                     {{ field }}
-                    {% if field.errors %}
-                        <div class="errorlist field-errors">
-                            {% for error in field.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                    <div class="error-message" id="error_{{ field.name }}">
+                        Este campo es obligatorio
+                    </div>
                     {% if field.help_text %}
                         <small class="help-text">{{ field.help_text }}</small>
                     {% endif %}
                 </div>
             {% endfor %}
-
             <div class="form-actions">
                 <button type="submit" class="btn-primary">Registrar</button>
                 <button type="button" class="btn-cancel" onclick="closeModal('registerModal')">Cancelar</button>
@@ -161,5 +163,78 @@
     </div>
 </div>
 
-<script src="{% static 'js/users.js' %}"></script>
+<script>
+// Validación de formularios
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar validación para todos los formularios
+    const forms = document.querySelectorAll('.needs-validation');
+    
+    forms.forEach(form => {
+        // Validar al enviar el formulario
+        form.addEventListener('submit', function(event) {
+            let isValid = true;
+            const requiredFields = form.querySelectorAll('[required]');
+            
+            // Ocultar todos los mensajes de error primero
+            form.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Limpiar clases de error
+            form.querySelectorAll('.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            
+            // Validar cada campo requerido
+            requiredFields.forEach(field => {
+                const errorElement = field.closest('.form-group').querySelector('.error-message');
+                if (!field.value.trim()) {
+                    if (errorElement) {
+                        errorElement.style.display = 'block';
+                    }
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                }
+            });
+            
+            if (!isValid) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }, false);
+        
+        // Limpiar errores cuando el usuario comienza a escribir
+        form.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('input', function() {
+                const errorElement = this.closest('.form-group').querySelector('.error-message');
+                if (errorElement) {
+                    errorElement.style.display = 'none';
+                }
+                this.classList.remove('is-invalid');
+            });
+        });
+    });
+});
+
+// Funciones existentes para modales
+function showModal(modalId) {
+    document.getElementById(modalId).style.display = 'flex';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+function performSearch() {
+    const searchValue = document.getElementById('searchInput').value;
+    window.location.href = '?q=' + encodeURIComponent(searchValue);
+}
+
+function confirmDelete(formId) {
+    if (confirm('¿Está seguro que desea eliminar este usuario?')) {
+        document.getElementById(formId).submit();
+    }
+}
+</script>
+
 {% endblock %}
