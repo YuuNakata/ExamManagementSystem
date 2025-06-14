@@ -422,27 +422,42 @@
             </div>
             
             <div class="grade-range-container">
-                <div class="grade-range-display" id="grade-display">
-                    Calificación seleccionada: <strong>{{ review.exam_request.grade }}</strong>
-                </div>
-                <input type="range" 
-                       id="grade-slider" 
-                       min="2" 
-                       max="5" 
-                       step="1" 
-                       value="{{ review.exam_request.grade }}"
-                       class="grade-range-slider">
-                <div class="grade-range-labels">
-                    <span>2</span>
-                    <span>3</span>
-                    <span>4</span>
-                    <span>5</span>
-                </div>
-            </div>
+    <div class="grade-range-display" id="grade-display">
+        Calificación seleccionada: <strong id="current-grade">{{ review.exam_request.grade|default:"3" }}</strong>
+    </div>
+    <input type="range" 
+           id="grade-slider" 
+           name="new_grade"
+           min="2" 
+           max="5" 
+           step="1" 
+           value="{{ review.exam_request.grade|default:'3' }}"
+           class="grade-range-slider">
+    <div class="grade-range-labels">
+        <span>2</span>
+        <span>3</span>
+        <span>4</span>
+        <span>5</span>
+    </div>
+</div>
+
+<script>
+    // Asegurar que el slider siempre muestre el valor actual
+    document.addEventListener('DOMContentLoaded', function() {
+        const slider = document.getElementById('grade-slider');
+        const gradeDisplay = document.getElementById('current-grade');
+        
+        // Mostrar valor inicial
+        gradeDisplay.textContent = slider.value;
+        
+        // Actualizar en tiempo real al mover el slider
+        slider.addEventListener('input', function() {
+            gradeDisplay.textContent = this.value;
+        });
+    });
+</script>
             
-            <div class="validation-message" id="validation-message">
-                La calificación debe ser un número entero entre 2 y 5
-            </div>
+           
         </div>
         
         <div class="form-actions">

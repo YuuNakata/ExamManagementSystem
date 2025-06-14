@@ -669,16 +669,29 @@ def approve_review(request, pk):
     
     if request.method == "POST":
         new_grade = request.POST.get("new_grade")
+        
+        # Conversión segura para comparación
         try:
-            # Actualizar calificación
-            review.exam_request.grade = new_grade
+            current_grade = str(float(review.exam_request.grade))  # Normalizamos a float y luego a string
+            new_grade_compare = str(float(new_grade))  # Convertimos el input a float y luego a string
+        except (ValueError, TypeError):
+            messages.error(request, "Formato de calificación inválido")
+            return redirect("exams:verify_requests")
+        
+        # Verificación precisa de igualdad
+        if current_grade == new_grade_compare:
+            messages.warning(request, "La calificación ingresada es igual a la actual")
+            context = {'review': review}
+            return render(request, 'exams/adjust_grade.html', context)
+        
+        try:
+            # Actualización de la calificación
+            review.exam_request.grade = float(new_grade)  # Guardamos como float
             review.exam_request.save()
             
-            # Marcar revisión como aprobada
             review.status = "Approved"
             review.save()
             
-            # Notificar estudiante
             Notification.objects.create(
                 user=review.exam_request.student,
                 message=f"Revisión aprobada en {review.exam_request.calendar_exam.subject}. Nueva calificación: {new_grade}"
@@ -686,11 +699,10 @@ def approve_review(request, pk):
             
             messages.success(request, "Revisión aprobada y calificación actualizada")
         except Exception as e:
-            messages.error(request, f"Error: {str(e)}")
+            messages.error(request, f"Error al actualizar: {str(e)}")
         
         return redirect("exams:verify_requests")
     
-    # Mostrar formulario de ajuste de calificación
     context = {'review': review}
     return render(request, 'exams/adjust_grade.html', context)
 
