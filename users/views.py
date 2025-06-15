@@ -1,4 +1,7 @@
 from django.shortcuts import redirect, render, get_object_or_404
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+from django.urls import reverse
 
 from exam_management.decorators import admin_required
 from django.contrib.auth.decorators import login_required
@@ -60,85 +63,72 @@ def delete_user(request, user_id):
 @login_required
 @admin_required
 def update_user(request, user_id):
-    user = get_object_or_404(User, id=user_id)
+    user_to_update = get_object_or_404(User, id=user_id)
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     if request.method == "POST":
-        form = UserUpdateForm(request.POST, instance=user)
-        try:
-            if form.is_valid():
-                updated_user = form.save()
-                messages.success(
-                    request,
-                    f"Usuario {updated_user.username} actualizado exitosamente.",
-                )
-                return redirect("users:user_management")
-            else:
-                # Si el formulario no es válido, captura los errores
-                raise IntegrityError("Error en los datos del formulario.")
-
-        except IntegrityError as e:
-            # Maneja errores de base de datos (como campos nulos)
-            messages.error(request, f"Error al actualizar: {str(e)}")
-            users = User.objects.all()
-            register_form = UserRegisterForm()
-            return render(
-                request,
-                "user_management.html",
-                {
-                    "users": users,
-                    "register_form": register_form,
-                    "edit_modal_errors": form.errors,
-                    "editing_user_id": user_id,
-                },
-            )
-
-
-@login_required
-@admin_required
-def register_user(request):
-    if request.method == "POST":
-        form = UserRegisterForm(request.POST)
-        
+        form = UserUpdateForm(request.POST, instance=user_to_update)
         if form.is_valid():
-            username = form.cleaned_data['username']
-            email = form.cleaned_data['email']
-            
-            # Verificar si ya existe el usuario o el correo
-            if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
-                messages.error(request, "Ya existe un usuario con este nombre/correo")
-                
-                if User.objects.filter(username=username).exists():
-                    form.add_error('username', 'Nombre de usuario ya registrado')
-                
-                if User.objects.filter(email=email).exists():
-                    form.add_error('email', 'Correo electrónico ya registrado')
-                
+            form.save()
+            messages.success(
+                request,
+                f"Usuario {user_to_update.username} actualizado exitosamente.",
+            )
+            if is_ajax:
+                return JsonResponse({'status': 'success'})
+            return redirect("users:user_management")
+        else:
+            if is_ajax:
+                return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+            else:
+                # Fallback for non-AJAX
                 users = User.objects.all()
+                register_form = UserRegisterForm()
+                for user in users:
+                    if user.id == user_to_update.id:
+                        user.update_form = form
+                    else:
+                        user.update_form = UserUpdateForm(instance=user)
+
                 return render(
                     request,
                     "user_management.html",
                     {
                         "users": users,
-                        "register_form": form,
-                        "register_modal_errors": True,
+                        "register_form": register_form,
+                        "editing_user_id": user_id,
                     },
                 )
-            
-            # Si no hay duplicados, crear el usuario
+
+
+@login_required
+@admin_required
+def register_user(request):
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if request.method == "POST":
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
             user = form.save()
             messages.success(request, f"Usuario {user.username} creado exitosamente.")
+            if is_ajax:
+                return JsonResponse({'status': 'success'})
             return redirect("users:user_management")
-        
-        # Si el formulario no es válido
-        users = User.objects.all()
-        return render(
-            request,
-            "user_management.html",
-            {
-                "users": users,
-                "register_form": form,
-                "register_modal_errors": True,
-            },
-        )
+        else: # Form is invalid
+            if is_ajax:
+                return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+            
+            # Fallback for non-AJAX
+            users = User.objects.all()
+            for u in users:
+                u.update_form = UserUpdateForm(instance=u)
+            return render(
+                request,
+                "user_management.html",
+                {
+                    "users": users,
+                    "register_form": form,
+                    "register_modal_errors": True,
+                },
+            )
     
-    # Si no es POST, redirigir al management
     return redirect("users:user_management")

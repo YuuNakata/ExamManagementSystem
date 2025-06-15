@@ -13,6 +13,8 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.urls import reverse_lazy, reverse 
 from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 from users.models import User
 from .forms import CalendarExamForm, GradeForm, ReviewRequestForm
 from .models import CalendarExam, ExamRequest, ReviewRequest  
@@ -219,13 +221,12 @@ def edit_calendar(request):
 @user_passes_test(is_teacher, login_url="/login/")
 def update_exam(request, pk):
     exam = get_object_or_404(CalendarExam, pk=pk)
-    month_param = exam.date.strftime("%Y-%m")  
-    redirect_url = reverse("exams:edit_calendar") + f"?month={month_param}"
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
     if request.method == "POST":
         form = CalendarExamForm(request.POST, instance=exam)
         if form.is_valid():
-            # Verificar duplicados (excluyendo el examen actual)
+            # Additional validation for duplicates
             exam_type = form.cleaned_data['exam_type']
             subject = form.cleaned_data['subject']
             date = form.cleaned_data['date']
@@ -237,61 +238,46 @@ def update_exam(request, pk):
                 exam_type=exam_type,
                 subject=subject,
                 date__range=[first_day_of_month, last_day_of_month]
-            ).exclude(pk=pk).exists()  # Excluir el examen actual
+            ).exclude(pk=pk).exists()
             
             if existing_exam:
-                form.add_error(
-                    None, 
-                    ValidationError(
-                        f"Ya existe un examen de tipo '{exam_type}' para la asignatura '{subject}' en este mes."
-                    )
-                )
-                request.session["error_in_modal_pk"] = pk
-                request.session["failed_form_data"] = request.POST
-                messages.error(
-                    request, 
-                    f"Ya existe un examen de tipo '{exam_type}' para '{subject}' en este mes."
-                )
-                return redirect(redirect_url)
-            
-            # Guardar si no hay duplicados
-            form.save()
-            return redirect(redirect_url)
-        else:
-            # Manejar otros errores de validación
-            ...
-    else:
-        return redirect("exams:edit_calendar")
+                form.add_error(None, f"Ya existe un examen de tipo '{exam_type}' para la asignatura '{subject}' en este mes.")
+            else:
+                form.save()
+                if is_ajax:
+                    return JsonResponse({'status': 'success', 'message': 'Examen actualizado con éxito.'})
+                messages.success(request, "Examen actualizado con éxito.")
+                month_param = f"?month={date.strftime('%Y-%m')}"
+                return redirect(reverse("exams:edit_calendar") + month_param)
+
+        # If form is invalid (including the custom duplicate error)
+        if is_ajax:
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+        
+        request.session["error_in_modal_pk"] = pk
+        request.session["failed_form_data"] = request.POST
+        messages.error(request, "Por favor, corrige los errores en el formulario.")
+        month_param = f"?month={exam.date.strftime('%Y-%m')}"
+        return redirect(reverse("exams:edit_calendar") + month_param)
+
+    return redirect("exams:edit_calendar")
 
 
 # TEACHER ACTION: Create Exam
 @login_required
 @user_passes_test(is_teacher, login_url="/login/")
 def create_exam(request):
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if request.method == "POST":
         form = CalendarExamForm(request.POST)
-        date_str = request.POST.get("date")
-        month_param = ""
-        if date_str:
-            try:
-                exam_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-                month_param = f"?month={exam_date.strftime('%Y-%m')}"
-            except ValueError:
-                pass  
-        redirect_url = reverse("exams:edit_calendar") + month_param
-
         if form.is_valid():
-            # Verificar duplicados
             exam_type = form.cleaned_data['exam_type']
             subject = form.cleaned_data['subject']
             date = form.cleaned_data['date']
             
-            # Obtener el primer día del mes
             first_day_of_month = date.replace(day=1)
-            # Obtener el último día del mes
             last_day_of_month = (first_day_of_month + relativedelta(months=1)) - timedelta(days=1)
             
-            # Verificar si ya existe un examen del mismo tipo y asignatura en el mismo mes
             existing_exam = CalendarExam.objects.filter(
                 exam_type=exam_type,
                 subject=subject,
@@ -299,35 +285,36 @@ def create_exam(request):
             ).exists()
             
             if existing_exam:
-                form.add_error(
-                    None, 
-                    ValidationError(
-                        f"Ya existe un examen de tipo '{exam_type}' para la asignatura '{subject}' en este mes."
-                    )
-                )
-                request.session["error_in_new_modal"] = True
-                request.session["failed_form_data"] = request.POST
-                messages.error(
-                    request, 
-                    f"Ya existe un examen de tipo '{exam_type}' para '{subject}' en este mes."
-                )
-                return redirect(redirect_url)
-            
-            # Si no existe duplicado, guardar el examen
-            new_exam = form.save()
-            messages.success(
-                request, f"Nuevo examen de '{new_exam.subject}' creado correctamente."
-            )
-            return redirect(redirect_url)
-        else:
-            request.session["error_in_new_modal"] = True
-            request.session["failed_form_data"] = request.POST
-            messages.error(
-                request, "Por favor, corrige los campos."
-            )
-            return redirect(redirect_url)  
-    else:
-        return redirect("exams:edit_calendar")
+                form.add_error(None, f"Ya existe un examen de tipo '{exam_type}' para la asignatura '{subject}' en este mes.")
+            else:
+                new_exam = form.save()
+                messages.success(request, f"Nuevo examen de '{new_exam.subject}' creado correctamente.")
+                if is_ajax:
+                    month_param = f"?month={date.strftime('%Y-%m')}"
+                    redirect_url = reverse("exams:edit_calendar") + month_param
+                    return JsonResponse({'status': 'success', 'redirect_url': redirect_url})
+                return redirect(reverse("exams:edit_calendar"))
+
+        # If form is invalid (including the custom duplicate error)
+        if is_ajax:
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+        
+        # Fallback for non-AJAX
+        date_str = request.POST.get("date")
+        month_param = ""
+        if date_str:
+            try:
+                exam_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                month_param = f"?month={exam_date.strftime('%Y-%m')}"
+            except ValueError:
+                pass
+        redirect_url = reverse("exams:edit_calendar") + month_param
+        request.session["error_in_new_modal"] = True
+        request.session["failed_form_data"] = request.POST
+        messages.error(request, "Por favor, corrige los campos.")
+        return redirect(redirect_url)
+
+    return redirect("exams:edit_calendar")
 
 
 @login_required

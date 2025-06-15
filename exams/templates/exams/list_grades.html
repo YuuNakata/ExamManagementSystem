@@ -11,7 +11,7 @@
         <!-- Cabecera -->
         <div class="management-header">
             <h1>Mis Calificaciones</h1>
-             <div class="actions filters">
+             <div class="actions-filters">
                 <form method="GET" action="{% url 'exams:my_grades' %}" class="form-inline">
                     <input type="text" name="subject_query" class="form-control mr-2" placeholder="Buscar por asignatura..." value="{{ request.GET.subject_query|default:'' }}">
                     <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>

@@ -19,7 +19,19 @@
         {% endif %}
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="error-message">
+                            {% for error in field.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
             <button type="submit" class="register-btn">Registrar</button>
         </form>
         <a href="{% url 'dashboard' %}">Volver al Dashboard</a>

@@ -1,3 +1,8 @@
+.main-content {
+    background-color: #fff;
+    min-height: 100vh;
+
+}
 /* ============ LISTADO DE USUARIOS ============ */
 .users-list {
     display: grid;
@@ -9,12 +14,19 @@
     border-radius: var(--radio-borde);
     padding: 1.5rem;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    box-shadow: var(--sombra);
-    transition: transform 0.2s ease;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    border: 4px solid var(--naranja-suave); /* Borde sutil para distinguir la tarjeta */
+    border-left: 6px solid transparent; /* Placeholder for hover effect */
 }
+
 .user-card:hover {
     transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+    border-left-color: var(--naranja); /* The brand color highlight */
 }
 
 .user-info {
@@ -102,19 +114,7 @@ input[type='password']:focus {
     background-repeat: no-repeat;
     
 }
-.error-list {
-    background: #FFEBEE;
-    border: 2px solid #FF5252;
-    border-radius: var(--radio-borde);
-    padding: 1rem;
-    margin: 1rem 0;
-}
 
-.error-message {
-    color: #D32F2F;
-    font-size: 0.9rem;
-    margin: 0.25rem 0;
-}
 
 
 /* ============ ICONOS ============ */

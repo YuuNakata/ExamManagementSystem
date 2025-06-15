@@ -10,10 +10,30 @@ function showModal(modalId) {
 // Cerrar modales
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
+    if (!modal) return;
+
+    // Find all forms within the modal
+    const forms = modal.querySelectorAll('form');
+    forms.forEach(form => {
+        // Reset form fields to their initial values
+        form.reset();
+
+        // Remove any dynamically added error messages
+        const errorLists = form.querySelectorAll('.errorlist');
+        errorLists.forEach(errorList => {
+            errorList.remove();
+        });
+
+        // Remove .is-invalid class from fields
+        const invalidFields = form.querySelectorAll('.is-invalid');
+        invalidFields.forEach(field => {
+            field.classList.remove('is-invalid');
+        });
+    });
+
+    // Hide the modal
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
 }
 
 // Manejo de clicks

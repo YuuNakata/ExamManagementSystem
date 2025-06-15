@@ -2,9 +2,8 @@
   background: var(--blanco);
   border-radius: var(--radio-borde);
   box-shadow: var(--sombra);
-  padding: 1.5rem;
-
-  margin: 2rem 0;
+  border: none;
+  padding: 1rem;
 }
 
 .management-header {

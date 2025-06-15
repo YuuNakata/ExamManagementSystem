@@ -24,7 +24,7 @@
     font-size: 1.8rem; /* Slightly larger H1 */
 }
 
-.actions.filters {
+.form-inline {
     display: flex;
     gap: 0.8rem;
     align-items: center;

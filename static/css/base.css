@@ -74,7 +74,7 @@ html {
 body {
   line-height: 1.6;
   color: var(--negro);
-  background-color: var(--gris); /* Fondo general gris claro */
+  background-color: var(--blanco); /* Fondo general gris claro */
   padding-top: calc(
     var(--header-height) + var(--nav-height)
   ); /* Espacio para header y nav fijos */
@@ -315,7 +315,7 @@ a:hover {
 .main-content {
   max-width: 1600px;
   margin: 0 auto; /* Centrado */
-  padding: 2rem 1.5rem; /* Espaciado interno */
+  padding: 0.8rem 1.2rem; /* Espaciado interno */
   animation: fadeIn 0.5s ease-out; /* Animación de entrada */
 }
 
@@ -583,6 +583,12 @@ a:hover {
   height: 18px;
 }
 
+
+/* Estilo para campos de formulario inválidos */
+.is-invalid {
+    border-color: var(--rojo) !important; /* Usando variable de color para consistencia */
+}
+
 /* ============ RESPONSIVE DESIGN ============ */
 
 /* Tabletas y móviles grandes */
@@ -771,4 +777,20 @@ a:hover {
 .main-header .logo-title a.logo-link {
   display: inline-block;
   line-height: 0; /* Elimina espacio extra debajo de la imagen */
+}
+
+/* ============ ESTILOS PARA LISTAS DE ERRORES DE FORMULARIO ============ */
+.errorlist {
+  list-style-type: none; /* Para compatibilidad con forms por defecto */
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+/* Se aplica a <li> (default) y <span> (custom) para máxima compatibilidad */
+.errorlist li,
+.errorlist span {
+  color: var(--rojo); /* Usamos la variable de color rojo principal */
+  display: block; /* Asegura que cada error ocupe su propia línea */
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
 }

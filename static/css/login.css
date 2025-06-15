@@ -59,7 +59,7 @@ body {
 .input-group .icon {
     position: absolute;
     left: 10px;
-    top: 50%;
+    top: 40%;
     transform: translateY(-50%);
 }
 
@@ -80,7 +80,7 @@ input:focus {
 .toggle-password {
     position: absolute;
     right: 15px;
-    top: 50%;
+    top: 40%;
     transform: translateY(-50%);
     background: none;
     border: none;

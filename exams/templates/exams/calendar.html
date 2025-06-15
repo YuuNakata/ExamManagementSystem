@@ -21,11 +21,12 @@
         <div class="management-header">
             
             <h2>Calendario de {{ current_month_date|date:"F Y"|capfirst }}</h2>
-            
+            {% if not modo_lectura %}
             <div class="actions">
                 <a href="?month={{ prev_month }}" class="btn-primary btn-sm">< Mes anterior</a>
                 <a href="?month={{ next_month }}" class="btn-primary btn-sm">Mes siguiente ></a>
             </div>
+            {% endif %}
         </div>
 
         
@@ -110,28 +111,27 @@
             <h3>Editar Examen</h3>
 
             
-            <form id="editForm{{ exam_data.instance.id }}" method="post" action="{% url 'exams:edit_exam' exam_data.instance.id %}">
+            <form id="editForm{{ exam_data.instance.id }}" method="post" action="{% url 'exams:edit_exam' exam_data.instance.id %}" novalidate>
                 {% csrf_token %}
                 {{ exam_data.form.as_p }}
                 
             </form>
 
             
-            <form id="deleteForm{{ exam_data.instance.id }}" method="post" action="{% url 'exams:delete_exam' exam_data.instance.id %}" style="display: none;"> 
+            <form id="deleteForm{{ exam_data.instance.id }}" method="post" action="{% url 'exams:delete_exam' exam_data.instance.id %}"> 
                 {% csrf_token %}
+           
+                
             </form>
-
+            
             
             <div class="form-actions">
                 
                 <button type="submit" form="editForm{{ exam_data.instance.id }}" class="btn-primary">Guardar Cambios</button>
-
-                
                 <button type="button" class="btn-delete"
-                        onclick="confirmDelete('{{ exam_data.instance.id }}', '{{ exam_data.instance.subject|escapejs }}', '{{ exam_data.instance.date|date:'d/m/Y'|escapejs }}')">
+                    onclick="confirmDelete('deleteForm{{ exam_data.instance.id }}')">
                     Eliminar
                 </button>
-                
                 <button type="button" class="btn-cancel" onclick="closeModal('examModal{{ exam_data.instance.id }}')">Cancelar</button>
 
             </div>
@@ -147,15 +147,9 @@
     <div class="modal-content">
         <span class="close" onclick="closeModal('newExamModal')">×</span>
         <h3>Nuevo Examen</h3>
-         
-        <form method="post" action="{% url 'exams:create_exam' %}" novalidate>
-            {% csrf_token %}
-            {{ new_exam_form.as_p }}
-            <div class="form-actions">
-                <button type="submit" class="btn-primary">Crear Examen</button>
-                <button type="button" class="btn-cancel" onclick="closeModal('newExamModal')">Cancelar</button>
-            </div>
-        </form>
+        <div id="createExamFormContainer">
+            {% include 'exams/_create_exam_form.html' with form=new_exam_form %}
+        </div>
     </div>
 </div>
 {% endif %} 
@@ -163,25 +157,38 @@
 
 
 <script src="{% static 'js/modals.js' %}"></script>
+<script src="{% static 'js/exams.js' %}"></script>
 
 
 <script>
 
-        // Función para confirmar eliminación
-        function confirmDelete(examId, examSubject, examDate) {
-            const message = `¿Estás seguro de que deseas eliminar el examen de "${examSubject}" del ${examDate}?\n\nEsta acción no se puede deshacer.`;
-            if (confirm(message)) {
-                // Si confirma, busca y envía el formulario de borrado correspondiente
-                const deleteForm = document.getElementById(`deleteForm${examId}`);
-                if (deleteForm) {
-                    deleteForm.submit();
+        function handleAddExam(event, date) {
+            event.stopPropagation(); // Evita que el clic se propague y cierre el modal si está abierto
+            const modal = document.getElementById('newExamModal');
+            if (modal) {
+                // El formulario se recarga vía AJAX, así que buscamos el input dentro del contenedor
+                const formContainer = document.getElementById('createExamFormContainer');
+                const dateInput = formContainer.querySelector('input[name="date"]');
+                if (dateInput) {
+                    dateInput.value = date;
+                    showModal('newExamModal');
                 } else {
-                    console.error(`Delete form with ID "deleteForm${examId}" not found.`);
-                    alert("Error: No se pudo encontrar el formulario de eliminación.");
+                    console.error('No se encontró el campo de fecha en el modal de nuevo examen.');
+                    alert('Error: No se pudo preparar el formulario para añadir el examen.');
                 }
             }
         }
 
+        // Función para confirmar eliminación
+        function confirmDelete(formId) {
+            window.showModalMessage(
+                '¿Está seguro que desea eliminar este examen?',
+                'warning',
+                function() {
+                    document.getElementById(formId).submit();
+                }
+            );
+        }
         // Script para re-abrir modales en error (si lo tienes)
         {% if error_in_modal_pk or error_in_new_modal %}
         document.addEventListener('DOMContentLoaded', () => {

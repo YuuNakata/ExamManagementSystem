@@ -1,0 +1,31 @@
+<form id="editForm{{ user.id }}" method="post" action="{% url 'users:update_user' user.id %}" class="needs-validation" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div class="errorlist non-field-errors">
+            {% for error in form.non_field_errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% for field in form %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}
+                <div class="errorlist">
+                    {% for error in field.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% if field.help_text %}
+                <small class="help-text">{{ field.help_text }}</small>
+            {% endif %}
+        </div>
+    {% endfor %}
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Guardar</button>
+        <button type="button" class="btn-cancel" onclick="closeModal('editModal{{ user.id }}')">Cancelar</button>
+    </div>
+</form>

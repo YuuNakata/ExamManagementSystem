@@ -1,0 +1,36 @@
+<form id="createExamForm" method="post" action="{% url 'exams:create_exam' %}" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div class="errorlist non-field-errors">
+            {% for error in form.non_field_errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {# Render hidden fields first. They don't need labels or wrappers. #}
+    {% for field in form.hidden_fields %}
+        {{ field }}
+    {% endfor %}
+
+    {# Render visible fields with their labels and wrappers. #}
+    {% for field in form.visible_fields %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}
+                <div class="errorlist">
+                    {% for error in field.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Crear Examen</button>
+        <button type="button" class="btn-cancel" onclick="closeModal('newExamModal')">Cancelar</button>
+    </div>
+</form>

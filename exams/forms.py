@@ -27,9 +27,7 @@ class CalendarExamForm(forms.ModelForm):
             "placeholder": "Nombre de la asignatura",
             "class": "form-control"
         }),
-        error_messages={
-            'required': "El nombre de la asignatura es obligatorio",
-        }
+
     )
 
     class Meta:
@@ -41,14 +39,9 @@ class CalendarExamForm(forms.ModelForm):
             "exam_type": forms.Select(attrs={
                 "class": "select-modal form-control",
             }),
-            "date": forms.HiddenInput(),
+            "date": forms.HiddenInput()
         }
         
-        error_messages = {
-            'exam_type': {
-                'required': "Debe seleccionar un tipo de examen",
-            }
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
