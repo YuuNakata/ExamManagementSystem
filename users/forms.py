@@ -4,19 +4,6 @@ from .models import User
 
 
 class UserRegisterForm(UserCreationForm):
-    password1 = forms.CharField(
-        label="Contraseña",
-        widget=forms.PasswordInput(attrs={"class": "form-control"}),
-        required=True,
-        help_text="",
-        error_messages={
-            "password_too_short": "La contraseña es demasiado corta. Debe contener al menos %(min_length)d caracteres.",
-            "password_too_common": "Esta contraseña es demasiado común. Por favor, elija una más segura.",
-            "password_entirely_numeric": "La contraseña no puede contener únicamente números.",
-            "password_too_similar": "La contraseña es demasiado parecida a tus otros datos personales.",
-        },
-    )
-
     username = forms.CharField(
         max_length=150,
         required=True,
@@ -39,7 +26,11 @@ class UserRegisterForm(UserCreationForm):
         required=True,
         widget=forms.EmailInput(attrs={"class": "form-control"}),
     )
-
+    password1 = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+        required=True,
+    )
     password2 = forms.CharField(
         label="Confirmar contraseña",
         widget=forms.PasswordInput(attrs={"class": "form-control"}),
@@ -78,14 +69,21 @@ class UserRegisterForm(UserCreationForm):
             "curso_programa",
             "departamento_facultad",
         ]
-        error_messages={
-            'required': "ingrese el nombre de usuario",
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.error_messages["password_mismatch"] = "Las contraseñas no coinciden."
+
+        # Personalización de mensajes de error según la especificación
+        self.error_messages['password_mismatch'] = 'Las contraseñas no coinciden.'
+        self.error_messages['duplicate_username'] = 'Ya existe un usuario con este nombre.'
+
+        for field in self.fields.values():
+            field.error_messages['required'] = 'Este campo es obligatorio.'
+
+        # Limpieza de textos de ayuda
         self.fields["username"].help_text = ""
+        self.fields["password1"].help_text = ""
+
         # Traducción de labels
         self.fields["username"].label = "Nombre de usuario"
         self.fields["email"].label = "Correo electrónico"
@@ -111,25 +109,24 @@ class UserUpdateForm(forms.ModelForm):
         widgets = {
             "username": forms.TextInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),
-            "first_name": forms.TextInput(
-                attrs={"class": "form-control", "required": True}
-            ),
-            "last_name": forms.TextInput(
-                attrs={"class": "form-control", "required": True}
-            ),
+            "first_name": forms.TextInput(attrs={"class": "form-control"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control"}),
             "role": forms.Select(attrs={"class": "form-control"}),
             "curso_programa": forms.TextInput(attrs={"class": "form-control"}),
             "departamento_facultad": forms.TextInput(attrs={"class": "form-control"}),
         }
         error_messages = {
             'username': {
-                'required': "Rellene este campo",
+                'unique': "Ya existe un usuario con este nombre/correo.",
+            },
+            'email': {
+                'unique': "Ya existe un usuario con este nombre/correo.",
             }
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["username"].help_text = ""
+
         # Traducción de labels
         self.fields["username"].label = "Nombre de usuario"
         self.fields["email"].label = "Correo electrónico"
@@ -143,8 +140,11 @@ class UserUpdateForm(forms.ModelForm):
         self.fields['first_name'].required = True
         self.fields['last_name'].required = True
 
-        # Eliminar texto de ayuda del username
-        self.fields["username"].help_text = ""
+        # Personalización de mensajes de error para campos requeridos
+        for field in self.fields.values():
+            if field.required:
+                field.error_messages['required'] = 'Por favor rellene este campo'
 
-        # Opcional: Mensajes de ayuda adicionales
+        # Textos de ayuda
+        self.fields["username"].help_text = ""
         self.fields["email"].help_text = "Ejemplo: usuario@dominio.com"

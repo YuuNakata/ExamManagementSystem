@@ -26,7 +26,7 @@ class CalendarExamForm(forms.ModelForm):
         widget=forms.TextInput(attrs={
             "placeholder": "Nombre de la asignatura",
             "class": "form-control"
-        }),
+        })
 
     )
 
@@ -41,6 +41,8 @@ class CalendarExamForm(forms.ModelForm):
             }),
             "date": forms.HiddenInput()
         }
+
+    
         
 
     def __init__(self, *args, **kwargs):
@@ -50,11 +52,13 @@ class CalendarExamForm(forms.ModelForm):
         self.fields['exam_type'].required = True
         self.fields['subject'].required = True
         
-        # Estilos y clases para los campos
+        # Estilos y clases para los campos y mensajes de error personalizados
         for field_name, field in self.fields.items():
             field.widget.attrs.update({
                 'class': 'form-control'
             })
+            if field.required:
+                field.error_messages['required'] = 'Error Por favor, corrige los campos'
 
 class GradeForm(forms.ModelForm):
     class Meta:

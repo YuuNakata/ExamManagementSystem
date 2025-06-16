@@ -70,6 +70,7 @@
     flex-shrink: 0; /* No se encoge */
 }
 
+
 .modal-header .close {
     background: transparent;
     border: 0;

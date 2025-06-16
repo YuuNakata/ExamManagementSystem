@@ -464,17 +464,22 @@ def grade_exam_request_fbv(request, pk):
             # Si son diferentes, proceder con el guardado
             exam_request.grade = round(new_grade, 1)  # Redondear a 1 decimal
             exam_request.save()
-            
+
             student_name = exam_request.student.get_full_name() or exam_request.student.username
             subject_name = exam_request.calendar_exam.subject
-            messages.success(
-                request,
-                f"Calificación actualizada: {current_grade} -> {new_grade}"
-            )
+
+            if current_grade is None:
+                success_message = f"Éxito Calificación para {student_name} en {subject_name} guardada exitosamente"
+                notification_message = f"Calificación asignada en {subject_name}: {new_grade}"
+            else:
+                success_message = f"Calificación actualizada: {current_grade} -> {new_grade}"
+                notification_message = f"Calificación actualizada en {subject_name}: {new_grade}"
+
+            messages.success(request, success_message)
             
             Notification.objects.create(
                 user=exam_request.student,
-                message=f"Calificación actualizada en {exam_request.calendar_exam.subject}: {new_grade}"
+                message=notification_message
             )
             
             return redirect('exams:manage_grades')
