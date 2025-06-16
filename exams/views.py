@@ -333,7 +333,7 @@ def delete_exam(request, pk):
         exam.delete()
         messages.success(
             request,
-            f"Examen de '{exam_subject}' del {exam_date_str} eliminado correctamente.",
+            "Eliminación completada.",
         )
     except Exception as e:
         messages.error(request, f"Ocurrió un error al eliminar el examen: {e}")
@@ -453,7 +453,7 @@ def grade_exam_request_fbv(request, pk):
             # Comparación numérica exacta
             if current_grade is not None and abs(new_grade - current_grade) < 0.05:  # Tolerancia mínima para floats
                 messages.warning(request,
-                    f"La calificación ingresada es igual a la actual ")
+                    f"La calificación ingresada es igual a la actual.")
                 exam_requests = ExamRequest.objects.filter(status='Approved').order_by('-calendar_exam__date')
                 return render(request, 'exams/manage_grades.html', {
                     'exam_requests': exam_requests,
@@ -469,7 +469,7 @@ def grade_exam_request_fbv(request, pk):
             subject_name = exam_request.calendar_exam.subject
             messages.success(
                 request,
-                f"Calificación para {student_name} en {subject_name} guardada exitosamente."
+                f"Calificación actualizada: {current_grade} -> {new_grade}"
             )
             
             Notification.objects.create(
@@ -694,7 +694,7 @@ def approve_review(request, pk):
         
         # Verificación precisa de igualdad
         if current_grade == new_grade_compare:
-            messages.warning(request, "La calificación ingresada es igual a la actual")
+            messages.warning(request, "La calificación ingresada es igual a la actual.")
             context = {'review': review}
             return render(request, 'exams/adjust_grade.html', context)
         

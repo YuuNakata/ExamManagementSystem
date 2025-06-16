@@ -51,7 +51,7 @@ def delete_user(request, user_id):
         try:
             username = user.username
             user.delete()
-            messages.success(request, f"Usuario {username} eliminado correctamente")
+            messages.success(request, "Eliminación completada")
         except Exception as e:
             messages.error(request, f"Error al eliminar el usuario: {str(e)}")
         
@@ -109,7 +109,7 @@ def register_user(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            messages.success(request, f"Usuario {user.username} creado exitosamente.")
+            messages.success(request, "Usuario registrado exitosamente.")
             if is_ajax:
                 return JsonResponse({'status': 'success'})
             return redirect("users:user_management")
