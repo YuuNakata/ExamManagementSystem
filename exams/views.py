@@ -247,6 +247,7 @@ def update_exam(request, pk):
                 form.add_error(None, f"Ya existe un examen de tipo '{exam_type}' para la asignatura '{subject}' en este mes.")
             else:
                 form.save()
+                
                 if is_ajax:
                     return JsonResponse({'status': 'success', 'message': 'Examen actualizado con éxito.'})
                 messages.success(request, "Examen actualizado con éxito.")
@@ -291,6 +292,9 @@ def create_exam(request):
                 form.add_error(None, f"Ya existe un examen de tipo '{exam_type}' para la asignatura '{subject}' en este mes.")
             else:
                 new_exam = form.save()
+                students = User.objects.filter(role="estudiante")
+                for student in students:
+                    notificar(student, f"Se ha creado un nuevo examen de '{new_exam.subject}' el {new_exam.date.strftime('%d/%m/%Y')}.")
                 messages.success(request, f"Nuevo examen de '{new_exam.subject}' creado correctamente.")
                 if is_ajax:
                     month_param = f"?month={date.strftime('%Y-%m')}"

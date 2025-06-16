@@ -314,6 +314,7 @@ a:hover {
 /* ============ CONTENIDO PRINCIPAL ============ */
 .main-content {
   max-width: 1600px;
+  min-width: 100%;
   margin: 0 auto; /* Centrado */
   padding: 0.8rem 1.2rem; /* Espaciado interno */
   animation: fadeIn 0.5s ease-out; /* Animación de entrada */
