@@ -47,13 +47,11 @@
             </a>
             <div class="header-actions">
                 {% if user.is_authenticated %}
-                <a href="{% url 'notifications' %}" class="notification-bell interactive-icon" aria-label="Notificaciones" title="Notificaciones">
+                                <a href="{% url 'notifications' %}" class="notification-bell interactive-icon notification-icon-container" aria-label="Notificaciones" title="Notificaciones">
                     <span class="icono icono-notificacion"></span>
-                    {% if unread_notifications > 0 %}
-                    <span class="badge">{{ unread_notifications }}</span>
+                    {% if unread_notifications_count > 0 %}
+                        <span class="notification-badge">{{ unread_notifications_count }}</span>
                     {% endif %}
-
-                    {# <span class="notification-count">3</span> #} {# Contador opcional #}
                 </a>
                 <div class="user-profile-header"> {# Quitada clase interactive-element si no hay dropdown #}
                     <div class="avatar-header">
@@ -151,7 +149,7 @@
                   {% endif %}
               </h4>
               <p class="user-role-mobile">{{ user.get_role_display }}</p>
-              <a href="{% url 'notifications' %}" class="menu-item notifications-mobile">
+                            <a href="{% url 'notifications' %}" class="menu-item notifications-mobile">
                  <span class="icono icono-notificacion"></span> Notificaciones
               </a>
           </div>
@@ -214,6 +212,26 @@
 
          {# Contenedor interno opcional si necesitas más control #}
          {# <div class="content-wrapper"> #}
+            {% block styles %}
+<style>
+    .notification-icon-container {
+        position: relative;
+        display: inline-block;
+    }
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -10px;
+        background-color: var(--rojo);
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        border: 2px solid var(--blanco);
+    }
+</style>
+            {% endblock %}
             {% block content %}
                 {# CONTENIDO ESPECÍFICO DE CADA PÁGINA VA AQUÍ #}
                 {# Ejemplo de cómo usar cards (puedes borrar esto en tus plantillas hijas) #}
@@ -273,17 +291,20 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const messageModalElement = document.getElementById('messageModal');
-    if (typeof bootstrap === 'undefined' || typeof bootstrap.Modal === 'undefined') {
+    if (typeof bootstrap === 'undefined' || !messageModalElement) {
+        console.error('Bootstrap o el elemento del modal no están disponibles.');
         return;
     }
 
-    if (!messageModalElement) {
-        return;
-    }
+    // Adjuntar el listener de limpieza UNA SOLA VEZ. Esto es clave.
+    messageModalElement.addEventListener('hidden.bs.modal', function () {
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
+        document.body.style.overflow = 'auto';
+        document.body.classList.remove('modal-open');
+    });
 
-    const messageModal = new bootstrap.Modal(messageModalElement, { backdrop: 'static', keyboard: false });
-
-    // Make the function globally accessible
+    // Hacer la función de mostrar modal accesible globalmente
     window.showModalMessage = function(message, tags, onConfirm) {
         const modalTitleElement = document.getElementById('messageModalLabel');
         const modalBodyElement = document.getElementById('messageModalBody');
@@ -292,12 +313,24 @@ document.addEventListener('DOMContentLoaded', function () {
         const cancelBtn = document.getElementById('modal-cancel-btn');
 
         if (!modalTitleElement || !modalBodyElement || !modalHeaderElement || !confirmBtn || !cancelBtn) {
-            console.error('Modal elements not found!');
+            console.error('Algunos elementos internos del modal no se encontraron.');
             return;
         }
+
+        // Obtener la instancia del modal de Bootstrap. Si existe, la destruimos para re-crearla con las nuevas opciones.
+        let messageModal = bootstrap.Modal.getInstance(messageModalElement);
+        if (messageModal) {
+            messageModal.dispose();
+        }
+        // Crear una nueva instancia con la configuración correcta para que siempre se pueda cerrar
+        messageModal = new bootstrap.Modal(messageModalElement, {
+            backdrop: true, // Siempre se puede cerrar haciendo clic fuera
+            keyboard: true  // Siempre se puede cerrar con la tecla ESC
+        });
+
+        // Configurar el contenido y estilo del modal
         modalBodyElement.innerHTML = message;
-        
-        modalHeaderElement.className = 'modal-header'; 
+        modalHeaderElement.className = 'modal-header'; // Resetear clases
 
         if (tags.includes('error') || tags.includes('danger')) {
             modalTitleElement.textContent = 'Error';
@@ -308,43 +341,42 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (tags.includes('warning')) {
             modalTitleElement.textContent = 'Advertencia';
             modalHeaderElement.classList.add('bg-warning', 'text-dark');
-        } else { 
+        } else {
             modalTitleElement.textContent = 'Notificación';
             modalHeaderElement.classList.add('bg-info', 'text-white');
         }
 
-        // Clone and replace to remove old event listeners from confirm button
+        // Clonar y reemplazar botones para evitar listeners duplicados
         const newConfirmBtn = confirmBtn.cloneNode(true);
         confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-        
-        if (onConfirm && typeof onConfirm === 'function') {
-            // This is a confirmation dialog
-            newConfirmBtn.textContent = 'Aceptar';
-            cancelBtn.style.display = ''; // Show cancel button
-            newConfirmBtn.style.display = '';
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
 
+        if (typeof onConfirm === 'function') {
+            // Es un diálogo de confirmación
+            newConfirmBtn.textContent = 'Aceptar';
+            newCancelBtn.style.display = '';
+            newConfirmBtn.style.display = '';
             newConfirmBtn.onclick = function() {
                 onConfirm();
                 messageModal.hide();
             };
-            
         } else {
-            // This is a simple notification
+            // Es una simple notificación
             newConfirmBtn.textContent = 'Aceptar';
-            cancelBtn.style.display = 'none'; // Hide cancel button
+            newCancelBtn.style.display = 'none';
             newConfirmBtn.style.display = '';
-
             newConfirmBtn.onclick = function() {
                 messageModal.hide();
             };
         }
-        
+
         messageModal.show();
     }
 
+    // Disparar los modales para los mensajes de Django que ya estén en la página
     {% if messages %}
         {% for message in messages %}
-            // Use the global function for Django messages
             window.showModalMessage("{{ message|escapejs }}", "{{ message.tags }}");
         {% endfor %}
     {% endif %}

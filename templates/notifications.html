@@ -1,14 +1,37 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/notifications.css' %}">
+{% endblock %}
+
 {% block content %}
-<h1>Notificaciones</h1>
-<ul>
-    {% for n in notifications %}
-    <li style="margin-bottom:10px;{% if n.is_read %}opacity:0.6;{% endif %}">
-        <div>{{ n.message }}</div>
-        <small style="color:#666;">{{ n.timestamp|date:"Y-m-d H:i" }}</small>
-    </li>
-    {% empty %}
-    <li>No tienes notificaciones.</li>
-    {% endfor %}
-</ul>
+<main class="main-content">
+    <div class="notifications-container">
+        <div class="notifications-header">
+            <h1>Notificaciones</h1>
+        </div>
+
+        {% if notifications %}
+            <ul class="notification-list">
+                {% for notification in notifications %}
+                <li class="notification-item">
+                    <div class="notification-icon">
+                        <span>🔔</span>
+                    </div>
+                    <div class="notification-content">
+                        <p>{{ notification.message }}</p>
+                        <p class="timestamp">{{ notification.timestamp|date:"d/m/Y, H:i" }}</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        
+        {% else %}
+            <div class="no-notifications">
+                <div class="icon">📬</div>
+            </div>
+        {% endif %}
+    </div>
+</main>
 {% endblock %}

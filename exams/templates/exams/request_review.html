@@ -10,7 +10,7 @@
 {% block content %}
 <div class="container">
     <h2>Solicitar Revisión de Examen</h2>
-    <form method="post" id="reviewForm" novalidate>
+    <form method="post" action="{% url 'exams:submit_review_request' %}" id="reviewForm" novalidate>
         {% csrf_token %}
         <div class="mb-3">
             <label class="form-label">Seleccionar Examen</label>

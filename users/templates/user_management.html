@@ -28,11 +28,16 @@
             {% for user in users %}
             <div id="editModal{{ user.id }}" class="modal" {% if editing_user_id == user.id|stringformat:"s" %}style="display: flex;"{% endif %}>
                 <div class="modal-content">
-                    <span class="close" onclick="closeModal('editModal{{ user.id }}')">&times;</span>
-                    <h3>Modificar Usuario</h3>
-
-                                        <div id="editFormContainer{{ user.id }}">
+                    <div class="modal-header">
+                        <h3>Modificar Usuario</h3>
+                        <button type="button" class="close" onclick="closeModal('editModal{{ user.id }}')">&times;</button>
+                    </div>
+                    <div class="modal-body" id="editFormContainer{{ user.id }}">
                         {% include 'users/_edit_user_form.html' with form=user.update_form user=user %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" form="editForm{{ user.id }}" class="btn-primary">Guardar</button>
+                        <button type="button" class="btn-cancel" onclick="closeModal('editModal{{ user.id }}')">Cancelar</button>
                     </div>
                 </div>
             </div>
@@ -69,9 +74,15 @@
 <!-- Modal Registro -->
 <div id="registerModal" class="modal" {% if register_modal_errors %}style="display: flex;"{% endif %}>
     <div class="modal-content">
-        <h3>Registrar Nuevo Usuario</h3>
-        <div id="registerFormContainer">
+        <div class="modal-header">
+            <h3>Registrar Nuevo Usuario</h3>
+        </div>
+        <div class="modal-body" id="registerFormContainer">
             {% include 'users/_register_user_form.html' with form=register_form %}
+        </div>
+        <div class="modal-footer">
+            <button type="submit" form="registerForm" class="btn-primary">Registrar</button>
+            <button type="button" class="btn-cancel" onclick="closeModal('registerModal')">Cancelar</button>
         </div>
     </div>
 </div>

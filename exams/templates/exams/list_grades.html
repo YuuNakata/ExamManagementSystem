@@ -44,18 +44,11 @@
                                 <td><strong>{{ exam.grade }}</strong></td>
                                 <td>{{ exam.comments|default:"-" }}</td>
                                 <td>
-                                    {# Check if a review request already exists and its status #}
-                                    {% with last_review_request=exam.review_requests.last %}
-                                        {% if not last_review_request or last_review_request.status == 'Rejected' or last_review_request.status == 'Approved' %}
-                                            {# The URL for request_review in urls.py does not take exam.pk, it's a general page #}
-                                            {# The form on that page will handle specific exam selection #}
-                                            <a href="{% url 'exams:request_review' %}" class="btn btn-info btn-sm">Solicitar Revisión</a>
-                                        {% elif last_review_request.status == 'Pending' %}
-                                            <span class="badge bg-warning text-dark">Revisión Pendiente</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">Revisión Solicitada</span>
-                                        {% endif %}
-                                    {% endwith %}
+                                    {% if exam.id not in reviews_requested_ids %}
+                                        <a href="{% url 'exams:request_review' %}" class="btn btn-info btn-sm">Solicitar Revisión</a>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Revisión Solicitada</span>
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% endfor %}

@@ -15,11 +15,19 @@ def logout_view(request):
 
 @login_required
 def notifications_view(request):
+    # Fetch unread notifications and evaluate the queryset immediately by converting to a list
+    notifications_to_display = list(Notification.objects.filter(user=request.user, is_read=False).order_by('-timestamp'))
+
+    # Now that we have the list of notifications to display, we can mark them as read in the DB.
+    # The notification badge will update on the next request.
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
-    context = get_calendar_data(request)
-    context['notifications'] = Notification.objects.filter(user=request.user).order_by('-timestamp')[:20]
-    context['unread_notifications'] = Notification.objects.filter(user=request.user, is_read=False).count()
-    return render(request, "notifications.html", context=context)
+
+    context = {
+        'notifications': notifications_to_display,
+        'page_title': 'Notificaciones' # Consistent page title
+    }
+
+    return render(request, "notifications.html", context)
 
 def dashboard_view(request):
     context = get_calendar_data(request)

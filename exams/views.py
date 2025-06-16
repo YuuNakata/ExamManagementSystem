@@ -7,7 +7,10 @@ from django.contrib.auth.decorators import (
     login_required,
     user_passes_test,
 )  
-from django.db.models import Q
+from users.models import User
+from exam_management.models import Notification
+from django.db.models import F, Q
+from exam_management.utils import notificar
 from datetime import date, timedelta, datetime
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
@@ -390,7 +393,7 @@ def manage_grades_list_fbv(request):
     exam_requests_query = (
         ExamRequest.objects.filter(status="Approved")
         .select_related("student", "calendar_exam")
-        .order_by("-calendar_exam__date", "calendar_exam__subject")
+        .order_by(F("grade").asc(nulls_first=True), "-calendar_exam__date")
     )
 
     subject_query = request.GET.get('subject_query')
@@ -462,10 +465,11 @@ def grade_exam_request_fbv(request, pk):
             exam_request.grade = round(new_grade, 1)  # Redondear a 1 decimal
             exam_request.save()
             
+            student_name = exam_request.student.get_full_name() or exam_request.student.username
+            subject_name = exam_request.calendar_exam.subject
             messages.success(
                 request,
-                f"Calificación actualizada: {current_grade or 'N/A'} → {new_grade} "
-                f"({exam_request.calendar_exam.subject})"
+                f"Calificación para {student_name} en {subject_name} guardada exitosamente."
             )
             
             Notification.objects.create(
@@ -501,8 +505,16 @@ def list_my_grades_fbv(request):
     if subject_query:
         graded_exams_query = graded_exams_query.filter(calendar_exam__subject__icontains=subject_query)
 
+    # Get IDs of exam requests that already have a review
+    reviews_requested_ids = set(
+        ReviewRequest.objects.filter(exam_request__student=request.user).values_list(
+            "exam_request_id", flat=True
+        )
+    )
+
     context = {
         "graded_exams": graded_exams_query,
+        "reviews_requested_ids": reviews_requested_ids,
         "page_title": "Mis Calificaciones",
     }
     return render(request, "exams/list_grades.html", context)
@@ -577,6 +589,10 @@ def submit_review_request(request):
     exam_request_id = request.POST.get("exam_request")
     reason = request.POST.get("reason", "").strip()
 
+    if not reason:
+        messages.error(request, "El motivo de la revisión no puede estar vacío.")
+        return redirect("exams:request_review")
+
     try:
         exam_request = ExamRequest.objects.get(
             pk=int(exam_request_id),
@@ -584,56 +600,62 @@ def submit_review_request(request):
             status="Approved",
             grade__isnull=False
         )
-        
-        # Eliminar verificación de profesor para la asignatura
+
+        # Prevent duplicate review requests
+        if ReviewRequest.objects.filter(exam_request=exam_request).exists():
+            messages.error(request, "Ya existe una solicitud de revisión para esta calificación.")
+            return redirect("exams:request_review")
+
+        # Create and save the new review request
         review = ReviewRequest(exam_request=exam_request, reason=reason)
         review.full_clean()
         review.save()
-        
-        messages.success(request, "Solicitud de revisión creada.")
+
+        # Notify all teachers, using the working pattern from submit_exam_request
+        professors = User.objects.filter(role="profesor")
+        student_name = request.user.get_full_name() or request.user.username
+        subject_name = exam_request.calendar_exam.subject
+
+        for prof in professors:
+            notificar(
+                prof,
+                f"El estudiante {student_name} ha solicitado una revisión para el examen de {subject_name}."
+            )
+
+        messages.success(request, "Solicitud de revisión creada exitosamente.")
         return redirect("exams:request_review")
 
-    except (ValidationError, ExamRequest.DoesNotExist, IntegrityError) as e:
-        messages.error(request, f"Error: {str(e)}")
+    except (ValidationError, ExamRequest.DoesNotExist) as e:
+        if isinstance(e, ValidationError):
+            messages.error(request, "Error de validación. Asegúrese de que el motivo sea válido.")
+        else:
+            messages.error(request, "No se pudo encontrar la solicitud de examen especificada.")
+        return redirect("exams:request_review")
+    except Exception as e:
+        messages.error(request, f"Ocurrió un error inesperado: {str(e)}")
         return redirect("exams:request_review")
 
 # exams/views.py
 @login_required
 @user_passes_test(is_student)
 def request_review(request):
-    # Obtener exámenes calificados sin revisiones pendientes
+    # Get IDs of exam requests that already have any review request
+    existing_review_ids = ReviewRequest.objects.filter(
+        exam_request__student=request.user
+    ).values_list('exam_request_id', flat=True)
+
+    # Get graded exams for the student that do NOT have a review request yet
     graded_exams = ExamRequest.objects.filter(
         student=request.user,
         status='Approved',
         grade__isnull=False
-    ).exclude(reviews__status='Pending')
+    ).exclude(id__in=existing_review_ids)
 
-    # Solicitudes pendientes del estudiante
+    # Get pending reviews to show their status on the same page
     pending_reviews = ReviewRequest.objects.filter(
         exam_request__student=request.user,
         status='Pending'
     )
-
-    if request.method == 'POST':
-        exam_request_id = request.POST.get('exam_request')
-        reason = request.POST.get('reason', '')
-        
-        try:
-            exam_request = ExamRequest.objects.get(
-                pk=exam_request_id,
-                student=request.user
-            )
-            
-            # Crear solicitud de revisión
-            ReviewRequest.objects.create(
-                exam_request=exam_request,
-                reason=reason
-            )
-            messages.success(request, "¡Solicitud de revisión creada exitosamente!")
-            return redirect('exams:request_review')
-            
-        except Exception as e:
-            messages.error(request, f"Error: {str(e)}")
 
     context = {
         'graded_exams': graded_exams,

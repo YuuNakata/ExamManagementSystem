@@ -4,6 +4,19 @@ from .models import User
 
 
 class UserRegisterForm(UserCreationForm):
+    password1 = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+        required=True,
+        help_text="",
+        error_messages={
+            "password_too_short": "La contraseña es demasiado corta. Debe contener al menos %(min_length)d caracteres.",
+            "password_too_common": "Esta contraseña es demasiado común. Por favor, elija una más segura.",
+            "password_entirely_numeric": "La contraseña no puede contener únicamente números.",
+            "password_too_similar": "La contraseña es demasiado parecida a tus otros datos personales.",
+        },
+    )
+
     username = forms.CharField(
         max_length=150,
         required=True,
@@ -26,11 +39,7 @@ class UserRegisterForm(UserCreationForm):
         required=True,
         widget=forms.EmailInput(attrs={"class": "form-control"}),
     )
-    password1 = forms.CharField(
-        label="Contraseña",
-        widget=forms.PasswordInput(attrs={"class": "form-control"}),
-        required=True,
-    )
+
     password2 = forms.CharField(
         label="Confirmar contraseña",
         widget=forms.PasswordInput(attrs={"class": "form-control"}),
@@ -75,8 +84,8 @@ class UserRegisterForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.error_messages["password_mismatch"] = "Las contraseñas no coinciden."
         self.fields["username"].help_text = ""
-        self.fields["password1"].help_text = ""
         # Traducción de labels
         self.fields["username"].label = "Nombre de usuario"
         self.fields["email"].label = "Correo electrónico"

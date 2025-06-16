@@ -44,17 +44,67 @@
     height: 100%;
     background: rgba(0,0,0,0.5);
     z-index: 1000;
-    align-items: center;
     justify-content: center;
+    overflow-y: auto; /* Permite el scroll si el contenido es muy alto */
+    padding: calc( var(--header-height) + var(--nav-height) ) 0; /* Añade espacio superior e inferior */
 }
 
 .modal-content {
     background: var(--blanco);
-    padding: 2rem;
     border-radius: var(--radio-borde);
     width: 90%;
     max-width: 500px;
     animation: modalEntrance 0.3s ease;
+    margin: auto; /* Centra el contenido verticalmente de forma robusta */
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh; /* Evita que el modal sea más alto que la pantalla */
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--gris-suave, #eee);
+    flex-shrink: 0; /* No se encoge */
+}
+
+.modal-header .close {
+    background: transparent;
+    border: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .5;
+    padding: 0;
+    cursor: pointer;
+}
+
+.modal-header .close:hover {
+    opacity: .75;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.modal-body {
+    padding: 2rem;
+    overflow-y: auto; /* Habilita el scroll solo para el cuerpo */
+    flex-grow: 1; /* Ocupa el espacio disponible */
+}
+
+.modal-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid var(--gris-suave, #eee);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    flex-shrink: 0; /* No se encoge */
 }
 
 @keyframes modalEntrance {
