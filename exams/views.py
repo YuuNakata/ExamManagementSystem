@@ -333,7 +333,7 @@ def delete_exam(request, pk):
         exam.delete()
         messages.success(
             request,
-            "Eliminación completada.",
+            "Examen eliminado.",
         )
     except Exception as e:
         messages.error(request, f"Ocurrió un error al eliminar el examen: {e}")
