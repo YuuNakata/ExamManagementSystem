@@ -2,24 +2,14 @@
 {% load static %}
 
 {% block extra_css %}
-
 <link rel="stylesheet" href="{% static 'css/base.css' %}"> 
-
 <link rel="stylesheet" href="{% static 'css/calendar.css' %}">
-
-
 {% endblock %}
-
 
 {% block content %}
 <div class="main-content">
-    
-
-
     <div class="widget">
-        
         <div class="management-header">
-            
             <h2>Calendario de {{ current_month_date|date:"F Y"|capfirst }}</h2>
             {% if not modo_lectura %}
             <div class="actions">
@@ -29,7 +19,6 @@
             {% endif %}
         </div>
 
-        
         <div class="calendar-grid">
             <div class="calendar-header">
                 <div class="header-day">Lun</div>
@@ -41,40 +30,27 @@
                 <div class="header-day">Dom</div>
             </div>
 
-            
             {% for week in weeks %}
             <div class="calendar-week">
                 {% for day_info in week %}
-                
                 <div class="calendar-day {% if not day_info.is_current_month %}other-month{% endif %} {% if day_info.is_today %}today{% endif %}">
                     <div class="day-number">{{ day_info.date.day }}</div>
 
-                    
                     <div class="exams-container">
-                    
                     {% for exam_data in exams_data %}
-                        
                         {% if exam_data.instance.date == day_info.date %}
-                        
                         <div class="exam-entry {% if exam_data.is_past %}exam-past{% endif %}"
-                             
                              data-exam-id="{{ exam_data.instance.id }}"
-                             
                              data-exam-subject="{{ exam_data.instance.subject }}"
                              data-exam-type="{{ exam_data.instance.get_exam_type_display }}"
                              data-exam-date="{{ exam_data.instance.date|date:'d/m/Y' }}"
                              data-exam-turn="{{ exam_data.instance.get_turn_display }}"
-                             
-                             
                              {% if not exam_data.is_past %}
                              onclick="showModal('examModal{{ exam_data.instance.id }}')"
                              title="Clic para editar este examen"
                              {% else %}
                              title="Examen pasado (no editable aquí)"
-                             {% endif %}
-                             >
-
-                            
+                             {% endif %}>
                             <div class="exam-badge {{ exam_data.instance.exam_type }}">
                                 {{ exam_data.instance.get_exam_type_display }}
                             </div>
@@ -85,23 +61,18 @@
                         </div>
                         {% endif %}
                     {% endfor %}
-                    </div> 
+                    </div>
 
-                    
-                    
                     {% if day_info.is_current_month and not modo_lectura %}
                     <div class="add-exam-btn" onclick="handleAddExam(event, '{{ day_info.date|date:"Y-m-d" }}')" title="Añadir examen en esta fecha">+</div>
                     {% endif %}
-
-                </div> 
-                {% endfor %} 
-            </div> 
-            {% endfor %} 
-        </div> 
-    </div> 
-</div> 
-
-
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 
 {% for exam_data in exams_data %}
     {% if exam_data.form %}
@@ -110,37 +81,31 @@
             <span class="close" onclick="closeModal('examModal{{ exam_data.instance.id }}')">×</span>
             <h3>Editar Examen</h3>
 
-            
             <form id="editForm{{ exam_data.instance.id }}" method="post" action="{% url 'exams:edit_exam' exam_data.instance.id %}" novalidate>
                 {% csrf_token %}
                 {{ exam_data.form.as_p }}
-                
             </form>
 
-            
-            <form id="deleteForm{{ exam_data.instance.id }}" method="post" action="{% url 'exams:delete_exam' exam_data.instance.id %}"> 
+            <form id="deleteForm{{ exam_data.instance.id }}" method="post" action="{% url 'exams:delete_exam' exam_data.instance.id %}">
                 {% csrf_token %}
-           
-                
             </form>
-            
-            
+
             <div class="form-actions">
-                
                 <button type="submit" form="editForm{{ exam_data.instance.id }}" class="btn-primary">Guardar Cambios</button>
                 <button type="button" class="btn-delete"
-                    onclick="confirmDelete('deleteForm{{ exam_data.instance.id }}')">
+                    onclick="confirmDelete(
+                        'deleteForm{{ exam_data.instance.id }}',
+                        '{{ exam_data.instance.subject }}',
+                        '{{ exam_data.instance.date|date:"d/m/Y" }}'
+                    )">
                     Eliminar
                 </button>
                 <button type="button" class="btn-cancel" onclick="closeModal('examModal{{ exam_data.instance.id }}')">Cancelar</button>
-
             </div>
-
         </div>
     </div>
     {% endif %}
 {% endfor %}
-
 
 {% if new_exam_form %}
 <div id="newExamModal" class="modal">
@@ -152,56 +117,49 @@
         </div>
     </div>
 </div>
-{% endif %} 
-
-
+{% endif %}
 
 <script src="{% static 'js/modals.js' %}"></script>
 <script src="{% static 'js/exams.js' %}"></script>
 
-
 <script>
-
-        function handleAddExam(event, date) {
-            event.stopPropagation(); // Evita que el clic se propague y cierre el modal si está abierto
-            const modal = document.getElementById('newExamModal');
-            if (modal) {
-                // El formulario se recarga vía AJAX, así que buscamos el input dentro del contenedor
-                const formContainer = document.getElementById('createExamFormContainer');
-                const dateInput = formContainer.querySelector('input[name="date"]');
-                if (dateInput) {
-                    dateInput.value = date;
-                    showModal('newExamModal');
-                } else {
-                    console.error('No se encontró el campo de fecha en el modal de nuevo examen.');
-                    alert('Error: No se pudo preparar el formulario para añadir el examen.');
-                }
+    function handleAddExam(event, date) {
+        event.stopPropagation();
+        const modal = document.getElementById('newExamModal');
+        if (modal) {
+            const formContainer = document.getElementById('createExamFormContainer');
+            const dateInput = formContainer.querySelector('input[name="date"]');
+            if (dateInput) {
+                dateInput.value = date;
+                showModal('newExamModal');
+            } else {
+                console.error('No se encontró el campo de fecha en el modal de nuevo examen.');
+                alert('Error: No se pudo preparar el formulario para añadir el examen.');
             }
         }
+    }
 
-        // Función para confirmar eliminación
-        function confirmDelete(formId) {
-            window.showModalMessage(
-                '¿Está seguro que desea eliminar este examen?',
-                'warning',
-                function() {
-                    document.getElementById(formId).submit();
-                }
-            );
+    function confirmDelete(formId, asignatura, dia) {
+    const mensaje = `¿Está seguro que desea eliminar el examen de ${asignatura} del ${dia}? Esta acción no se puede deshacer.`;
+    // Asumiendo que tienes una función showModalMessage definida en modals.js
+    showModalMessage(
+        mensaje,
+        'warning',
+        function() {
+            document.getElementById(formId).submit();
         }
-        // Script para re-abrir modales en error (si lo tienes)
-        {% if error_in_modal_pk or error_in_new_modal %}
-        document.addEventListener('DOMContentLoaded', () => {
-            {% if error_in_modal_pk %}
-            // console.log("Re-opening edit modal for PK:", {{ error_in_modal_pk }});
-            showModal('examModal{{ error_in_modal_pk }}');
-            {% elif error_in_new_modal %}
-            // console.log("Re-opening new exam modal");
-            showModal('newExamModal');
-            {% endif %}
-        });
-        {% endif %}
-</script>
+    );
+}
 
+    {% if error_in_modal_pk or error_in_new_modal %}
+    document.addEventListener('DOMContentLoaded', () => {
+        {% if error_in_modal_pk %}
+        showModal('examModal{{ error_in_modal_pk }}');
+        {% elif error_in_new_modal %}
+        showModal('newExamModal');
+        {% endif %}
+    });
+    {% endif %}
+</script>
 
 {% endblock %}
